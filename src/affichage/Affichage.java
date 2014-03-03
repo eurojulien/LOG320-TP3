@@ -6,12 +6,25 @@ public class Affichage {
 	private final static String DISPLAY_NOIR	= "x";
 	private final static String DISPLAY_VIDE	= " ";
 	private final static String DISPLAY_COL		= "|";
-	private final static String DISPLAY_LIN		= " - - - - - - - - - - ";
+	private final static String DISPLAY_LIN		= " - - - - - - - - ";
 	
 	public final static int PION_BLANC			= 2;
 	public final static int PION_NOIR			= 4;
 	public final static int CASE_VIDE			= 0;
 	private final static int DIMENSION_MAX		= 8;
+	
+	// Fonction de test uniquement !
+	public static void main(String [] args){
+	
+		int [][] grilleJeu = new int[DIMENSION_MAX][DIMENSION_MAX];
+		
+		grilleJeu[0][1] = PION_BLANC;
+		grilleJeu[7][6] = PION_NOIR;
+		
+		printBoard(grilleJeu);
+		
+		return;
+	}
 	
 	public static void printBoard(final int grilleJeu[][]){
 		
