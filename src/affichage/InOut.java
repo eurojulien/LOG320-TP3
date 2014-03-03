@@ -1,4 +1,4 @@
-package LinesOfActions;
+package affichage;
 
 public class InOut {
 

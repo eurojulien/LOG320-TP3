@@ -1,4 +1,4 @@
-package LinesOfActions;
+package communication;
 import java.io.*;
 import java.net.*;
 
