@@ -4,114 +4,94 @@ import java.net.*;
 
 
 class ServerConnect {
-	public static void main(String[] args) {
-         
-	Socket MyClient;
-	BufferedInputStream input;
-	BufferedOutputStream output;
-    int[][] board = new int[8][8];
-
-	try {
-		MyClient = new Socket("localhost", 8888);
-	   	input    = new BufferedInputStream(MyClient.getInputStream());
-		output   = new BufferedOutputStream(MyClient.getOutputStream());
-		BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-
+	
+	private int[][] board = new int[8][8];
+	private BufferedInputStream input;
+	private BufferedOutputStream output;
+	
+	public ServerConnect(){
 		
-		
-		
-	   	while(true){
-			char cmd = 0;
+		Socket MyClient;
 
-            cmd = (char)input.read();
-
-            // Debut de la partie en joueur blanc
-            if(cmd == '1'){
-                byte[] aBuffer = new byte[1024];
-				
-				int size = input.available();
-				//System.out.println("size " + size);
-				input.read(aBuffer,0,size);
-                String s = new String(aBuffer).trim();
-                String[] boardValues;
-                boardValues = s.split(" ");
-                
-                int x=0,y=0;
-                for(int i=0; i<boardValues.length;i++){
-                    board[x][y] = Integer.parseInt(boardValues[i]);
-                    x++;
-                    if(x == 8){
-                        x = 0;
-                        y++;
-                    }
-                }
-
-
-                
-                System.out.println("Nouvelle partie! Vous jouer blanc, entrez votre premier coup : ");
-                String move = null;
-                move = console.readLine();
-				output.write(move.getBytes(),0,move.length());
-				output.flush();
-            }
-            
-            // Debut de la partie en joueur Noir
-            if(cmd == '2'){
-                System.out.println("Nouvelle partie! Vous jouer noir, attendez le coup des blancs");
-                byte[] aBuffer = new byte[1024];
-				
-				int size = input.available();
-				//System.out.println("size " + size);
-				input.read(aBuffer,0,size);
-                String s = new String(aBuffer).trim();
-                String[] boardValues;
-                boardValues = s.split(" ");
-                int x=0,y=0;
-                for(int i=0; i<boardValues.length;i++){
-                    board[x][y] = Integer.parseInt(boardValues[i]);
-                    x++;
-                    if(x == 8){
-                        x = 0;
-                        y++;
-                    }
-                }
-            }
-
-
-			// Le serveur demande le prochain coup
-			// Le message contient aussi le dernier coup joue.
-			if(cmd == '3'){
-				byte[] aBuffer = new byte[16];
-				
-				int size = input.available();
-				//System.out.println("size " + size);
-				input.read(aBuffer,0,size);
-				
-				String s = new String(aBuffer);
-				System.out.println("Dernier coup : "+ s);
-		       	System.out.println("Entrez votre coup : ");
-				String move = null;
-				move = console.readLine();
-				output.write(move.getBytes(),0,move.length());
-				output.flush();
-				
-			}
-			// Le dernier coup est invalide
-			if(cmd == '4'){
-				System.out.println("Coup invalide, entrez un nouveau coup : ");
-		       	String move = null;
-				move = console.readLine();
-				output.write(move.getBytes(),0,move.length());
-				output.flush();
-				
-			}
-        }
-	}
-	catch (IOException e) {
-   		System.out.println(e);
+		try {
+			MyClient = new Socket("localhost", 8888);
+		   	input    = new BufferedInputStream(MyClient.getInputStream());
+			output   = new BufferedOutputStream(MyClient.getOutputStream());
+		}
+		catch (IOException e) {
+	   		System.out.println(e);
+		}
 	}
 	
-    }
-
+	public char readServerCommand(){
+		char cmd = 0;
+		
+		try {
+			while(cmd == 0){
+				cmd = (char)input.read();
+			}
+	        
+		}catch (IOException e) {
+	   		System.out.println(e);
+		}
+		
+		return cmd;
+	}
+	
+	public String readLastTurn(){
+		byte[] aBuffer = new byte[16];
+		
+		int size;
+		
+		try {
+			size = input.available();
+			input.read(aBuffer,0,size);
+		} catch (IOException e){e.printStackTrace();}
+		//System.out.println("size " + size);
+		
+		String s = new String(aBuffer);
+		return s;
+	}
+	
+	public void refreshBoard(){
+		
+		try {
+			byte[] aBuffer = new byte[1024];
+			
+			int size = input.available();
+			//System.out.println("size " + size);
+			input.read(aBuffer,0,size);
+	        String s = new String(aBuffer).trim();
+	        String[] boardValues;
+	        boardValues = s.split(" ");
+	        
+	        int x=0,y=0;
+	        int boardLength  = boardValues.length;
+	        for(int i = 0 ; i < boardLength ; i++){
+	            board[x][y] = Integer.parseInt(boardValues[i]);
+	            
+	            x++;
+	            if(x == 8){
+	                x = 0;
+	                y++;
+	            }
+	        }
+	        
+		}catch (IOException e) {
+	   		System.out.println(e);
+		}
+	}
+	
+	public void sendServerCommand(String move){
+		try {
+			output.write(move.getBytes(),0,move.length());
+			output.flush();
+		} catch (IOException e){e.printStackTrace();}
+	}
+	
+	public int[][] getBoard(){
+		return board;
+	}
+	
 	
 }
