@@ -5,6 +5,7 @@ import java.net.*;
 
 class ServerConnect {
 	
+	// Test de commit
 	private int[][] board = new int[8][8];
 	private BufferedInputStream input;
 	private BufferedOutputStream output;
