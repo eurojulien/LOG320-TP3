@@ -5,8 +5,29 @@ import java.net.*;
 
 class ServerConnect {
 	public static void main(String[] args) {
-         
-	Socket MyClient;
+
+        int[][] board = new int[10][10];
+        board[0] = new int[] {0,2,2,2,2,2,2,2,2,0};
+        board[1] = new int[] {4,0,0,0,0,0,0,0,0,4};
+        board[2] = new int[] {4,0,0,0,0,0,0,0,0,4};
+        board[3] = new int[] {4,0,0,0,0,0,0,0,0,4};
+        board[4] = new int[] {4,0,0,0,0,0,0,0,0,4};
+        board[5] = new int[] {4,0,0,0,0,0,0,0,0,4};
+        board[6] = new int[] {4,0,0,0,0,0,0,0,0,4};
+        board[7] = new int[] {4,0,0,0,0,0,0,0,0,4};
+        board[8] = new int[] {4,0,0,0,0,0,0,0,0,4};
+        board[9] = new int[] {0,2,2,2,2,2,2,2,2,0};
+
+        IA boardSolver = new IA(board,4);
+
+
+
+        boardSolver.notifyMovement("A3 - C3");
+        boardSolver.notifyMovement("A4 - C4");
+        boardSolver.notifyMovement("A5 - C5");
+        boardSolver.drawBoard(true);
+
+	/*Socket MyClient;
 	BufferedInputStream input;
 	BufferedOutputStream output;
     int[][] board = new int[8][8];
@@ -110,8 +131,8 @@ class ServerConnect {
 	catch (IOException e) {
    		System.out.println(e);
 	}
-	
+	*/
     }
 
-	
+
 }

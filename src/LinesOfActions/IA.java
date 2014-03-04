@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class IA {
 
     // ceci devrais etre 2 ou 4
-    private static final int BOARDSIZE = 8;
+    private static final int BOARDSIZE = 10;
     private static int playerNumber;
     private int[][] playBoard;
     private int[][] solvingBoard;
@@ -17,6 +17,7 @@ public class IA {
         this.playerNumber = playerNumber;
         initializeSolvingBoard();
         initializePositionsList();
+        fillInSolvingBoard();
     }
 
     public IA(int[][] playBoard, int playerNumber,int[][] solvingBoard){
@@ -24,6 +25,7 @@ public class IA {
         this.playerNumber = playerNumber;
         this.solvingBoard = solvingBoard;
         initializePositionsList();
+        fillInSolvingBoard();
     }
 
     public IA(int[][] playBoard, int playerNumber,int[][] solvingBoard,ArrayList<int[]> positionsPions){
@@ -31,14 +33,18 @@ public class IA {
         this.playerNumber = playerNumber;
         this.solvingBoard = solvingBoard;
         this.positionsPions = positionsPions;
+        fillInSolvingBoard();
     }
 
     public void notifyMovement(String movement){
         char[] tabLettres = movement.toLowerCase().toCharArray();
-        int posIDepart = getIndexFromLetter(tabLettres[0]);
-        int posJDepart = Character.getNumericValue(tabLettres[1]);
-        int posIFin = getIndexFromLetter(tabLettres[5]);
-        int posJFin = Character.getNumericValue(tabLettres[6]);
+        int posJDepart = getIndexFromLetter(tabLettres[0]);
+        int posIDepart = Character.getNumericValue(tabLettres[1])-1;
+        int posJFin = getIndexFromLetter(tabLettres[5]);
+        int posIFin = Character.getNumericValue(tabLettres[6]) -1;
+
+        playBoard[posIDepart][posJDepart] = 0;
+        playBoard[posIFin][posJFin] =playerNumber;
 
         for(int i=0;i<positionsPions.size();i++){
             int[] comparaison = positionsPions.get(i);
@@ -47,28 +53,42 @@ public class IA {
                 positionsPions.add(new int[] {posIFin,posJFin});
             }
         }
+
+        initializeSolvingBoard();
+        removePiecesFromSolving();
+        fillInSolvingBoard();
     }
 
     public void drawBoard(boolean showSolvingBoard){
         System.out.println("====== PLAY BOARD ========");
         for(int i =0; i < BOARDSIZE; i++){
+            System.out.println("");
             for(int j = 0; j< BOARDSIZE; j++){
                 System.out.print(playBoard[i][j] + " ");
             }
         }
+        System.out.println("");
         System.out.println("=========================");
 
         if(showSolvingBoard){
             System.out.println("====== SOLVE BOARD ========");
             for(int i =0; i < BOARDSIZE; i++){
+                System.out.println("");
                 for(int j = 0; j< BOARDSIZE; j++){
                     System.out.print(solvingBoard[i][j] + " ");
                 }
             }
+            System.out.println("");
             System.out.println("=========================");
 
         }
 
+    }
+
+    private void removePiecesFromSolving(){
+        for(int i = 0 ; i < positionsPions.size(); i++){
+            solvingBoard[positionsPions.get(i)[0]][positionsPions.get(i)[1]] = -1;
+        }
     }
 
     private int getIndexFromLetter(char letter){
@@ -104,7 +124,7 @@ public class IA {
     }
 
     private void initializeSolvingBoard(){
-        solvingBoard = new int[8][8];
+        solvingBoard = new int[10][10];
     }
 
     private void initializePositionsList(){
@@ -113,6 +133,7 @@ public class IA {
             for(int j=0;j<BOARDSIZE;j++){
                 if(playBoard[i][j] == playerNumber){
                     positionsPions.add(new int[] {i,j});
+                    solvingBoard[i][j] = -1;
                 }
             }
         }
@@ -146,13 +167,16 @@ public class IA {
     private void applyPositionMask(){
         for(int i =0; i < BOARDSIZE; i++){
             for(int j = 0; j< BOARDSIZE; j++){
-                if(i >= 1 && j >= 1 && i <= (BOARDSIZE-1) && j <= (BOARDSIZE-1)){
+                if(i >= 1 && j >= 1 && i <= (BOARDSIZE-2) && j <= (BOARDSIZE-2)){
                     incrementPositionWithValidation(i,j);
                 }
-                if(i >= 2 && j >= 2 && i <= (BOARDSIZE-2) && j <= (BOARDSIZE-2)){
+                if(i >= 2 && j >= 2 && i <= (BOARDSIZE-3) && j <= (BOARDSIZE-3)){
                     incrementPositionWithValidation(i,j);
                 }
-                if(i >= 3 && j >= 3 && i <= (BOARDSIZE-3) && j <= (BOARDSIZE-3)){
+                if(i >= 3 && j >= 3 && i <= (BOARDSIZE-4) && j <= (BOARDSIZE-4)){
+                    incrementPositionWithValidation(i,j);
+                }
+                if(i >= 4 && j >= 4 && i <= (BOARDSIZE-5) && j <= (BOARDSIZE-5)){
                     incrementPositionWithValidation(i,j);
                 }
             }
@@ -162,26 +186,25 @@ public class IA {
 
 
     private void incrementAround(int i, int j){
-        solvingBoard[i][j] = -1;
         if(i > 0){
             incrementPositionWithValidation(i-1,j);
             if(j > 0)
                 incrementPositionWithValidation(i-1,j-1);
-            if(j < BOARDSIZE)
+            if(j < BOARDSIZE-1)
                 incrementPositionWithValidation(i-1,j+1);
         }
 
-        if(i < BOARDSIZE){
+        if(i < BOARDSIZE-1){
             incrementPositionWithValidation(i+1,j);
             if(j > 0)
                 incrementPositionWithValidation(i+1,j-1);
-            if(j < BOARDSIZE)
+            if(j < BOARDSIZE-1)
                 incrementPositionWithValidation(i+1,j+1);
         }
 
         if(j > 0)
             incrementPositionWithValidation(i,j - 1);
-        if(j < BOARDSIZE)
+        if(j < BOARDSIZE-1)
             incrementPositionWithValidation(i,j + 1);
 
     }
