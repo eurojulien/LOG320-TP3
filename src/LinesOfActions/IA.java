@@ -40,19 +40,24 @@ public class IA {
     // 0X0
 
     // ceci devrais etre 2 ou 4
-    private static final int BOARDSIZE = 10;
+    private static final int BOARDSIZE = 8;
     private static int playerNumber;
     private int[][] playBoard;
     private int[][] solvingBoard;
     private ArrayList<int[]> positionsPions = new ArrayList<int[]>();
+    private ArrayList<int[]> positionsPionsEnemy = new ArrayList<int[]>();
+    private double centreIDeMasseAllier = 4.5;
+    private double centreJDeMasseAllier = 4.5;
+    private double centreIDeMasseEnemy = 4.5;
+    private double centreJDeMasseEnemy = 4.5;
 
     // valeurs qui pourraient être modifiée
-    private static final int enemyPawnDevalue = -3;
+    private static final int enemyPawnDevalue = -4;
     private static final int tuileToucheUnAllier = 1;
     private static final int importanceCentraleIncrement1 = 1;
     private static final int importanceCentraleIncrement2 = 2;
     private static final int importanceCentraleIncrement3 = 3;
-    private static final int importanceCentraleIncrement4 = 4;
+    private static final int trouEntreDeuxPieces = 4;
 
     public IA(int[][] playBoard, int playerNumber){
         this.playBoard = playBoard;
@@ -78,6 +83,16 @@ public class IA {
         fillInSolvingBoard();
     }
 
+    public IA(int[][] playBoard, int playerNumber,int[][] solvingBoard,ArrayList<int[]> positionsPions
+    ,ArrayList<int[]> positionsPionsEnemy){
+
+        this.playBoard = playBoard;
+        this.playerNumber = playerNumber;
+        this.solvingBoard = solvingBoard;
+        this.positionsPions = positionsPions;
+        this.positionsPionsEnemy = positionsPionsEnemy;
+        fillInSolvingBoard();
+    }
 
     public void notifyMovementEnemyTeam(String movement){
         // cette méthode permet a l'algoritme de prendre compte des déplacments
@@ -97,6 +112,7 @@ public class IA {
             int[] comparaison = positionsPions.get(i);
             if(comparaison[0] == posIFin && comparaison[1] == posJFin){
                 positionsPions.remove(i);
+                positionsPionsEnemy.add(new int[] {posIFin,posJFin});
             }
         }
 
@@ -134,13 +150,29 @@ public class IA {
         fillInSolvingBoard();
     }
 
+    private void printASlot(String text){
+        char[] tableChar = text.toCharArray();
+
+
+        for(int i = 0; i < 3; i++){
+            if( i < tableChar.length){
+                System.out.print(tableChar[i]);
+            }else{
+                System.out.print(" ");
+            }
+        }
+
+        System.out.print(" ");
+    }
+
+
     public void drawBoard(boolean showSolvingBoard){
         // nous fait un dessin du board, pour le debugging
         System.out.println("====== PLAY BOARD ========");
         for(int i =0; i < BOARDSIZE; i++){
             System.out.println("");
             for(int j = 0; j< BOARDSIZE; j++){
-                System.out.print(playBoard[i][j] + " ");
+                printASlot(playBoard[i][j]+"");
             }
         }
         System.out.println("");
@@ -151,11 +183,16 @@ public class IA {
             for(int i =0; i < BOARDSIZE; i++){
                 System.out.println("");
                 for(int j = 0; j< BOARDSIZE; j++){
-                    System.out.print(solvingBoard[i][j] + " ");
+                    printASlot(solvingBoard[i][j] + "");
                 }
             }
             System.out.println("");
             System.out.println("=========================");
+
+            System.out.println("");
+            System.out.println("===== CENTRE DE MASSE =====");
+            System.out.println("Allié : [" + centreIDeMasseAllier + " ; " + centreJDeMasseAllier + " ]");
+            System.out.println("Enemy : [" + centreIDeMasseEnemy + " ; " + centreJDeMasseEnemy + " ]");
 
         }
 
@@ -278,7 +315,7 @@ public class IA {
 
     private void initializeSolvingBoard(){
         // initialise le solving board
-        solvingBoard = new int[10][10];
+        solvingBoard = new int[8][8];
     }
 
     private void initializePositionsList(){
@@ -289,6 +326,8 @@ public class IA {
                 if(playBoard[i][j] == playerNumber){
                     positionsPions.add(new int[] {i,j});
                     solvingBoard[i][j] = -1;
+                }else if(playBoard[i][j] != 0){
+                    positionsPionsEnemy.add(new int[] {i,j});
                 }
             }
         }
@@ -297,28 +336,43 @@ public class IA {
     private void fillInSolvingBoard(){
         // cette méthode fournie une évaluation de chaque tuile du jeu ainsi que leurs valeurs.
         // on incrémente autour de toutes nos pieces pour indiquer que ce sont des positions favorables
+        initializeSolvingBoard();
+        removePiecesFromSolving();
         for(int i =0;i<positionsPions.size();i++){
             incrementAround(positionsPions.get(i)[0],positionsPions.get(i)[1]);
         }
 
-        // on incrémente pour les pions connectés avec un autre pion
-        for(int i =0;i<positionsPions.size();i++){
-            int[] coordLookup = positionsPions.get(i);
-            for(int j =0;j<positionsPions.size();j++){
-                if(i != j){
-                    int[] coordCompare = positionsPions.get(j);
-                    if(coordCompare[0]-1 == coordLookup[0] || coordCompare[0]+1 == coordLookup[0] ||
-                       coordCompare[1]-1 == coordLookup[1] || coordCompare[1]+1 == coordLookup[1]){
-                        // ici, la donnée comparée est a 1 de distance (elle touche) l'autre pièce.
-                        incrementAround(coordLookup[0],coordLookup[1]);
-                    }
-
-                }
-            }
-        }
+        calculerCentreDeMasses();
         applyPositionMask();
         reduceEnemyPositions();
     }
+
+
+    private void calculerCentreDeMasses(){
+        // cette méthode calcule le centre de masse des joueurs
+        double cummulateurI = 0;
+        double cummulateurJ = 0;
+        for(int x = 0; x < positionsPions.size();x++){
+            cummulateurI += positionsPions.get(x)[0] + 1;
+            cummulateurJ += positionsPions.get(x)[1] + 1;
+        }
+
+        centreIDeMasseAllier = cummulateurI / positionsPions.size();
+        centreJDeMasseAllier = cummulateurJ / positionsPions.size();
+
+
+        cummulateurI = 0;
+        cummulateurJ = 0;
+        for(int x = 0; x < positionsPionsEnemy.size();x++){
+            cummulateurI += positionsPionsEnemy.get(x)[0] + 1;
+            cummulateurJ += positionsPionsEnemy.get(x)[1] + 1;
+        }
+
+        centreIDeMasseEnemy = cummulateurI / positionsPionsEnemy.size();
+        centreJDeMasseEnemy = cummulateurJ / positionsPionsEnemy.size();
+    }
+
+
 
 
     private void reduceEnemyPositions(){
@@ -337,17 +391,14 @@ public class IA {
         // on applique sur le solving board le masque de position ou le centre est plus favorable
         for(int i =0; i < BOARDSIZE; i++){
             for(int j = 0; j< BOARDSIZE; j++){
-                if(i >= 1 && j >= 1 && i <= (BOARDSIZE-2) && j <= (BOARDSIZE-2)){
-                    incrementPositionWithValidation(i,j,importanceCentraleIncrement1);
-                }
-                else if(i >= 2 && j >= 2 && i <= (BOARDSIZE-3) && j <= (BOARDSIZE-3)){
-                    incrementPositionWithValidation(i,j,importanceCentraleIncrement2);
-                }
-                else if(i >= 3 && j >= 3 && i <= (BOARDSIZE-4) && j <= (BOARDSIZE-4)){
+                if(i >= (centreIDeMasseAllier-1.5) && j >= (centreJDeMasseAllier-1.5) && i <= (BOARDSIZE-centreIDeMasseAllier+1) && j <= (BOARDSIZE-centreJDeMasseAllier+1)){
                     incrementPositionWithValidation(i,j,importanceCentraleIncrement3);
                 }
-                else if(i >= 4 && j >= 4 && i <= (BOARDSIZE-5) && j <= (BOARDSIZE-5)){
-                    incrementPositionWithValidation(i,j,importanceCentraleIncrement4);
+                else if(i >= (centreIDeMasseAllier-2.5) && j >= (centreJDeMasseAllier-2.5) && i <= (BOARDSIZE-centreIDeMasseAllier+2) && j <= (BOARDSIZE-centreJDeMasseAllier+2)){
+                    incrementPositionWithValidation(i,j,importanceCentraleIncrement2);
+                }
+                else if(i >= (centreIDeMasseAllier-3.5) && j >= (centreJDeMasseAllier-3.5) && i <= (BOARDSIZE-centreIDeMasseAllier+3) && j <= (BOARDSIZE-centreJDeMasseAllier+3)){
+                    incrementPositionWithValidation(i,j,importanceCentraleIncrement1);
                 }
             }
         }
