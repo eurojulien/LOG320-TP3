@@ -34,7 +34,7 @@ public class IA {
     // 000
     // XXX
     // 000
-    // DIRECTION S
+    // DIRECTION N
     // 0X0
     // 0X0
     // 0X0
@@ -210,7 +210,7 @@ public class IA {
         }
     }
 
-    private char getLatterFromIndex(int letter){
+    private char getLetterFromIndex(int letter){
         // retourne la lettre lié a l'index donné
         char retour = 'z';
         switch (letter){
