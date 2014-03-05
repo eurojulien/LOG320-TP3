@@ -5,8 +5,6 @@ import java.net.*;
 
 class ServerConnect {
 	
-	// Test de commit
-	private int[][] board = new int[8][8];
 	private BufferedInputStream input;
 	private BufferedOutputStream output;
 	
@@ -24,7 +22,7 @@ class ServerConnect {
 		}
 	}
 	
-	public char readServerCommand(){
+	public char getServerCommand(){
 		char cmd = 0;
 		
 		try {
@@ -39,7 +37,7 @@ class ServerConnect {
 		return cmd;
 	}
 	
-	public String readLastTurn(){
+	public String getLastTurn(){
 		byte[] aBuffer = new byte[16];
 		
 		int size;
@@ -48,36 +46,36 @@ class ServerConnect {
 			size = input.available();
 			input.read(aBuffer,0,size);
 		} catch (IOException e){e.printStackTrace();}
-		//System.out.println("size " + size);
 		
 		String s = new String(aBuffer);
 		return s;
 	}
 	
-	public void refreshBoard(){
+	public int[][] void getBoardSetup(){
 		
 		try {
+			int[][] board = new int[8][8];
 			byte[] aBuffer = new byte[1024];
 			
 			int size = input.available();
-			//System.out.println("size " + size);
 			input.read(aBuffer,0,size);
 	        String s = new String(aBuffer).trim();
 	        String[] boardValues;
 	        boardValues = s.split(" ");
 	        
 	        int x=0,y=0;
-	        int boardLength  = boardValues.length;
-	        for(int i = 0 ; i < boardLength ; i++){
+	        for(int i = 0 ; i < BOARDSIZE ; i++){
+	        	
 	            board[x][y] = Integer.parseInt(boardValues[i]);
-	            
 	            x++;
+	            
 	            if(x == 8){
 	                x = 0;
 	                y++;
 	            }
 	        }
 	        
+	        return board;
 		}catch (IOException e) {
 	   		System.out.println(e);
 		}
