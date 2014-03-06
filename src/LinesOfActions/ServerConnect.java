@@ -1,13 +1,13 @@
-package LinesOfActions;
+package LinesOfActions_2;
 import java.io.*;
 import java.net.*;
 
 
 class ServerConnect {
 	
-	private int[][] board = new int[8][8];
 	private BufferedInputStream input;
 	private BufferedOutputStream output;
+	private static final int BOARDSIZE = BoardInOut.BOARDSIZE;
 	
 	public ServerConnect(){
 		
@@ -23,7 +23,7 @@ class ServerConnect {
 		}
 	}
 	
-	public char readServerCommand(){
+	public char getServerCommand(){
 		char cmd = 0;
 		
 		try {
@@ -38,7 +38,7 @@ class ServerConnect {
 		return cmd;
 	}
 	
-	public String readLastTurn(){
+	public String getLastTurn(){
 		byte[] aBuffer = new byte[16];
 		
 		int size;
@@ -47,39 +47,41 @@ class ServerConnect {
 			size = input.available();
 			input.read(aBuffer,0,size);
 		} catch (IOException e){e.printStackTrace();}
-		//System.out.println("size " + size);
 		
 		String s = new String(aBuffer);
 		return s;
 	}
 	
-	public void refreshBoard(){
+	public int[][] getBoardSetup(){
+		
+		int[][] board = new int[BOARDSIZE][BOARDSIZE];
 		
 		try {
 			byte[] aBuffer = new byte[1024];
 			
 			int size = input.available();
-			//System.out.println("size " + size);
 			input.read(aBuffer,0,size);
 	        String s = new String(aBuffer).trim();
 	        String[] boardValues;
 	        boardValues = s.split(" ");
 	        
 	        int x=0,y=0;
-	        int boardLength  = boardValues.length;
-	        for(int i = 0 ; i < boardLength ; i++){
+	        int boardValuesLength = boardValues.length;
+	        for(int i = 0 ; i < boardValuesLength ; i++){
+	        	
 	            board[x][y] = Integer.parseInt(boardValues[i]);
-	            
 	            x++;
-	            if(x == 8){
+	            
+	            if(x == BOARDSIZE){
 	                x = 0;
 	                y++;
 	            }
 	        }
-	        
 		}catch (IOException e) {
 	   		System.out.println(e);
 		}
+		
+		return board;
 	}
 	
 	public void sendServerCommand(String move){
@@ -88,10 +90,4 @@ class ServerConnect {
 			output.flush();
 		} catch (IOException e){e.printStackTrace();}
 	}
-	
-	public int[][] getBoard(){
-		return board;
-	}
-	
-	
 }
