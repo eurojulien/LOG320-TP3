@@ -202,6 +202,7 @@ public class IA {
         switch (dir){
             case E:
                 retour = new int[] {i,j + distance};
+
                 break;
             case N:
                 retour = new int[] {i+ distance,j};
