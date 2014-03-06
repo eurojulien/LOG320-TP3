@@ -6,8 +6,6 @@ import java.net.*;
 class ServerConnect {
 	public static void main(String[] args) {
 
-
-
         // partie debug alex
         int[][] board = new int[8][8];
         board[0] = new int[] {0,2,2,2,2,2,2,0};
@@ -21,9 +19,9 @@ class ServerConnect {
 
         IA boardSolver = new IA(board,4);
         boardSolver.drawBoard(true);
-       // boardSolver.notifyMovementMyTeam("A3 - C3");
-       // boardSolver.notifyMovementEnemyTeam("D1 - D3");
-       // boardSolver.drawBoard(true);
+        //boardSolver.notifyMovementMyTeam("A3 - C3");
+        //boardSolver.notifyMovementEnemyTeam("D1 - D3");
+        //boardSolver.drawBoard(true);
     /*
 	Socket MyClient;
 	BufferedInputStream input;

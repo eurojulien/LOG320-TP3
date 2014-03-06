@@ -57,6 +57,7 @@ public class IA {
     private static final int importanceCentraleIncrement1 = 1;
     private static final int importanceCentraleIncrement2 = 2;
     private static final int importanceCentraleIncrement3 = 3;
+    private static final int importanceBlockEnemyPath = 1;
     private static final int trouEntreDeuxPieces = 4;
 
     public IA(int[][] playBoard, int playerNumber){
@@ -152,8 +153,6 @@ public class IA {
 
     private void printASlot(String text){
         char[] tableChar = text.toCharArray();
-
-
         for(int i = 0; i < 3; i++){
             if( i < tableChar.length){
                 System.out.print(tableChar[i]);
@@ -161,7 +160,6 @@ public class IA {
                 System.out.print(" ");
             }
         }
-
         System.out.print(" ");
     }
 
@@ -183,7 +181,10 @@ public class IA {
             for(int i =0; i < BOARDSIZE; i++){
                 System.out.println("");
                 for(int j = 0; j< BOARDSIZE; j++){
-                    printASlot(solvingBoard[i][j] + "");
+                    if(playBoard[i][j] == playerNumber)
+                        printASlot("X");
+                    else
+                        printASlot(solvingBoard[i][j] + "");
                 }
             }
             System.out.println("");
@@ -193,57 +194,74 @@ public class IA {
             System.out.println("===== CENTRE DE MASSE =====");
             System.out.println("Allié : [" + centreIDeMasseAllier + " ; " + centreJDeMasseAllier + " ]");
             System.out.println("Enemy : [" + centreIDeMasseEnemy + " ; " + centreJDeMasseEnemy + " ]");
-
         }
-
     }
 
-   public int distanceMove(int i, int j, direction d){
-       // cette méthode retourne le nombre de pions sur une ligne d'action
-       int retour = 0;
-       int x;
-       switch (d){
-           case E:
-               for(x = 0; x< BOARDSIZE;x++){ if(playBoard[i][x] != 0) retour ++; }
-               break;
+    public int[] getCoordsAfterMove(int i, int j, int distance, direction dir){
+        int [] retour = new int[2];
+        switch (dir){
+            case E:
+                retour = new int[] {i,j + distance};
+                break;
+            case N:
+                retour = new int[] {i+ distance,j};
+                break;
+            case NE:
+                retour = new int[] {i- distance,j + distance};
+                break;
+            case NW:
+                retour = new int[] {i- distance,j - distance};
+                break;
+        }
+        return retour;
+    }
 
-           case N:
-               for(x = 0; x< BOARDSIZE;x++){ if(playBoard[x][j] != 0) retour ++; }
-               break;
+    public int distanceMove(int i, int j, direction d){
+        // cette méthode retourne le nombre de pions sur une ligne d'action
+        int retour = 0;
+        int x;
+        switch (d){
+            case E:
+                for(x = 0; x< BOARDSIZE;x++){ if(playBoard[i][x] != 0) retour ++; }
+                break;
 
-           case NE:
-               x = 0;
-               while(x+j < BOARDSIZE && x+i < BOARDSIZE){
-                   if(playBoard[i+x][j+x] != 0) retour ++;
-                   x++;
-               }
-               x = 1;
-               while(j-x >= 0 && i-x >= 0){
-                   if(playBoard[i-x][j-x] != 0) retour ++;
-                   x++;
-               }
-               break;
+            case N:
+                for(x = 0; x< BOARDSIZE;x++){ if(playBoard[x][j] != 0) retour ++; }
+                break;
 
-           case NW:
-               x = 0;
-               while(x+j < BOARDSIZE && i-x >= 0){
-                   if(playBoard[i-x][j+x] != 0) retour ++;
-                   x++;
-               }
-               x = 1;
-               while(j-x >= 0 && i+x < BOARDSIZE){
-                   if(playBoard[i+x][j-x] != 0) retour ++;
-                   x++;
-               }
-               break;
-       }
-       return retour;
-   }
+            case NE:
+                x = 0;
+                while(x+j < BOARDSIZE && i-x >= 0 ){
+                    if(playBoard[i-x][j+x] != 0) retour ++;
+                    x++;
+                }
+                x = 1;
+                while(j-x >= 0 && i+x < BOARDSIZE){
+                    if(playBoard[i-x][j-x] != 0) retour ++;
+                    x++;
+                }
+                break;
+
+            case NW:
+                x = 0;
+                while(x+j < BOARDSIZE && i+x < BOARDSIZE){
+                    if(playBoard[i+x][j+x] != 0) retour ++;
+                    x++;
+                }
+                x = 1;
+                while(j-x >= 0 && i-x >= 0){
+                    if(playBoard[i+x][j-x] != 0) retour ++;
+                    x++;
+                }
+                break;
+        }
+        return retour;
+    }
 
     private void removePiecesFromSolving(){
         // méthode qui enlève (met a -1) toutes les pièces de notre jeux du solving board
         for(int i = 0 ; i < positionsPions.size(); i++){
-            solvingBoard[positionsPions.get(i)[0]][positionsPions.get(i)[1]] = -1;
+            solvingBoard[positionsPions.get(i)[0]][positionsPions.get(i)[1]] = -10;
         }
     }
 
@@ -345,6 +363,38 @@ public class IA {
         calculerCentreDeMasses();
         applyPositionMask();
         reduceEnemyPositions();
+        applyCounterEnemy();
+    }
+
+    private void applyCounterEnemy(){
+        for(int i=0;i<BOARDSIZE ; i++){
+            for(int j=0; j<BOARDSIZE;j++){
+                if(playBoard[i][j] == 0){
+                    for(int x = 0; x < positionsPionsEnemy.size();x++){
+
+                        int posEnemyI = positionsPionsEnemy.get(x)[0];
+                        int posEnemyJ = positionsPionsEnemy.get(x)[1];
+
+                        if((posEnemyI+1 ==i || posEnemyI-1 == i || posEnemyI == i)
+                                && (posEnemyJ+1 == j || posEnemyJ-1 == j || posEnemyJ == j)){
+                            // la tuile est adjacente a une tuile enemie
+                            if((posEnemyI < i && centreIDeMasseEnemy > i)
+                                || (posEnemyI > i && centreIDeMasseEnemy < i)
+                                || (posEnemyJ < j && centreJDeMasseEnemy > j)
+                                || (posEnemyJ > j && centreJDeMasseEnemy < j)){
+
+                                // la tuile se situe entre la pièce examinée et le centre de masse de l'adversaire
+                                incrementPositionWithValidation(i,j,importanceBlockEnemyPath);
+                            }
+
+
+
+
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
@@ -391,13 +441,16 @@ public class IA {
         // on applique sur le solving board le masque de position ou le centre est plus favorable
         for(int i =0; i < BOARDSIZE; i++){
             for(int j = 0; j< BOARDSIZE; j++){
-                if(i >= (centreIDeMasseAllier-1.5) && j >= (centreJDeMasseAllier-1.5) && i <= (BOARDSIZE-centreIDeMasseAllier+1) && j <= (BOARDSIZE-centreJDeMasseAllier+1)){
+                if(i > (centreIDeMasseAllier-2) && j > (centreJDeMasseAllier-2)
+                        && i < (centreIDeMasseAllier) && j < (centreJDeMasseAllier)){
                     incrementPositionWithValidation(i,j,importanceCentraleIncrement3);
                 }
-                else if(i >= (centreIDeMasseAllier-2.5) && j >= (centreJDeMasseAllier-2.5) && i <= (BOARDSIZE-centreIDeMasseAllier+2) && j <= (BOARDSIZE-centreJDeMasseAllier+2)){
+                else if(i > (centreIDeMasseAllier-3) && j > (centreJDeMasseAllier-3)
+                        && i < (centreIDeMasseAllier+1) && j < (centreJDeMasseAllier+1)){
                     incrementPositionWithValidation(i,j,importanceCentraleIncrement2);
                 }
-                else if(i >= (centreIDeMasseAllier-3.5) && j >= (centreJDeMasseAllier-3.5) && i <= (BOARDSIZE-centreIDeMasseAllier+3) && j <= (BOARDSIZE-centreJDeMasseAllier+3)){
+                else if(i > (centreIDeMasseAllier-4) && j > (centreJDeMasseAllier-4)
+                        && i < (centreIDeMasseAllier+2) && j < (centreJDeMasseAllier+2)){
                     incrementPositionWithValidation(i,j,importanceCentraleIncrement1);
                 }
             }
@@ -433,7 +486,7 @@ public class IA {
 
     private void incrementPositionWithValidation(int i, int j,int value){
         // incrémente la valeur d'une tuile en s'assurant que cette tuile n'est pas un de nos pions
-        if(solvingBoard[i][j] != -1)
+        if(solvingBoard[i][j] != -10)
             solvingBoard[i][j]+= value;
     }
 }
