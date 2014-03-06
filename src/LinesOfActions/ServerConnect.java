@@ -1,4 +1,4 @@
-package LinesOfActions;
+package LinesOfActions_2;
 import java.io.*;
 import java.net.*;
 
@@ -7,6 +7,7 @@ class ServerConnect {
 	
 	private BufferedInputStream input;
 	private BufferedOutputStream output;
+	private static final int BOARDSIZE = BoardInOut.BOARDSIZE;
 	
 	public ServerConnect(){
 		
@@ -51,10 +52,11 @@ class ServerConnect {
 		return s;
 	}
 	
-	public int[][] void getBoardSetup(){
+	public int[][] getBoardSetup(){
+		
+		int[][] board = new int[BOARDSIZE][BOARDSIZE];
 		
 		try {
-			int[][] board = new int[8][8];
 			byte[] aBuffer = new byte[1024];
 			
 			int size = input.available();
@@ -64,21 +66,22 @@ class ServerConnect {
 	        boardValues = s.split(" ");
 	        
 	        int x=0,y=0;
-	        for(int i = 0 ; i < BOARDSIZE ; i++){
+	        int boardValuesLength = boardValues.length;
+	        for(int i = 0 ; i < boardValuesLength ; i++){
 	        	
 	            board[x][y] = Integer.parseInt(boardValues[i]);
 	            x++;
 	            
-	            if(x == 8){
+	            if(x == BOARDSIZE){
 	                x = 0;
 	                y++;
 	            }
 	        }
-	        
-	        return board;
 		}catch (IOException e) {
 	   		System.out.println(e);
 		}
+		
+		return board;
 	}
 	
 	public void sendServerCommand(String move){
@@ -87,10 +90,4 @@ class ServerConnect {
 			output.flush();
 		} catch (IOException e){e.printStackTrace();}
 	}
-	
-	public int[][] getBoard(){
-		return board;
-	}
-	
-	
 }

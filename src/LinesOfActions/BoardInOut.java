@@ -1,19 +1,20 @@
-package LinesOfActions;
+package LinesOfActions_2;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class InOut {
+public class BoardInOut {
 
+	public static final int BOARDSIZE = 8;
+	
 	private ServerConnect server = new ServerConnect();
-	private boolean humain = true;
-	BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-	private static final int BOARDSIZE = 8;
+	private final boolean joueurHumain = true;
+	private BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 	private int[][] board = new int[BOARDSIZE][BOARDSIZE];
 	
 	public static void main(String[] args) {
-		InOut io = new InOut();
+		BoardInOut io = new BoardInOut();
 		
 		while(true){
 			try {
@@ -24,13 +25,15 @@ public class InOut {
 	
 	public void talkToServer() throws IOException{
 		
-		char cmd = server.readServerCommand();
-		
+		char cmd = server.getServerCommand();
+		String coup = "";
+				
 		if(cmd == '1'){
 			board = server.getBoardSetup();
 			printBoard();
-            System.out.println("Nouvelle partie! Vous jouez blanc, entrez votre premier coup : "); 
-            jouer();
+            System.out.println("Nouvelle partie! Vous jouez blanc, entrez votre premier coup : ");
+            coup = console.readLine();
+            jouer(coup);
         }
 		
         // Debut de la partie en joueur Noir
@@ -43,14 +46,16 @@ public class InOut {
 		// Le serveur demande le prochain coup
 		// Le message contient aussi le dernier coup joue.
 		if(cmd == '3'){
-			String s = server.getLastTurn();
-			System.out.println("Dernier coup : "+ s);
-			updateBoard(s);
+			coup = server.getLastTurn();
+			System.out.println("Dernier coup : "+ coup);
+			updateBoard(coup);
 			printBoard();
 			
 	       	System.out.println("Entrez votre coup : ");
-	       	
-	       	jouer();
+	       	coup = console.readLine();
+	       	jouer(coup);
+	       	updateBoard(coup);
+			printBoard();	       	
 		}
 		
 		// Le dernier coup est invalide
@@ -74,13 +79,15 @@ public class InOut {
         System.out.print("\n\n");
     }
 	
-	public void jouer(){
-		
-		if(humain)
-       		server.sendServerCommand(console.readLine());
-       	else
-        	//Proposition :
-        	//server.sendServerCommand(getNextMove(board));
+	public void jouer(String coup){
+				
+
+			if(joueurHumain)
+	       		server.sendServerCommand(coup);
+			//else
+	        	//Proposition :
+	        	//server.sendServerCommand(getNextMove(board));
+
 		
 	}
 	
@@ -102,10 +109,10 @@ public class InOut {
         return retour;
     }
 
-	//Mise à jour du board	
-	public void updateBoard(String s, boolean blancs){
+	//Mise a jour du board	
+	public void updateBoard(String s){
 		
-		s = s.toLowerCase();
+		s = s.toLowerCase().trim();
 		String delemiter = " - ";
 		
 		if(s.contains(delemiter)) 
@@ -113,11 +120,13 @@ public class InOut {
 		
 		char[] charArray = s.toCharArray();
 		
-		int posA1 = getIndexFromLetter(charArray[0]);
-		int pions = 2;
-		if(blancs) pions = 4;
+		int posA1 = BOARDSIZE - Character.getNumericValue(charArray[1]);
+		int posA2 = getIndexFromLetter(charArray[0]);
+		int posB1 = BOARDSIZE - Character.getNumericValue(charArray[3]);
+		int posB2 = getIndexFromLetter(charArray[2]);
 		
-		board[getIndexFromLetter(charArray[0])][(charArray[1]] = 0;
-		board[getIndexFromLetter(charArray[2])][(charArray[3]] = pions;
+		int chiffrePion = board[posA1][posA2];
+		board[posA1][posA2] = 0;
+		board[posB1][posB2] = chiffrePion;
 	}
 }
