@@ -18,6 +18,7 @@ class ServerConnect {
         board[7] = new int[] {0,2,2,2,2,2,2,0};
 
         IA boardSolver = new IA(board,4);
+        boardSolver.obtainMove();
         boardSolver.drawBoard(true);
         //boardSolver.notifyMovementMyTeam("A3 - C3");
         //boardSolver.notifyMovementEnemyTeam("D1 - D3");
