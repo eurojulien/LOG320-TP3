@@ -24,7 +24,7 @@ class ServerConnect {
 	}
 	
 	
-	//lit la catégorie de commande/message du serveur (1-2-3-4) qui precede les autres infos, s'il y a lieu
+	//lit la categorie de commande/message du serveur (1-2-3-4) qui precede les autres infos, s'il y a lieu
 	public char getServerCommand(){
 		char cmd = 0;
 		
@@ -45,7 +45,7 @@ class ServerConnect {
 		byte[] aBuffer = new byte[16];
 		
 		int size;
-		
+			
 		try {
 			size = input.available();
 			input.read(aBuffer,0,size);
@@ -74,11 +74,11 @@ class ServerConnect {
 	        for(int i = 0 ; i < boardValuesLength ; i++){
 	        	
 	            board[x][y] = Integer.parseInt(boardValues[i]);
-	            x++;
+	            y++;
 	            
-	            if(x == BOARDSIZE){
-	                x = 0;
-	                y++;
+	            if(y == BOARDSIZE){
+	                y = 0;
+	                x++;
 	            }
 	        }
 		}catch (IOException e) {

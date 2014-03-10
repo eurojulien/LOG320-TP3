@@ -11,6 +11,9 @@ public class Main extends Thread{
 	private static IA megaMind = null;
 	private static int playerColor = 0;
 	
+	private static String theirLastMove = "";
+	private static String ourLastMove	= "";
+	
 	private Main(){
 
 		server = new ServerConnect();
@@ -30,21 +33,21 @@ public class Main extends Thread{
 	public void run(){
 		
 		// Reception de la couleur de nos pions
-		// Les noirs jouent en premier
-		// Les blancs attendent une reponse du serveur avant de commencer a jouer
+		// Les blancs jouent en premier
+		// Les noirs attendent une reponse du serveur avant de commencer a jouer
 		switch( server.getServerCommand())
 		{
-			case 1: playerColor = BLACK;
+			case '1': playerColor = WHITE;
 					break;
 					
-			case 2: playerColor = WHITE;
+			case '2': playerColor = BLACK;
 					break;
 		}
 		
 		// Initalisation du plateau
 		megaMind = new IA(server.getBoardSetup(), playerColor);
 		
-		if(playerColor == BLACK){
+		if(playerColor == WHITE){
 			
 			megaMind.run();
 			server.sendServerCommand(megaMind.getMove());
@@ -60,15 +63,34 @@ public class Main extends Thread{
 		do{
 			
 			// Reception de la reponse du serveur
-			megaMind.notifyMovementEnemyTeam(server.getLastTurn());
+			server.getServerCommand();
+			
+			megaMind.notifyMovementEnemyTeam(server.getLastTurn().trim());
 			
 			// Arbre MiniMax
 			megaMind.run();
 			
+			// TODO : Attente de 4500 millisecondes, temps maximum alloue a Minimax
+			// pour generer un arbre
+			// Cette attente devrait etre levee quand la classe IA le permet. Durant le temps
+			// de traitement de IA, il nous est possible de faire d'autre changements aussi.
+			try {
+				Thread.sleep(4500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			try {
+				megaMind.wait();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			}
+			
 			// Envoie de la reponse
 			server.sendServerCommand(megaMind.getMove());
 			megaMind.notifyMovementMyTeam(megaMind.getMove());
-			
 			
 			// TODO : Traitement supplementaire lorsque l'adversaire joue
 			

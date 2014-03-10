@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class IA implements Runnable{
 
-    // considérations sur le board :
+    // considerations sur le board :
     // - I EST VERTICAL (CHIFFRES)
     // - J EST HORIZONTAL (LETTRE)
 
@@ -21,7 +21,7 @@ public class IA implements Runnable{
     //  JJJJJJJJJJ
 
     public enum direction { NE, NW, E, N, S, W, SE, SW};
-    // définition des directions :
+    // definition des directions :
     // DIRECTION NE
     // 00X
     // 0X0
@@ -41,7 +41,7 @@ public class IA implements Runnable{
 
     // ceci devrais etre 2 ou 4
     private static final int BOARDSIZE = 8;
-    private static int playerNumber;
+    private int playerNumber;
     private int[][] playBoard;
     private int[][] solvingBoard;
     private ArrayList<int[]> positionsPions = new ArrayList<int[]>();
@@ -54,7 +54,7 @@ public class IA implements Runnable{
     private double centreIDeMasseEnemy = 4.5;
     private double centreJDeMasseEnemy = 4.5;
 
-    // valeurs qui pourraient être modifiée
+    // valeurs qui pourraient etre modifiee
     private static final int enemyPawnDevalue = -4;
     private static final int tuileToucheUnAllier = 1;
     private static final int importanceCentraleIncrement1 = 1;
@@ -64,7 +64,7 @@ public class IA implements Runnable{
     private static final int trouEntreDeuxPieces = 4;
 
     public IA(int[][] playBoard, int playerNumber){
-        this.playBoard = playBoard;
+        cloneBoard(playBoard);
         this.playerNumber = playerNumber;
         initializeSolvingBoard();
         initializePositionsList();
@@ -72,7 +72,7 @@ public class IA implements Runnable{
     }
 
     public IA(int[][] playBoard, int playerNumber,int[][] solvingBoard){
-        this.playBoard = playBoard;
+    	cloneBoard(playBoard);
         this.playerNumber = playerNumber;
         this.solvingBoard = solvingBoard;
         initializePositionsList();
@@ -80,7 +80,7 @@ public class IA implements Runnable{
     }
 
     public IA(int[][] playBoard, int playerNumber,int[][] solvingBoard,ArrayList<int[]> positionsPions){
-        this.playBoard = playBoard;
+    	cloneBoard(playBoard);
         this.playerNumber = playerNumber;
         this.solvingBoard = solvingBoard;
         this.positionsPions = positionsPions;
@@ -89,7 +89,7 @@ public class IA implements Runnable{
 
     public IA(int[][] playBoard, int playerNumber,int[][] solvingBoard,ArrayList<int[]> positionsPions
     ,ArrayList<int[]> positionsPionsEnemy){
-        this.playBoard = playBoard;
+    	cloneBoard(playBoard);
         this.playerNumber = playerNumber;
         this.solvingBoard = solvingBoard;
         this.positionsPions = positionsPions;
@@ -98,9 +98,11 @@ public class IA implements Runnable{
     }
 
     public void notifyMovementEnemyTeam(String movement){
-        // cette méthode permet a l'algoritme de prendre compte des déplacments
+    	// todo : chekout & remove if ...
+    	if (movement.length() == 0) {return;}
+        // cette methode permet a l'algoritme de prendre compte des deplacments
         // que notre adversaire fait !
-        // IMPORTANT : Le format doit toujours être "A5_-_B5"
+        // IMPORTANT : Le format doit toujours etre "A5_-_B5"
         char[] tabLettres = movement.toCharArray();
         int posJDepart = getIndexFromLetter(tabLettres[0]);
         int posIDepart = Character.getNumericValue(tabLettres[1]) -1;
@@ -110,42 +112,56 @@ public class IA implements Runnable{
         playBoard[posIFin][posJFin] = playBoard[posIDepart][posJDepart];
         playBoard[posIDepart][posJDepart] = 0;
 
-        for(int i=0;i<positionsPions.size();i++){
-            int[] comparaison = positionsPions.get(i);
+        for(int i=0;i<positionsPionsEnemy.size();i++){
+            int[] comparaison = positionsPionsEnemy.get(i);
             if(comparaison[0] == posIFin && comparaison[1] == posJFin){
-                positionsPions.remove(i);
-                positionsPionsEnemy.add(new int[] {posIFin,posJFin});
+            	// todo : verifier si on se fait manger
+            	positionsPionsEnemy.remove(i);
+            	positionsPionsEnemy.add(new int[] {posIFin,posJFin});
             }
         }
-
-        initializeSolvingBoard();
+        // todo peut etre enelver lui ci-bas
         removePiecesFromSolving();
+        // todo peut etre enelver lui ci-bas
         fillInSolvingBoard();
+    }
+    
+    private void cloneBoard(int[][] argumentBoard){
+    	// todo : est-ce que sa sameliore ??
+    	playBoard = new int[BOARDSIZE][BOARDSIZE];
+    	for(int i = 0;i<BOARDSIZE;i++){
+    		for(int j = 0;j<BOARDSIZE;j++){
+    			this.playBoard[i][j] = argumentBoard[i][j];
+    		}
+    	}
     }
 
     public void notifyMovementMyTeam(String movement){
-        // cette méthode permet a l'algoritme de prendre compte des déplacments
+        // cette methode permet a l'algoritme de prendre compte des deplacments
         // que nous fesons
-        // IMPORTANT : Le format doit toujours être "A5_-_B5"
-        char[] tabLettres = movement.toLowerCase().toCharArray();
+        // IMPORTANT : Le format doit toujours etre "A5_-_B5"
+        char[] tabLettres = movement.toCharArray();
         int posJDepart = getIndexFromLetter(tabLettres[0]);
         int posIDepart = Character.getNumericValue(tabLettres[1])-1;
         int posJFin = getIndexFromLetter(tabLettres[5]);
         int posIFin = Character.getNumericValue(tabLettres[6]) -1;
 
         playBoard[posIDepart][posJDepart] = 0;
-        playBoard[posIFin][posJFin] =playerNumber;
+        playBoard[posIFin][posJFin] = playerNumber;
 
         for(int i=0;i<positionsPions.size();i++){
             int[] comparaison = positionsPions.get(i);
             if(comparaison[0] == posIDepart && comparaison[1] == posJDepart){
-                positionsPions.remove(i);
+                // todo : verif
+            	positionsPions.remove(i);
                 positionsPions.add(new int[] {posIFin,posJFin});
             }
         }
 
-        initializeSolvingBoard();
+        
+        // todo peut etre enelver lui ci-bas
         removePiecesFromSolving();
+        // todo peut etre enelver lui ci-bas
         fillInSolvingBoard();
     }
 
@@ -188,7 +204,7 @@ public class IA implements Runnable{
             System.out.println("=========================");
             System.out.println("");
             System.out.println("===== CENTRE DE MASSE =====");
-            System.out.println("Allié : [" + centreIDeMasseAllier + " ; " + centreJDeMasseAllier + " ]");
+            System.out.println("Allie : [" + centreIDeMasseAllier + " ; " + centreJDeMasseAllier + " ]");
             System.out.println("Enemy : [" + centreIDeMasseEnemy + " ; " + centreJDeMasseEnemy + " ]");
             System.out.println("Nombre de move possible : " + lstPossibleMove.size());
         }
@@ -202,6 +218,7 @@ public class IA implements Runnable{
 
         Boolean gauche = true;
         Boolean droite = true;
+        // todo : watch for impossible move
         for(int x = 1; x <= distanceEstWest;x++){
             if(x+j >= BOARDSIZE){ droite = false;}
             else if(x == distanceEstWest){ if(playBoard[i][j+x] == playerNumber) droite = false;}
@@ -247,6 +264,9 @@ public class IA implements Runnable{
             lstPossibleMove.add(toAdd);
         }
 
+        
+        // todo : optimiser
+        // todo : make sure it works !!
         /*gauche = true;
         droite = true;
         for(int x = 1; x <= distanceNordEst;x++){
@@ -307,7 +327,8 @@ public class IA implements Runnable{
 
 
     private int getBestScore(){
-        for(int x = 0; x < lstPossibleMove.size();x ++){
+    // todo : peut etre enelver
+    	for(int x = 0; x < lstPossibleMove.size();x ++){
             String currentMove = lstPossibleMove.get(x);
             int indexJ = getIndexFromLetter(currentMove.charAt(5));
             int indexi = Integer.parseInt(currentMove.substring(6, 7));
@@ -321,10 +342,16 @@ public class IA implements Runnable{
         return bestPointage;
     }
 
+    public void obtainMove(){
+        for(int x =0; x<positionsPions.size();x++){
+            inspectAndInsertMovement(positionsPions.get(x)[0],positionsPions.get(x)[1]);
+        }
+    }
+    
     public void buildMoves(){
-        obtainMove();
+        
+    	obtainMove();
         int EnemyPlayerID = 0;
-
         if(playerNumber == 4){
             EnemyPlayerID = 2;
         }else{
@@ -339,17 +366,14 @@ public class IA implements Runnable{
 
             IA newBoardTryOut = new IA(this.playBoard,EnemyPlayerID);
             newBoardTryOut.notifyMovementEnemyTeam(currentMove);
-            newBoardTryOut.obtainMove();
             int meilleurScoreEnfant =  newBoardTryOut.getBestScore();
             //System.out.println(currentMove + " Valeur du move (MAX) :"+ solvingBoard[indexi][indexJ] + " valeu enemy meilleur =" +  meilleurScoreEnfant);
-            int valueMove = solvingBoard[indexi][indexJ] + meilleurScoreEnfant;
             // todo : keep more than 1 value !
-            if(valueMove - meilleurScoreEnfant > bestPointage){
-                bestPointage = valueMove;
+            if(solvingBoard[indexi][indexJ]  - meilleurScoreEnfant > bestPointage){
+                bestPointage = solvingBoard[indexi][indexJ] - meilleurScoreEnfant;
                 bestMove = currentMove;
             }
         }
-        //System.out.println("Move Choisi :" + bestMove);
     }
 
     public int[] getCoordsAfterMove(int i, int j, int distance, direction dir){
@@ -384,7 +408,7 @@ public class IA implements Runnable{
     }
 
     public int distanceMove(int i, int j, direction d){
-        // cette méthode retourne le nombre de pions sur une ligne d'action
+        // cette methode retourne le nombre de pions sur une ligne d'action
         int retour = 0;
         int x;
         switch (d){
@@ -460,14 +484,14 @@ public class IA implements Runnable{
     }
 
     private void removePiecesFromSolving(){
-        // méthode qui enlève (met a -1) toutes les pièces de notre jeux du solving board
+        // methode qui enleve (met a -1) toutes les pieces de notre jeux du solving board
         for(int i = 0 ; i < positionsPions.size(); i++){
             solvingBoard[positionsPions.get(i)[0]][positionsPions.get(i)[1]] = -10;
         }
     }
 
     private char getLetterFromIndex(int letter){
-        // retourne la lettre lié a l'index donné
+        // retourne la lettre liee a l'index donne
         letter++;
         char retour = 'z';
         switch (letter){
@@ -500,14 +524,8 @@ public class IA implements Runnable{
         return retour;
     }
 
-    public void obtainMove(){
-        for(int x =0; x<positionsPions.size();x++){
-            inspectAndInsertMovement(positionsPions.get(x)[0],positionsPions.get(x)[1]);
-        }
-    }
-
     private int getIndexFromLetter(char letter){
-        // retourne l'index lié a la lettre donnée
+        // retourne l'index lie a la lettre donnee
         int retour = -1;
         switch (letter){
             case 'A':
@@ -541,17 +559,18 @@ public class IA implements Runnable{
 
     private void initializeSolvingBoard(){
         // initialise le solving board
+    	// todo : remove this shizzle
         solvingBoard = new int[8][8];
     }
 
     private void initializePositionsList(){
-        // trouve toutes nos pièces et les ajoutes dans l'array de pieces
+        // trouve toutes nos pieces et les ajoutes dans l'array de pieces
         positionsPions = new ArrayList<int[]>();
         for(int i=0;i<BOARDSIZE;i++){
             for(int j=0;j<BOARDSIZE;j++){
                 if(playBoard[i][j] == playerNumber){
                     positionsPions.add(new int[] {i,j});
-                    solvingBoard[i][j] = -1;
+                    solvingBoard[i][j] = -10;
                 }else if(playBoard[i][j] != 0){
                     positionsPionsEnemy.add(new int[] {i,j});
                 }
@@ -560,9 +579,10 @@ public class IA implements Runnable{
     }
 
     private void fillInSolvingBoard(){
-        // cette méthode fournie une évaluation de chaque tuile du jeu ainsi que leurs valeurs.
-        // on incrémente autour de toutes nos pieces pour indiquer que ce sont des positions favorables
-        initializeSolvingBoard();
+        // cette methode fournie une evaluation de chaque tuile du jeu ainsi que leurs valeurs.
+        // on incremente autour de toutes nos pieces pour indiquer que ce sont des positions favorables
+        // todo : check again
+    	initializeSolvingBoard();
         removePiecesFromSolving();
         for(int i =0;i<positionsPions.size();i++){
             incrementAround(positionsPions.get(i)[0],positionsPions.get(i)[1]);
@@ -592,13 +612,9 @@ public class IA implements Runnable{
                                 || (posEnemyJ < j && centreJDeMasseEnemy > j)
                                 || (posEnemyJ > j && centreJDeMasseEnemy < j)){
 
-                                // la tuile se situe entre la pièce examinée et le centre de masse de l'adversaire
+                                // la tuile se situe entre la piece examinee et le centre de masse de l'adversaire
                                 incrementPositionWithValidation(i,j,importanceBlockEnemyPath);
                             }
-
-
-
-
                         }
                     }
                 }
@@ -608,7 +624,7 @@ public class IA implements Runnable{
 
 
     private void calculerCentreDeMasses(){
-        // cette méthode calcule le centre de masse des joueurs
+        // cette methode calcule le centre de masse des joueurs
         double cummulateurI = 0;
         double cummulateurJ = 0;
         for(int x = 0; x < positionsPions.size();x++){
@@ -669,7 +685,7 @@ public class IA implements Runnable{
 
 
     private void incrementAround(int i, int j){
-        // fait l'incrément de toutes les tuiles autour de [i][j] ne contenant pas de pièces qui nous appartiens
+        // fait l'increment de toutes les tuiles autour de [i][j] ne contenant pas de pieces qui nous appartiens
         if(i > 0){
             incrementPositionWithValidation(i-1,j,tuileToucheUnAllier);
             if(j > 0)
@@ -694,18 +710,24 @@ public class IA implements Runnable{
     }
 
     private void incrementPositionWithValidation(int i, int j,int value){
-        // incrémente la valeur d'une tuile en s'assurant que cette tuile n'est pas un de nos pions
+        // incremente la valeur d'une tuile en s'assurant que cette tuile n'est pas un de nos pions
         if(solvingBoard[i][j] != -10)
             solvingBoard[i][j]+= value;
     }
 
-    // 4500 donne 500 millisecondes pour l'envoie des donnees
-	private final int COMPUTING_TIME_LIMIT_IN_MILLISECONDS = 4500;
+    // 4500 * 100 donne 500 millisecondes pour l'envoie des donnees
+	private final double COMPUTING_TIME_LIMIT_IN_NANOSECONDS = 4.0 * Math.pow(10, 9);
+	private long startTime 	= 0;
 
 	@Override
 	// Thread de compilation d'arbre MiniMax
 	public void run() {
-		
+		initializeSolvingBoard();
+		initializePositionsList();
+		fillInSolvingBoard();		
+		bestMove = "";
+		bestPointage = -100;
+		this.buildMoves();
 	}
 	
 }
