@@ -2,7 +2,7 @@ package LinesOfActions;
 
 import java.util.ArrayList;
 
-public class IA {
+public class IA implements Runnable{
 
     // considérations sur le board :
     // - I EST VERTICAL (CHIFFRES)
@@ -698,4 +698,14 @@ public class IA {
         if(solvingBoard[i][j] != -10)
             solvingBoard[i][j]+= value;
     }
+
+    // 4500 donne 500 millisecondes pour l'envoie des donnees
+	private final int COMPUTING_TIME_LIMIT_IN_MILLISECONDS = 4500;
+
+	@Override
+	// Thread de compilation d'arbre MiniMax
+	public void run() {
+		
+	}
+	
 }
