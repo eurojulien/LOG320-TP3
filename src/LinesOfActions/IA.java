@@ -47,6 +47,8 @@ public class IA {
     private ArrayList<int[]> positionsPions = new ArrayList<int[]>();
     private ArrayList<int[]> positionsPionsEnemy = new ArrayList<int[]>();
     private ArrayList<String> lstPossibleMove = new ArrayList<String>();
+    private String bestMove = "";
+    private int bestPointage = -100;
     private double centreIDeMasseAllier = 4.5;
     private double centreJDeMasseAllier = 4.5;
     private double centreIDeMasseEnemy = 4.5;
@@ -87,7 +89,6 @@ public class IA {
 
     public IA(int[][] playBoard, int playerNumber,int[][] solvingBoard,ArrayList<int[]> positionsPions
     ,ArrayList<int[]> positionsPionsEnemy){
-
         this.playBoard = playBoard;
         this.playerNumber = playerNumber;
         this.solvingBoard = solvingBoard;
@@ -100,10 +101,9 @@ public class IA {
         // cette méthode permet a l'algoritme de prendre compte des déplacments
         // que notre adversaire fait !
         // IMPORTANT : Le format doit toujours être "A5_-_B5"
-
-        char[] tabLettres = movement.toLowerCase().toCharArray();
+        char[] tabLettres = movement.toCharArray();
         int posJDepart = getIndexFromLetter(tabLettres[0]);
-        int posIDepart = Character.getNumericValue(tabLettres[1])-1;
+        int posIDepart = Character.getNumericValue(tabLettres[1]) -1;
         int posJFin = getIndexFromLetter(tabLettres[5]);
         int posIFin = Character.getNumericValue(tabLettres[6]) -1;
 
@@ -123,14 +123,10 @@ public class IA {
         fillInSolvingBoard();
     }
 
-
-
     public void notifyMovementMyTeam(String movement){
         // cette méthode permet a l'algoritme de prendre compte des déplacments
         // que nous fesons
         // IMPORTANT : Le format doit toujours être "A5_-_B5"
-
-
         char[] tabLettres = movement.toLowerCase().toCharArray();
         int posJDepart = getIndexFromLetter(tabLettres[0]);
         int posIDepart = Character.getNumericValue(tabLettres[1])-1;
@@ -177,7 +173,6 @@ public class IA {
         }
         System.out.println("");
         System.out.println("=========================");
-
         if(showSolvingBoard){
             System.out.println("====== SOLVE BOARD ========");
             for(int i =0; i < BOARDSIZE; i++){
@@ -191,7 +186,6 @@ public class IA {
             }
             System.out.println("");
             System.out.println("=========================");
-
             System.out.println("");
             System.out.println("===== CENTRE DE MASSE =====");
             System.out.println("Allié : [" + centreIDeMasseAllier + " ; " + centreJDeMasseAllier + " ]");
@@ -219,12 +213,12 @@ public class IA {
         }
 
         if(droite){
-            String toAdd = getLetterFromIndex(j) + i + " - " + getLetterFromIndex(j + distanceEstWest) + i;
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(j + distanceEstWest) + (i+1);
             lstPossibleMove.add(toAdd);
         }
 
         if(gauche){
-            String toAdd = getLetterFromIndex(j) + i + " - " + getLetterFromIndex(j - distanceEstWest) + i;
+            String toAdd = getLetterFromIndex(j) + "" + (1 + i) + " - " + getLetterFromIndex(j - distanceEstWest) + (i+1);
             lstPossibleMove.add(toAdd);
         }
 
@@ -242,20 +236,18 @@ public class IA {
 
         }
         if(down){
-            int indexI = i + distanceNordSud;
-            String toAdd = getLetterFromIndex(j) + i + " - " + getLetterFromIndex(j) + indexI;
+            int indexI = i + distanceNordSud +1;
+            String toAdd = getLetterFromIndex(j)+ "" + (i +1) + " - " + getLetterFromIndex(j) + indexI;
             lstPossibleMove.add(toAdd);
         }
 
         if(up){
-            int indexI = i - distanceNordSud;
-            String toAdd = getLetterFromIndex(j) + i + " - " + getLetterFromIndex(j) + indexI;
+            int indexI = i - distanceNordSud +1;
+            String toAdd = getLetterFromIndex(j)+ "" + (i +1) + " - " + getLetterFromIndex(j) + indexI;
             lstPossibleMove.add(toAdd);
         }
 
-
-
-        gauche = true;
+        /*gauche = true;
         droite = true;
         for(int x = 1; x <= distanceNordEst;x++){
 
@@ -306,7 +298,58 @@ public class IA {
             int indexJ = j - distanceNordWest;
             String toAdd = getLetterFromIndex(j) + i + " - " + getLetterFromIndex(indexJ) + indexI;
             lstPossibleMove.add(toAdd);
+        }*/
+    }
+
+    public String getMove(){
+        return this.bestMove;
+    }
+
+
+    private int getBestScore(){
+        for(int x = 0; x < lstPossibleMove.size();x ++){
+            String currentMove = lstPossibleMove.get(x);
+            int indexJ = getIndexFromLetter(currentMove.charAt(5));
+            int indexi = Integer.parseInt(currentMove.substring(6, 7));
+            int valueMove = solvingBoard[indexi-1][indexJ];
+            // todo : keep more than 1 value !
+            if(valueMove > bestPointage){
+                bestPointage = valueMove;
+                bestMove = currentMove;
+            }
         }
+        return bestPointage;
+    }
+
+    public void buildMoves(){
+        obtainMove();
+        int EnemyPlayerID = 0;
+
+        if(playerNumber == 4){
+            EnemyPlayerID = 2;
+        }else{
+            EnemyPlayerID = 4;
+        }
+        //System.out.println("Essais de move :");
+        ArrayList<IA> listeDeMoveEtageInferieure = new ArrayList<IA>();
+        for(int x = 0; x < lstPossibleMove.size();x ++){
+            String currentMove = lstPossibleMove.get(x);
+            int indexJ = getIndexFromLetter(currentMove.charAt(5));
+            int indexi = Integer.parseInt(currentMove.substring(6, 7)) -1;
+
+            IA newBoardTryOut = new IA(this.playBoard,EnemyPlayerID);
+            newBoardTryOut.notifyMovementEnemyTeam(currentMove);
+            newBoardTryOut.obtainMove();
+            int meilleurScoreEnfant =  newBoardTryOut.getBestScore();
+            //System.out.println(currentMove + " Valeur du move (MAX) :"+ solvingBoard[indexi][indexJ] + " valeu enemy meilleur =" +  meilleurScoreEnfant);
+            int valueMove = solvingBoard[indexi][indexJ] + meilleurScoreEnfant;
+            // todo : keep more than 1 value !
+            if(valueMove - meilleurScoreEnfant > bestPointage){
+                bestPointage = valueMove;
+                bestMove = currentMove;
+            }
+        }
+        //System.out.println("Move Choisi :" + bestMove);
     }
 
     public int[] getCoordsAfterMove(int i, int j, int distance, direction dir){
@@ -425,6 +468,7 @@ public class IA {
 
     private char getLetterFromIndex(int letter){
         // retourne la lettre lié a l'index donné
+        letter++;
         char retour = 'z';
         switch (letter){
             case 1:
@@ -466,28 +510,28 @@ public class IA {
         // retourne l'index lié a la lettre donnée
         int retour = -1;
         switch (letter){
-            case 'a':
+            case 'A':
                 retour = 0;
                 break;
-            case 'b':
+            case 'B':
                 retour = 1;
                 break;
-            case 'c':
+            case 'C':
                 retour = 2;
                 break;
-            case 'd':
+            case 'D':
                 retour = 3;
                 break;
-            case 'e':
+            case 'E':
                 retour = 4;
                 break;
-            case 'f':
+            case 'F':
                 retour = 5;
                 break;
-            case 'g':
+            case 'G':
                 retour = 6;
                 break;
-            case 'h':
+            case 'H':
                 retour = 7;
                 break;
         }
