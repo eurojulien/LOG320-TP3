@@ -11,7 +11,6 @@ public class BoardInOut {
 	private ServerConnect server = new ServerConnect();
 	private final boolean joueurHumain = true;
 	private BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-	private int[][] board = new int[BOARDSIZE][BOARDSIZE];
 	
 	public static void main(String[] args) {
 		BoardInOut io = new BoardInOut();
@@ -23,6 +22,7 @@ public class BoardInOut {
 		}
 	}
 	
+	//interprete la commende du serveur (1-2-3-4) et lance les methodes en consequence
 	public void talkToServer() throws IOException{
 		
 		char cmd = server.getServerCommand();
@@ -65,6 +65,7 @@ public class BoardInOut {
 		}
     }
 	
+	//Affiche le board dans la console
 	public void printBoard(){
 		
         System.out.print("\n********************************************\n************** Planche de Jeu **************\n********************************************\n\n");
@@ -79,6 +80,8 @@ public class BoardInOut {
         System.out.print("\n\n");
     }
 	
+	
+	//Envoit le coup au serveur
 	public void jouer(String coup){
 				
 
@@ -86,10 +89,11 @@ public class BoardInOut {
 	       		server.sendServerCommand(coup);
 			//else
 	        	//Proposition :
-	        	//server.sendServerCommand(getNextMove(board));
+	        	//server.sendServerCommand(IA.getNextMove(board));
 
 		
 	}
+	
 	
 	private int getIndexFromLetter(char letter){
         
@@ -110,13 +114,14 @@ public class BoardInOut {
     }
 
 	//Mise a jour du board	
-	public void updateBoard(String s){
+	//Interprete le coup de l'adversaire et update du board en memoire
+	public void updateBoard(String coup){
 		
-		s = s.toLowerCase().trim();
+		coup = coup.toLowerCase().trim();
 		String delemiter = " - ";
 		
 		if(s.contains(delemiter)) 
-			s = s.replace(" - ","");
+			coup = coup.replace(" - ","");
 		
 		char[] charArray = s.toCharArray();
 		
@@ -128,5 +133,10 @@ public class BoardInOut {
 		int chiffrePion = board[posA1][posA2];
 		board[posA1][posA2] = 0;
 		board[posB1][posB2] = chiffrePion;
+	}
+	
+
+	public int[][] getBoard(){
+		return board;
 	}
 }
