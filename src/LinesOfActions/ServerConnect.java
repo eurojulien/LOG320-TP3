@@ -1,4 +1,4 @@
-package LinesOfActions_2;
+package LinesOfActions;
 import java.io.*;
 import java.net.*;
 
@@ -23,6 +23,8 @@ class ServerConnect {
 		}
 	}
 	
+	
+	//lit la catégorie de commande/message du serveur (1-2-3-4) qui precede les autres infos, s'il y a lieu
 	public char getServerCommand(){
 		char cmd = 0;
 		
@@ -38,6 +40,7 @@ class ServerConnect {
 		return cmd;
 	}
 	
+	//Lit le coup joue par l'adversaire, ex. A1 - A3
 	public String getLastTurn(){
 		byte[] aBuffer = new byte[16];
 		
@@ -52,6 +55,7 @@ class ServerConnect {
 		return s;
 	}
 	
+	//Lit la configuration du board initiale (C'est le serveur qui l'envoit)
 	public int[][] getBoardSetup(){
 		
 		int[][] board = new int[BOARDSIZE][BOARDSIZE];
@@ -84,6 +88,7 @@ class ServerConnect {
 		return board;
 	}
 	
+	//Pour envoyer un coup (ex. A1 - A3) au serveur pour jouer notre tour
 	public void sendServerCommand(String move){
 		try {
 			output.write(move.getBytes(),0,move.length());
