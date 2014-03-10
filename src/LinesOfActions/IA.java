@@ -30,7 +30,7 @@ public class IA {
     // X00
     // 0X0
     // 00X
-    // DIRECTION E
+    // DIRECTION EST
     // 000
     // XXX
     // 000

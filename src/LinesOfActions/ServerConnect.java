@@ -19,11 +19,9 @@ class ServerConnect {
 
         IA boardSolver = new IA(board,4);
         boardSolver.obtainMove();
-        //boardSolver.drawBoard(true);
         boardSolver.buildMoves();
-        //boardSolver.notifyMovemnetMyTeam("A3 - C3");
-        //boardSolver.notifyMovementEnemyTeam("D1 - D3");
-        //boardSolver.drawBoard(true);
+
+
     /*
 	Socket MyClient;
 	BufferedInputStream input;
