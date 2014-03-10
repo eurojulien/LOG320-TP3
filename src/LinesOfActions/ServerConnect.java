@@ -1,4 +1,4 @@
-package LinesOfActions_2;
+package LinesOfActions;
 import java.io.*;
 import java.net.*;
 
