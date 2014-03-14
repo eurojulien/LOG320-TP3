@@ -1,4 +1,4 @@
-package LinesOfActions.MiniMax;
+package MiniMax;
 
 import java.util.ArrayList;
 
