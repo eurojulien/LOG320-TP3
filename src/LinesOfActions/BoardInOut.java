@@ -122,10 +122,10 @@ public class BoardInOut {
 		coup = coup.toLowerCase().trim();
 		String delemiter = " - ";
 		
-		if(s.contains(delemiter)) 
+		if(coup.contains(delemiter)) 
 			coup = coup.replace(" - ","");
 		
-		char[] charArray = s.toCharArray();
+		char[] charArray = coup.toCharArray();
 		
 		int posA1 = BOARDSIZE - Character.getNumericValue(charArray[1]);
 		int posA2 = getIndexFromLetter(charArray[0]);
