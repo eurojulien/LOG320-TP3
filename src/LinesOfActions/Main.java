@@ -1,5 +1,7 @@
 package LinesOfActions;
 
+import MiniMax.MiniMax;
+
 public class Main extends Thread{
 
 	private static final int BLACK = 2;
@@ -9,6 +11,7 @@ public class Main extends Thread{
 	private static ServerConnect server;
 	private static BoardInOut controller = null;
 	private static IA megaMind = null;
+	private static MiniMax miniMax;
 	private static int playerColor = 0;
 	
 	private static String theirLastMove = "";
@@ -45,11 +48,14 @@ public class Main extends Thread{
 		}
 		
 		// Initalisation du plateau
-		megaMind = new IA(server.getBoardSetup(), playerColor);
+		int[][] board = server.getBoardSetup().clone();
+		megaMind 	= new IA(board, playerColor);
+		miniMax.initaliserMinMax(board);
 		
 		if(playerColor == WHITE){
 			
 			megaMind.run();
+			miniMax.run();
 			server.sendServerCommand(megaMind.getMove());
 			megaMind.notifyMovementMyTeam(megaMind.getMove());
 		}
