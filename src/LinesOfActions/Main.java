@@ -1,5 +1,4 @@
 package LinesOfActions;
-
 import MiniMax.MiniMax;
 
 public class Main extends Thread{
@@ -56,8 +55,8 @@ public class Main extends Thread{
 			
 			megaMind.run();
 			miniMax.run();
-			server.sendServerCommand(megaMind.getMove());
-			megaMind.notifyMovementMyTeam(megaMind.getMove());
+			server.sendServerCommand(megaMind.getBestMove());
+			megaMind.notifyMovementMyTeam(megaMind.getBestMove());
 		}
 		
 		
@@ -95,8 +94,8 @@ public class Main extends Thread{
 			}
 			
 			// Envoie de la reponse
-			server.sendServerCommand(megaMind.getMove());
-			megaMind.notifyMovementMyTeam(megaMind.getMove());
+			server.sendServerCommand(megaMind.getBestMove());
+			megaMind.notifyMovementMyTeam(megaMind.getBestMove());
 			
 			// TODO : Traitement supplementaire lorsque l'adversaire joue
 			
