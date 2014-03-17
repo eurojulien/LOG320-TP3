@@ -1,7 +1,5 @@
 package MiniMax;
 
-import java.util.ArrayList;
-
 import LinesOfActions.IA;
 
 public class MiniMax implements Runnable{
