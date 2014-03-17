@@ -24,12 +24,12 @@ public class MiniMax implements Runnable{
 	
 	// Instancie l'arbre MinMax
 	// Cette fonction doit etre appeler de commencer a jouer notre premier coup seulement
-	public static void initaliserMinMax(int [][] tableauJeu){
+	public static void initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
 	
 		MiniMax.plateauJeu 					= tableauJeu;
 		MiniMax.profondeurMaximalePermise 	= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
-		MiniMax.megaMind					= new IA(tableauJeu.clone(), 2);
-		MiniMax.feuilleSouche				= new Feuille(true, "");
+		MiniMax.megaMind					= new IA(tableauJeu.clone(), numeroJoueur);
+		MiniMax.feuilleSouche				= new Feuille(MiniMax.megaMind, true, "");
 	}
 	
 	// Donne une nouvelle profondeur de recherche de l'arbre MiniMax
@@ -54,9 +54,12 @@ public class MiniMax implements Runnable{
 	
 	// Fonction recursive de construction d'arbre
 	private static void construireArbre(int[][] tableauDeJeu, Feuille feuille, int profondeurArbre){
-			
+		
 		// Calcul du score
 		if (profondeurArbre == profondeurMaximalePermise){
+			
+			feuille.getIA().generateMoveList();
+			feuille.setCoupJoue(feuille.getIA().getBestMove());
 			
 			// Calculer score du tableauDeJeu
 			// Attribuer ce score a la feuille en cours Ex : feuilleParent.setScore(score)
@@ -64,15 +67,18 @@ public class MiniMax implements Runnable{
 		
 		else{
 			
-			// Trouver les coups possibles
-			// TODO : Par alex !
-			//String [] mouvementsPossibles = megaMind.getMouvementsPossibles(tableauDeJeu, !feuille.isJoueurEstMAX());
-			String [] mouvementsPossibles = null;
+			// IA
+			IA newIA = null;
 			
-			for (String deplacement : mouvementsPossibles){
+			if (feuille.isJoueurEstMAX()) {newIA = new IA(tableauDeJeu, 2);}
+			else {newIA = new IA(tableauDeJeu, 2);}
+			 
+			newIA.generateMoveList();
+			
+			for (String deplacement : newIA.getListeMouvements()){
 				
 				// Construction d'une feuille enfant
-				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacement);
+				Feuille feuilleEnfant = new Feuille(newIA, !feuille.isJoueurEstMAX(), deplacement);
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
 				construireArbre(tableauDeJeu.clone(), feuilleEnfant, profondeurArbre + 1);
 				
@@ -84,13 +90,14 @@ public class MiniMax implements Runnable{
 	public static void resetArbre(){
 		feuilleSouche = null;
 	}
+	
+	public 
 
 	@Override
 	public void run() {
 		
-		//construireArbre(null, null);
-		
 		// TODO Auto-generated method stub
+		construireArbre();
 		
 	}
 }

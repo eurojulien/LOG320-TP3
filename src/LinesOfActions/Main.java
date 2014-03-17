@@ -49,7 +49,7 @@ public class Main extends Thread{
 		// Initalisation du plateau
 		int[][] board = server.getBoardSetup().clone();
 		megaMind 	= new IA(board, playerColor);
-		miniMax.initaliserMinMax(board);
+		miniMax.initaliserMinMax(board, playerColor);
 		
 		if(playerColor == WHITE){
 			

@@ -2,6 +2,8 @@ package MiniMax;
 
 import java.util.ArrayList;
 
+import LinesOfActions.IA;
+
 /**
  * 
  * @author julien
@@ -20,14 +22,18 @@ public class Feuille {
 	private boolean joueurEstMAX;
 	private int score;
 	
+	// IA
+	private IA megaMind = null;
+	
 	// Coup joue pour atteindre cette feuille
 	private String coupJoue;
 	
 	// Constructeur pour creer une feuille dans l'arbre MiniMax
-	public Feuille(boolean joueurAdverse, String coupJoue){
+	public Feuille(IA megaMind, boolean joueurEstMAX, String coupJoue){
 		
 		this.feuilleEnfants = new ArrayList<Feuille>();
-		this.joueurEstMAX = joueurAdverse;
+		this.joueurEstMAX = joueurEstMAX;
+		this.megaMind = megaMind;
 		this.score = 0;
 		this.coupJoue = coupJoue;
 	}
@@ -96,5 +102,8 @@ public class Feuille {
 		return this.joueurEstMAX;
 	}
 	
+	public IA getIA(){
+		return this.megaMind; 
+	}
 	
 }
