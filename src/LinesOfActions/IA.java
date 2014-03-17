@@ -110,6 +110,7 @@ public class IA implements Runnable{
     }
 
     public int getMeilleurScore(){
+        generateBestScore();
         return bestPointage;
     }
 
