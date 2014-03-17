@@ -105,7 +105,12 @@ public class IA implements Runnable{
     }
 
     public String getBestMove(){
+        generateBestScore();
         return this.bestMove;
+    }
+
+    public int getMeilleurScore(){
+        return bestPointage;
     }
 
     public void generateMoveList(){
@@ -120,6 +125,19 @@ public class IA implements Runnable{
     public ArrayList<String> getListeMouvements(){
         return this.lstPossibleMove;
     }
+
+    private void generateBestScore(){
+        for(int x = 0; x < lstPossibleMove.size();x ++){
+            String currentMove = lstPossibleMove.get(x);
+            int indexJ = getIndexFromLetter(currentMove.charAt(5));
+            int indexi = Integer.parseInt(currentMove.substring(6, 7)) -1;
+            if(solvingBoard[indexi][indexJ] > bestPointage){
+                bestPointage = solvingBoard[indexi][indexJ];
+                bestMove = currentMove;
+            }
+        }
+    }
+
 
     public void generateFastTree(){
         // todo : are we keeping this ?
