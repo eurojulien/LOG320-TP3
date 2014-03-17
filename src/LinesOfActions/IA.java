@@ -116,6 +116,11 @@ public class IA implements Runnable{
         }
     }
 
+
+    public ArrayList<String> getListeMouvements(){
+        return this.lstPossibleMove;
+    }
+
     public void generateFastTree(){
         // todo : are we keeping this ?
         generateMoveList();
