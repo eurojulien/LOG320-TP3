@@ -47,6 +47,11 @@ public class IA implements Runnable{
     private ArrayList<int[]> positionsPions = new ArrayList<int[]>();
     private ArrayList<int[]> positionsPionsEnemy = new ArrayList<int[]>();
     private ArrayList<String> lstPossibleMove = new ArrayList<String>();
+    
+    
+
+    
+    
     private String bestMove = "";
     private int bestPointage = -100;
     private double centreIDeMasseAllier = 4.5;
@@ -654,12 +659,12 @@ public class IA implements Runnable{
         for(int i =0;i<positionsPions.size();i++){
             incrementAround(positionsPions.get(i)[0],positionsPions.get(i)[1]);
         }
-        // todo:ajouter la méthode de bruno
+        // todo:ajouter la m��thode de bruno
         calculerCentreDeMasses();
         applyPositionMask();
         reduceEnemyPositions();
         applyCounterEnemy();
-
+        trouverMotton();
     }
 
     private void applyCounterEnemy(){
@@ -796,5 +801,65 @@ public class IA implements Runnable{
             }
         }
     }
-	
+
+    private ArrayList<int[]> pieceCourantes = new ArrayList<int[]>();
+    private ArrayList<int[]> piecesVisitees = new ArrayList<int[]>();
+    
+    public void trouverMotton(){
+    	
+    	for(int x =0; x<positionsPions.size();x++){
+
+    		parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1]);
+    		
+    		for(int y = 0 ; y < piecesCourantes.size() ; y++){
+    			incrementAround(piecesCourantes.get(y)[0],piecesCourantes.get(y)[1]);
+    		}
+    		
+    		pieceCourantes.clear();
+    	}
+    }
+    
+    public void parcoursMotton(int i, int j){
+    	
+    	
+    	if(i > 0){
+    			inspecterTuilePourMoton(i-1,j);
+            if(j > 0)
+            	inspecterTuilePourMoton(i-1,j-1);
+            if(j < BOARDSIZE-1)
+            	inspecterTuilePourMoton(i-1,j+1);
+        }
+
+        if(i < BOARDSIZE-1){
+        	inspecterTuilePourMoton(i+1,j);
+            if(j > 0)
+            	inspecterTuilePourMoton(i+1,j-1);
+            if(j < BOARDSIZE-1)
+            	inspecterTuilePourMoton(i+1,j+1);
+        }
+
+        if(j > 0)
+        	inspecterTuilePourMoton(i,j-1);
+        if(j < BOARDSIZE-1)
+        	inspecterTuilePourMoton(i,j+1);
+    }
+    
+    public void inspecterTuilePourMoton(int i, int j){
+    	
+    	boolean dejaVisite = false;
+    	
+    	for(int x = 0 ; x < piecesVisitees.size() ; x++)
+    	{
+    		if(piecesVisitees.get(x)[0] == i && piecesVisitees.get(x)[1] == j)
+    			dejaVisite = true;
+    	}
+    	
+    	if(playBoard[i][j] == playerNumber && !dejaVisite){
+    		piecesCourantes.add(new int[]{i,j});
+    		piecesVisitees.add(new int[]{i,j});
+    		parcoursMotton(i,j);
+    	}
+    }
+    
+    
 }
