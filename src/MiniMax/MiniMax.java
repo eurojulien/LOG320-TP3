@@ -5,13 +5,10 @@ import LinesOfActions.IA;
 public class MiniMax implements Runnable{
 
 	// Profodeur maximale de l'arbre MiniMax par defaut
-	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 3;
+	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 1;
 	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
-	
-	// snapshot du plateau de jeu de la premiere feuille de l'arbre
-	private static int [][] plateauJeu;
 	
 	// La profondeur maximale de l'arbre MiniMax peut etre augmentee
 	// s'il y a moins de piece a calculee sur le jeu
@@ -19,17 +16,28 @@ public class MiniMax implements Runnable{
 	
 	private static IA megaMind;
 	
+	private static int currentPlayer;
+	
+	private static MiniMax occurence = null;
 	
 	private MiniMax(){}
 	
 	// Instancie l'arbre MinMax
 	// Cette fonction doit etre appeler de commencer a jouer notre premier coup seulement
-	public static void initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
+	public static MiniMax initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
 	
-		MiniMax.plateauJeu 					= tableauJeu;
+		if(occurence == null) { occurence = new MiniMax();}
+		
 		MiniMax.profondeurMaximalePermise 	= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
-		MiniMax.megaMind					= new IA(tableauJeu.clone(), numeroJoueur);
-		MiniMax.feuilleSouche				= new Feuille(MiniMax.megaMind, true, "");
+		MiniMax.megaMind					= new IA(tableauJeu, numeroJoueur);
+		MiniMax.currentPlayer				= numeroJoueur;
+		
+		return occurence;
+	}
+	
+	public static IA getIA(){
+		
+		return MiniMax.megaMind;
 	}
 	
 	// Donne une nouvelle profondeur de recherche de l'arbre MiniMax
@@ -41,49 +49,75 @@ public class MiniMax implements Runnable{
 	// Trouve tous les deplacement permis pour un etat du tableau de jeu
 	// Creer une feuille par deplacement permis
 	// Repete le traitement pour le nombre maximal de profondeur permise
-	public static String construireArbre(){
+	public static void construireArbre(){
 		
 		// Profonfeur de construction de l'arbre
 		int profondeurArbre = 0;
 		
-		construireArbre(MiniMax.plateauJeu, MiniMax.feuilleSouche, profondeurArbre + 1);
+		MiniMax.resetArbre();
+		MiniMax.feuilleSouche = new Feuille(MiniMax.megaMind, true, "");
 		
-		// Retourne le meilleur coup a jouer pour cet arbre MinMax
-		return feuilleSouche.getCoupJoue();
+		construireArbre(MiniMax.megaMind, MiniMax.feuilleSouche, profondeurArbre, MiniMax.feuilleSouche.getScore());
+	
 	}
 	
 	// Fonction recursive de construction d'arbre
-	private static void construireArbre(int[][] tableauDeJeu, Feuille feuille, int profondeurArbre){
+	private static void construireArbre(IA nextIA, Feuille feuille, int profondeurArbre, int scoreElagage){
 		
 		// Calcul du score
 		if (profondeurArbre == profondeurMaximalePermise){
-			
+
+			// Genere la list des mouvements
 			feuille.getIA().generateMoveList();
-			feuille.setCoupJoue(feuille.getIA().getBestMove());
 			
-			// Calculer score du tableauDeJeu
-			// Attribuer ce score a la feuille en cours Ex : feuilleParent.setScore(score)
-		}
-		
+			// Conserve les meilleurs score
+			feuille.setScore(feuille.getIA().getMeilleurScore());
+
+		}		
 		else{
 			
 			// IA
 			IA newIA = null;
 			
-			if (feuille.isJoueurEstMAX()) {newIA = new IA(tableauDeJeu, 2);}
-			else {newIA = new IA(tableauDeJeu, 2);}
+			if (MiniMax.currentPlayer == 4 && feuille.isJoueurEstMAX()) {newIA = new IA(tableauDeJeu, 4);}
+			else if (MiniMax.currentPlayer == 2 && feuille.isJoueurEstMAX()) {newIA = new IA(tableauDeJeu, 2);}
+			else if (MiniMax.currentPlayer == 4 && !feuille.isJoueurEstMAX()) {newIA = new IA(tableauDeJeu, 2);}
+			else if (MiniMax.currentPlayer == 2 && !feuille.isJoueurEstMAX()) {newIA = new IA(tableauDeJeu, 4);}
 			 
 			newIA.generateMoveList();
 			
 			for (String deplacement : newIA.getListeMouvements()){
+
+				IA feuilleIA = null;
+						
+				if (MiniMax.currentPlayer == 4 && feuille.isJoueurEstMAX()) {
+					feuilleIA = new IA(tableauDeJeu, 4);
+					feuilleIA.notifyMovementMyTeam(deplacement);
+				}
+				
+				else if (MiniMax.currentPlayer == 2 && feuille.isJoueurEstMAX()) {
+					feuilleIA = new IA(tableauDeJeu, 2);
+					feuilleIA.notifyMovementMyTeam(deplacement);
+				}
+				
+				else if (MiniMax.currentPlayer == 4 && !feuille.isJoueurEstMAX()) {
+					feuilleIA = new IA(tableauDeJeu, 2);
+					feuilleIA.notifyMovementEnemyTeam(deplacement);
+				}
+				
+				else if (MiniMax.currentPlayer == 2 && !feuille.isJoueurEstMAX()) {
+					feuilleIA = new IA(tableauDeJeu, 4);
+					feuilleIA.notifyMovementEnemyTeam(deplacement);
+				}
 				
 				// Construction d'une feuille enfant
-				Feuille feuilleEnfant = new Feuille(newIA, !feuille.isJoueurEstMAX(), deplacement);
+				Feuille feuilleEnfant = new Feuille(feuilleIA, !feuille.isJoueurEstMAX(), deplacement);
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
-				construireArbre(tableauDeJeu.clone(), feuilleEnfant, profondeurArbre + 1);
-				
-				feuille.updateFeuilleScoreAvecMeilleurScoreEnfants();
+				construireArbre(tableauDeJeu.clone(), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
 			}
+			
+			// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
+			feuille.updateFeuilleScoreAvecMeilleurScoreEnfants();
 		}
 	}
 	
@@ -91,7 +125,9 @@ public class MiniMax implements Runnable{
 		feuilleSouche = null;
 	}
 	
-	public 
+	public static String getBestMove(){
+		return MiniMax.feuilleSouche.getCoupJoue();
+	}
 
 	@Override
 	public void run() {

@@ -49,14 +49,17 @@ public class Main extends Thread{
 		// Initalisation du plateau
 		int[][] board = server.getBoardSetup().clone();
 		megaMind 	= new IA(board, playerColor);
-		miniMax.initaliserMinMax(board, playerColor);
+		miniMax 	= MiniMax.initaliserMinMax(board, playerColor);
 		
 		if(playerColor == WHITE){
 			
-			megaMind.run();
+			//megaMind.run();
+			//server.sendServerCommand(megaMind.getBestMove());
+			//megaMind.notifyMovementMyTeam(megaMind.getBestMove());
+			
 			miniMax.run();
-			server.sendServerCommand(megaMind.getBestMove());
-			megaMind.notifyMovementMyTeam(megaMind.getBestMove());
+			server.sendServerCommand(miniMax.getBestMove());
+			megaMind.notifyMovementMyTeam(miniMax.getBestMove());
 		}
 		
 		
@@ -70,10 +73,11 @@ public class Main extends Thread{
 			// Reception de la reponse du serveur
 			server.getServerCommand();
 			
-			megaMind.notifyMovementEnemyTeam(server.getLastTurn().trim());
+			//megaMind.notifyMovementEnemyTeam(server.getLastTurn().trim());
+			//megaMind.run();
 			
-			// Arbre MiniMax
-			megaMind.run();
+			miniMax.getIA().notifyMovementEnemyTeam(server.getLastTurn().trim());
+			miniMax.run();
 			
 			// TODO : Attente de 4500 millisecondes, temps maximum alloue a Minimax
 			// pour generer un arbre
@@ -87,15 +91,19 @@ public class Main extends Thread{
 			}
 			
 			try {
-				megaMind.wait();
+				//megaMind.wait();
+				miniMax.wait();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				//e.printStackTrace();
 			}
 			
 			// Envoie de la reponse
-			server.sendServerCommand(megaMind.getBestMove());
-			megaMind.notifyMovementMyTeam(megaMind.getBestMove());
+			//server.sendServerCommand(megaMind.getBestMove());
+			//megaMind.notifyMovementMyTeam(megaMind.getBestMove());
+			
+			server.sendServerCommand(miniMax.getBestMove());
+			miniMax.getIA().notifyMovementMyTeam(miniMax.getBestMove());
 			
 			// TODO : Traitement supplementaire lorsque l'adversaire joue
 			

@@ -12,9 +12,7 @@ import LinesOfActions.IA;
  */
 public class Feuille {
 
-	// Liste des feuilles enfant de cette feuille
-	// Cette approche a ete choisie car il est possible que deux feuilles
-	// parent aient la meme feuille enfant
+	// Pointeur sur la feuille parent
 	private ArrayList <Feuille> feuilleEnfants;
 	
 	// Vrai : Notre Pion
