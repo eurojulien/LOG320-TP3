@@ -67,11 +67,9 @@ public class IA implements Runnable{
         cloneBoard(playBoard);
         this.playerNumber = playerNumber;
         initializeSolvingBoard();
-        initializePositionsList();
-        fillInSolvingBoard();
     }
 
-    public IA(int[][] playBoard, int playerNumber,int[][] solvingBoard){
+    /*public IA(int[][] playBoard, int playerNumber,int[][] solvingBoard){
     	cloneBoard(playBoard);
         this.playerNumber = playerNumber;
         this.solvingBoard = solvingBoard;
@@ -95,14 +93,61 @@ public class IA implements Runnable{
         this.positionsPions = positionsPions;
         this.positionsPionsEnemy = positionsPionsEnemy;
         fillInSolvingBoard();
+    }*/
+
+    @Override
+    // Thread de compilation d'arbre MiniMax
+    public void run() {
+        bestMove = "";
+        bestPointage = -100;
+        // todo : are we keeping this ? check avec julien
+        this.generateFastTree();
+    }
+
+    public String getBestMove(){
+        return this.bestMove;
+    }
+
+    public void generateMoveList(){
+        initializePositionsList();
+        fillInSolvingBoard();
+        for(int x =0; x<positionsPions.size();x++){
+            genererMouvementPiece(positionsPions.get(x)[0], positionsPions.get(x)[1]);
+        }
+    }
+
+    public void generateFastTree(){
+        // todo : are we keeping this ?
+        generateMoveList();
+        int EnemyPlayerID = 0;
+        if(playerNumber == 4){
+            EnemyPlayerID = 2;
+        }else{
+            EnemyPlayerID = 4;
+        }
+        //System.out.println("Essais de move :");
+        ArrayList<IA> listeDeMoveEtageInferieure = new ArrayList<IA>();
+        for(int x = 0; x < lstPossibleMove.size();x ++){
+            String currentMove = lstPossibleMove.get(x);
+            int indexJ = getIndexFromLetter(currentMove.charAt(5));
+            int indexi = Integer.parseInt(currentMove.substring(6, 7)) -1;
+
+            IA newBoardTryOut = new IA(this.playBoard,EnemyPlayerID);
+            newBoardTryOut.notifyMovementEnemyTeam(currentMove);
+            int meilleurScoreEnfant =  newBoardTryOut.getBestScore();
+            //System.out.println(currentMove + " Valeur du move (MAX) :"+ solvingBoard[indexi][indexJ] + " valeu enemy meilleur =" +  meilleurScoreEnfant);
+            if(solvingBoard[indexi][indexJ]  - meilleurScoreEnfant > bestPointage){
+                bestPointage = solvingBoard[indexi][indexJ] - meilleurScoreEnfant;
+                bestMove = currentMove;
+            }
+        }
     }
 
     public void notifyMovementEnemyTeam(String movement){
-    	// todo : chekout & remove if ...
-    	if (movement.length() == 0) {return;}
         // cette methode permet a l'algoritme de prendre compte des deplacments
         // que notre adversaire fait !
         // IMPORTANT : Le format doit toujours etre "A5_-_B5"
+        try{
         char[] tabLettres = movement.toCharArray();
         int posJDepart = getIndexFromLetter(tabLettres[0]);
         int posIDepart = Character.getNumericValue(tabLettres[1]) -1;
@@ -111,30 +156,20 @@ public class IA implements Runnable{
 
         playBoard[posIFin][posJFin] = playBoard[posIDepart][posJDepart];
         playBoard[posIDepart][posJDepart] = 0;
+        }catch (Exception ex){
+            System.out.println("wtf happened ?");
+        }
 
-        for(int i=0;i<positionsPionsEnemy.size();i++){
+        /*for(int i=0;i<positionsPionsEnemy.size();i++){
             int[] comparaison = positionsPionsEnemy.get(i);
             if(comparaison[0] == posIFin && comparaison[1] == posJFin){
             	// todo : verifier si on se fait manger
             	positionsPionsEnemy.remove(i);
             	positionsPionsEnemy.add(new int[] {posIFin,posJFin});
             }
-        }
-        // todo peut etre enelver lui ci-bas
-        removePiecesFromSolving();
-        // todo peut etre enelver lui ci-bas
-        fillInSolvingBoard();
+        }*/
     }
-    
-    private void cloneBoard(int[][] argumentBoard){
-    	// todo : est-ce que sa sameliore ??
-    	playBoard = new int[BOARDSIZE][BOARDSIZE];
-    	for(int i = 0;i<BOARDSIZE;i++){
-    		for(int j = 0;j<BOARDSIZE;j++){
-    			this.playBoard[i][j] = argumentBoard[i][j];
-    		}
-    	}
-    }
+
 
     public void notifyMovementMyTeam(String movement){
         // cette methode permet a l'algoritme de prendre compte des deplacments
@@ -145,38 +180,18 @@ public class IA implements Runnable{
         int posIDepart = Character.getNumericValue(tabLettres[1])-1;
         int posJFin = getIndexFromLetter(tabLettres[5]);
         int posIFin = Character.getNumericValue(tabLettres[6]) -1;
-
         playBoard[posIDepart][posJDepart] = 0;
         playBoard[posIFin][posJFin] = playerNumber;
 
-        for(int i=0;i<positionsPions.size();i++){
+        /*for(int i=0;i<positionsPions.size();i++){
             int[] comparaison = positionsPions.get(i);
             if(comparaison[0] == posIDepart && comparaison[1] == posJDepart){
                 // todo : verif
             	positionsPions.remove(i);
                 positionsPions.add(new int[] {posIFin,posJFin});
             }
-        }
-
-        
-        // todo peut etre enelver lui ci-bas
-        removePiecesFromSolving();
-        // todo peut etre enelver lui ci-bas
-        fillInSolvingBoard();
+        }*/
     }
-
-    private void printASlot(String text){
-        char[] tableChar = text.toCharArray();
-        for(int i = 0; i < 3; i++){
-            if( i < tableChar.length){
-                System.out.print(tableChar[i]);
-            }else{
-                System.out.print(" ");
-            }
-        }
-        System.out.print(" ");
-    }
-
 
     public void drawBoard(boolean showSolvingBoard){
         // nous fait un dessin du board, pour le debugging
@@ -210,23 +225,50 @@ public class IA implements Runnable{
         }
     }
 
-    private void inspectAndInsertMovement(int i,int j){
+    private void printASlot(String text){
+        char[] tableChar = text.toCharArray();
+        for(int i = 0; i < 3; i++){
+            if( i < tableChar.length){
+                System.out.print(tableChar[i]);
+            }else{
+                System.out.print(" ");
+            }
+        }
+        System.out.print(" ");
+    }
+
+    private void genererMouvementPiece(int i, int j){
         int distanceEstWest = distanceMove(i,j,direction.E);
         int distanceNordSud = distanceMove(i,j,direction.N);
         int distanceNordEst = distanceMove(i,j,direction.NE);
-        int distanceNordWest = distanceMove(i,j,direction.NW);
+        int distanceNordWest = distanceMove(i, j, direction.NW);
 
         Boolean gauche = true;
         Boolean droite = true;
         // todo : watch for impossible move
         for(int x = 1; x <= distanceEstWest;x++){
-            if(x+j >= BOARDSIZE){ droite = false;}
-            else if(x == distanceEstWest){ if(playBoard[i][j+x] == playerNumber) droite = false;}
-            else if(playBoard[i][j+x] != playerNumber && playBoard[i][j+x]!= 0){ droite = false; }
 
-            if(j-x < 0){ gauche = false;}
-            else if(x == distanceEstWest){ if(playBoard[i][j-x] == playerNumber) gauche = false;}
-            else if(playBoard[i][j-x] != playerNumber && playBoard[i][j-x]!= 0){ gauche = false;}
+            if(x+j >= BOARDSIZE){
+                droite = false;
+            }
+            else if(x == distanceEstWest){
+                if(playBoard[i][j+x] == playerNumber)
+                    droite = false;
+            }
+            else if(playBoard[i][j+x] != playerNumber && playBoard[i][j+x]!= 0){
+                droite = false;
+            }
+
+            if(j-x < 0){
+                gauche = false;
+            }
+            else if(x == distanceEstWest){
+                if(playBoard[i][j-x] == playerNumber)
+                    gauche = false;
+            }
+            else if(playBoard[i][j-x] != playerNumber && playBoard[i][j-x]!= 0){
+                gauche = false;
+            }
         }
 
         if(droite){
@@ -243,13 +285,27 @@ public class IA implements Runnable{
         Boolean down = true;
         for(int x = 1; x <= distanceNordSud;x++){
 
-            if(x+i >= BOARDSIZE){ down = false;}
-            else if(x == distanceNordSud)if(playBoard[i+x][j] == playerNumber){ down = false;}
-            else if(playBoard[i+x][j] != playerNumber && playBoard[i+x][j]!= 0){down = false;}
+            if(x+i >= BOARDSIZE){
+                down = false;
+            }
+            else if(x == distanceNordSud){
+                if(playBoard[i+x][j] == playerNumber)
+                    down = false;
+            }
+            else if(playBoard[i+x][j] != playerNumber && playBoard[i+x][j]!= 0){
+                down = false;
+            }
 
-            if(i-x < 0){up = false;}
-            else if(x == distanceNordSud)if(playBoard[i-x][j] == playerNumber){up = false;}
-            else if(playBoard[i-x][j] != playerNumber && playBoard[i-x][j]!= 0){up = false;}
+            if(i-x < 0){
+                up = false;
+            }
+            else if(x == distanceNordSud){
+                if(playBoard[i-x][j] == playerNumber)
+                    up = false;
+            }
+            else if(playBoard[i-x][j] != playerNumber && playBoard[i-x][j]!= 0){
+                up = false;
+            }
 
         }
         if(down){
@@ -267,64 +323,87 @@ public class IA implements Runnable{
         
         // todo : optimiser
         // todo : make sure it works !!
-        /*gauche = true;
+        gauche = true;
         droite = true;
         for(int x = 1; x <= distanceNordEst;x++){
+            if(x+j >= BOARDSIZE || i-x < 0){
+                droite = false;
+            }
+            else if(x == distanceNordEst) {
+                if(playBoard[i-x][j+x] == playerNumber)
+                    droite = false;
+            }
+            else if(playBoard[i-x][j+x] != playerNumber || playBoard[i-x][j+x]!= 0){
+                droite = false;
+            }
 
-            if(x+j >= BOARDSIZE || i-x < 0){ droite = false;}
-            else if(x == distanceNordEst) if(playBoard[i-x][j+x] == playerNumber){droite = false;}
-            else if(playBoard[i-x][j+x] != playerNumber || playBoard[i-x][j+x]!= 0){droite = false;}
-
-            if(j-x < 0 || x+i >= BOARDSIZE ){gauche = false;}
-            else if(x == distanceNordEst) if(playBoard[i+x][j-x] == playerNumber){gauche = false;}
-            else if(playBoard[i+x][j-x] != playerNumber || playBoard[i+x][j-x]!= 0){gauche = false;}
+            if(j-x < 0 || x+i >= BOARDSIZE ){
+                gauche = false;
+            }
+            else if(x == distanceNordEst){
+                if(playBoard[i+x][j-x] == playerNumber)
+                    gauche = false;
+            }
+            else if(playBoard[i+x][j-x] != playerNumber || playBoard[i+x][j-x]!= 0){
+                gauche = false;
+            }
         }
 
         if(droite){
             int indexI = i - distanceNordEst;
             int indexJ = j + distanceNordEst;
-            String toAdd = getLetterFromIndex(j) + i + " - " + getLetterFromIndex(indexJ) + indexI;
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1+indexI);
             lstPossibleMove.add(toAdd);
         }
 
         if(gauche){
             int indexI = i + distanceNordEst;
             int indexJ = j - distanceNordEst;
-            String toAdd = getLetterFromIndex(j) + i + " - " + getLetterFromIndex(indexJ) + indexI;
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1+indexI);
             lstPossibleMove.add(toAdd);
         }
 
         gauche = true;
         droite = true;
         for(int x = 1; x <= distanceNordWest;x++){
-            if(x+j >= BOARDSIZE || i+x >= BOARDSIZE){droite = false;}
-            else if(x == distanceNordWest) if(playBoard[i+x][j+x] == playerNumber){droite = false;}
-            else if(playBoard[i+x][j+x] != playerNumber || playBoard[i+x][j+x]!= 0){droite = false;}
+            if(x+j >= BOARDSIZE || i+x >= BOARDSIZE){
+                droite = false;
+            }
+            else if(x == distanceNordWest){
+                if(playBoard[i+x][j+x] == playerNumber)
+                    droite = false;
+            }
+            else if(playBoard[i+x][j+x] != playerNumber || playBoard[i+x][j+x]!= 0)
+            {
+                droite = false;
+            }
 
-            if(j-x < 0 || i-x < 0 ){gauche = false;}
-            else if(x == distanceNordWest) if(playBoard[i-x][j-x] == playerNumber){gauche = false;}
-            else if(playBoard[i-x][j-x] != playerNumber || playBoard[i-x][j-x]!= 0){gauche = false;}
+            if(j-x < 0 || i-x < 0 ){
+                gauche = false;
+            }
+            else if(x == distanceNordWest){
+                if(playBoard[i-x][j-x] == playerNumber)
+                    gauche = false;
+            }
+            else if(playBoard[i-x][j-x] != playerNumber || playBoard[i-x][j-x]!= 0){
+                gauche = false;
+            }
         }
 
         if(droite){
             int indexI = i + distanceNordWest;
             int indexJ = j + distanceNordWest;
-            String toAdd = getLetterFromIndex(j) + i + " - " + getLetterFromIndex(indexJ) + indexI;
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (indexI +1);
             lstPossibleMove.add(toAdd);
         }
 
         if(gauche){
             int indexI = i - distanceNordWest;
             int indexJ = j - distanceNordWest;
-            String toAdd = getLetterFromIndex(j) + i + " - " + getLetterFromIndex(indexJ) + indexI;
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1 + indexI);
             lstPossibleMove.add(toAdd);
-        }*/
+        }
     }
-
-    public String getMove(){
-        return this.bestMove;
-    }
-
 
     private int getBestScore(){
     // todo : peut etre enelver
@@ -340,40 +419,6 @@ public class IA implements Runnable{
             }
         }
         return bestPointage;
-    }
-
-    public void obtainMove(){
-        for(int x =0; x<positionsPions.size();x++){
-            inspectAndInsertMovement(positionsPions.get(x)[0],positionsPions.get(x)[1]);
-        }
-    }
-    
-    public void buildMoves(){
-        
-    	obtainMove();
-        int EnemyPlayerID = 0;
-        if(playerNumber == 4){
-            EnemyPlayerID = 2;
-        }else{
-            EnemyPlayerID = 4;
-        }
-        //System.out.println("Essais de move :");
-        ArrayList<IA> listeDeMoveEtageInferieure = new ArrayList<IA>();
-        for(int x = 0; x < lstPossibleMove.size();x ++){
-            String currentMove = lstPossibleMove.get(x);
-            int indexJ = getIndexFromLetter(currentMove.charAt(5));
-            int indexi = Integer.parseInt(currentMove.substring(6, 7)) -1;
-
-            IA newBoardTryOut = new IA(this.playBoard,EnemyPlayerID);
-            newBoardTryOut.notifyMovementEnemyTeam(currentMove);
-            int meilleurScoreEnfant =  newBoardTryOut.getBestScore();
-            //System.out.println(currentMove + " Valeur du move (MAX) :"+ solvingBoard[indexi][indexJ] + " valeu enemy meilleur =" +  meilleurScoreEnfant);
-            // todo : keep more than 1 value !
-            if(solvingBoard[indexi][indexJ]  - meilleurScoreEnfant > bestPointage){
-                bestPointage = solvingBoard[indexi][indexJ] - meilleurScoreEnfant;
-                bestMove = currentMove;
-            }
-        }
     }
 
     public int[] getCoordsAfterMove(int i, int j, int distance, direction dir){
@@ -407,7 +452,7 @@ public class IA implements Runnable{
         return retour;
     }
 
-    public int distanceMove(int i, int j, direction d){
+    private int distanceMove(int i, int j, direction d){
         // cette methode retourne le nombre de pions sur une ligne d'action
         int retour = 0;
         int x;
@@ -483,7 +528,7 @@ public class IA implements Runnable{
         return retour;
     }
 
-    private void removePiecesFromSolving(){
+    private void removePiecesFromSolvingBoard(){
         // methode qui enleve (met a -1) toutes les pieces de notre jeux du solving board
         for(int i = 0 ; i < positionsPions.size(); i++){
             solvingBoard[positionsPions.get(i)[0]][positionsPions.get(i)[1]] = -10;
@@ -559,7 +604,6 @@ public class IA implements Runnable{
 
     private void initializeSolvingBoard(){
         // initialise le solving board
-    	// todo : remove this shizzle
         solvingBoard = new int[8][8];
     }
 
@@ -581,13 +625,12 @@ public class IA implements Runnable{
     private void fillInSolvingBoard(){
         // cette methode fournie une evaluation de chaque tuile du jeu ainsi que leurs valeurs.
         // on incremente autour de toutes nos pieces pour indiquer que ce sont des positions favorables
-        // todo : check again
-    	initializeSolvingBoard();
-        removePiecesFromSolving();
+        removePiecesFromSolvingBoard();
+
         for(int i =0;i<positionsPions.size();i++){
             incrementAround(positionsPions.get(i)[0],positionsPions.get(i)[1]);
         }
-
+        // todo:ajouter la méthode de bruno
         calculerCentreDeMasses();
         applyPositionMask();
         reduceEnemyPositions();
@@ -719,15 +762,15 @@ public class IA implements Runnable{
 	private final double COMPUTING_TIME_LIMIT_IN_NANOSECONDS = 4.0 * Math.pow(10, 9);
 	private long startTime 	= 0;
 
-	@Override
-	// Thread de compilation d'arbre MiniMax
-	public void run() {
-		initializeSolvingBoard();
-		initializePositionsList();
-		fillInSolvingBoard();		
-		bestMove = "";
-		bestPointage = -100;
-		this.buildMoves();
-	}
+
+    private void cloneBoard(int[][] argumentBoard){
+        // todo : est-ce que sa sameliore ??
+        playBoard = new int[BOARDSIZE][BOARDSIZE];
+        for(int i = 0;i<BOARDSIZE;i++){
+            for(int j = 0;j<BOARDSIZE;j++){
+                this.playBoard[i][j] = argumentBoard[i][j];
+            }
+        }
+    }
 	
 }

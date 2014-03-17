@@ -1,4 +1,5 @@
 package LinesOfActions;
+import MiniMax.MiniMax;
 
 public class Main extends Thread{
 
@@ -9,6 +10,7 @@ public class Main extends Thread{
 	private static ServerConnect server;
 	private static BoardInOut controller = null;
 	private static IA megaMind = null;
+	private static MiniMax miniMax;
 	private static int playerColor = 0;
 	
 	private static String theirLastMove = "";
@@ -45,13 +47,16 @@ public class Main extends Thread{
 		}
 		
 		// Initalisation du plateau
-		megaMind = new IA(server.getBoardSetup(), playerColor);
+		int[][] board = server.getBoardSetup().clone();
+		megaMind 	= new IA(board, playerColor);
+		miniMax.initaliserMinMax(board);
 		
 		if(playerColor == WHITE){
 			
 			megaMind.run();
-			server.sendServerCommand(megaMind.getMove());
-			megaMind.notifyMovementMyTeam(megaMind.getMove());
+			miniMax.run();
+			server.sendServerCommand(megaMind.getBestMove());
+			megaMind.notifyMovementMyTeam(megaMind.getBestMove());
 		}
 		
 		
@@ -89,8 +94,8 @@ public class Main extends Thread{
 			}
 			
 			// Envoie de la reponse
-			server.sendServerCommand(megaMind.getMove());
-			megaMind.notifyMovementMyTeam(megaMind.getMove());
+			server.sendServerCommand(megaMind.getBestMove());
+			megaMind.notifyMovementMyTeam(megaMind.getBestMove());
 			
 			// TODO : Traitement supplementaire lorsque l'adversaire joue
 			
