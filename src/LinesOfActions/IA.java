@@ -47,6 +47,12 @@ public class IA implements Runnable{
     private ArrayList<int[]> positionsPions = new ArrayList<int[]>();
     private ArrayList<int[]> positionsPionsEnemy = new ArrayList<int[]>();
     private ArrayList<String> lstPossibleMove = new ArrayList<String>();
+    private ArrayList<int[]> pieceCourantes = new ArrayList<int[]>();
+    private ArrayList<int[]> piecesVisitees = new ArrayList<int[]>();
+    
+
+    
+    
     private String bestMove = "";
     private int bestPointage = -100;
     private double centreIDeMasseAllier = 4.5;
@@ -57,9 +63,9 @@ public class IA implements Runnable{
     // valeurs qui pourraient etre modifiee
     private static final int enemyPawnDevalue = -4;
     private static final int tuileToucheUnAllier = 1;
-    private static final int importanceCentraleIncrement1 = 1;
-    private static final int importanceCentraleIncrement2 = 2;
-    private static final int importanceCentraleIncrement3 = 3;
+    private static final int importanceCentraleIncrement1 = 10;
+    private static final int importanceCentraleIncrement2 = 12;
+    private static final int importanceCentraleIncrement3 = 15;
     private static final int importanceBlockEnemyPath = 1;
     private static final int trouEntreDeuxPieces = 4;
 
@@ -98,6 +104,8 @@ public class IA implements Runnable{
     @Override
     // Thread de compilation d'arbre MiniMax
     public void run() {
+        initializeSolvingBoard();
+        initializePositionsList();
         bestMove = "";
         bestPointage = -100;
         // todo : are we keeping this ? check avec julien
@@ -114,9 +122,11 @@ public class IA implements Runnable{
         return bestPointage;
     }
 
-    public void generateMoveList(){
-        initializePositionsList();
-        fillInSolvingBoard();
+    public void generateMoveList(boolean fastGen){
+        if(fastGen){
+            initializePositionsList();
+            fillInSolvingBoard();
+        }
         for(int x =0; x<positionsPions.size();x++){
             genererMouvementPiece(positionsPions.get(x)[0], positionsPions.get(x)[1]);
         }
@@ -165,6 +175,24 @@ public class IA implements Runnable{
                 bestMove = currentMove;
             }
         }
+    }
+
+    public IA notifyAndGetNewIA(String movement){
+        // cette methode permet a l'algoritme de prendre compte des deplacments
+        // que notre adversaire fait !
+        // IMPORTANT : Le format doit toujours etre "A5_-_B5"
+        int EnemyPlayerID = 0;
+        if(playerNumber == 4){
+            EnemyPlayerID = 2;
+        }else{
+            EnemyPlayerID = 4;
+        }
+
+        IA retour = new IA(playBoard,EnemyPlayerID);
+
+        retour.notifyMovementEnemyTeam(movement);
+
+        return retour;
     }
 
     public void notifyMovementEnemyTeam(String movement){
@@ -230,7 +258,7 @@ public class IA implements Runnable{
         System.out.println("=========================");
         if(showSolvingBoard){
             System.out.println("====== SOLVE BOARD ========");
-            for(int i =0; i < BOARDSIZE; i++){
+            for(int i =BOARDSIZE-1; i >= 0; i--){
                 System.out.println("");
                 for(int j = 0; j< BOARDSIZE; j++){
                     if(playBoard[i][j] == playerNumber)
@@ -650,16 +678,12 @@ public class IA implements Runnable{
         // cette methode fournie une evaluation de chaque tuile du jeu ainsi que leurs valeurs.
         // on incremente autour de toutes nos pieces pour indiquer que ce sont des positions favorables
         removePiecesFromSolvingBoard();
-
-        for(int i =0;i<positionsPions.size();i++){
-            incrementAround(positionsPions.get(i)[0],positionsPions.get(i)[1]);
-        }
-        // todo:ajouter la méthode de bruno
         calculerCentreDeMasses();
         applyPositionMask();
         reduceEnemyPositions();
         applyCounterEnemy();
-
+        trouverMotton();
+        drawBoard(true);
     }
 
     private void applyCounterEnemy(){
@@ -751,28 +775,28 @@ public class IA implements Runnable{
 
 
 
-    private void incrementAround(int i, int j){
+    private void incrementAround(int i, int j, int howMuch){
         // fait l'increment de toutes les tuiles autour de [i][j] ne contenant pas de pieces qui nous appartiens
         if(i > 0){
-            incrementPositionWithValidation(i-1,j,tuileToucheUnAllier);
+            incrementPositionWithValidation(i-1,j,howMuch);
             if(j > 0)
-                incrementPositionWithValidation(i-1,j-1,tuileToucheUnAllier);
+                incrementPositionWithValidation(i-1,j-1,howMuch);
             if(j < BOARDSIZE-1)
-                incrementPositionWithValidation(i-1,j+1,tuileToucheUnAllier);
+                incrementPositionWithValidation(i-1,j+1,howMuch);
         }
 
         if(i < BOARDSIZE-1){
-            incrementPositionWithValidation(i+1,j,tuileToucheUnAllier);
+            incrementPositionWithValidation(i+1,j,howMuch);
             if(j > 0)
-                incrementPositionWithValidation(i+1,j-1,tuileToucheUnAllier);
+                incrementPositionWithValidation(i+1,j-1,howMuch);
             if(j < BOARDSIZE-1)
-                incrementPositionWithValidation(i+1,j+1,tuileToucheUnAllier);
+                incrementPositionWithValidation(i+1,j+1,howMuch);
         }
 
         if(j > 0)
-            incrementPositionWithValidation(i,j - 1,tuileToucheUnAllier);
+            incrementPositionWithValidation(i,j - 1,howMuch);
         if(j < BOARDSIZE-1)
-            incrementPositionWithValidation(i,j + 1,tuileToucheUnAllier);
+            incrementPositionWithValidation(i,j + 1,howMuch);
 
     }
 
@@ -796,5 +820,62 @@ public class IA implements Runnable{
             }
         }
     }
-	
+    
+    public void trouverMotton(){
+    	
+    	for(int x =0; x<positionsPions.size();x++){
+
+    		parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1]);
+    		
+    		for(int y = 0 ; y < pieceCourantes.size() ; y++){
+    			incrementAround(pieceCourantes.get(y)[0],pieceCourantes.get(y)[1],pieceCourantes.size());
+    		}
+    		
+    		pieceCourantes.clear();
+    	}
+    }
+    
+    public void parcoursMotton(int i, int j){
+
+        inspecterTuilePourMoton(i,j);
+    	if(i > 0){
+    			inspecterTuilePourMoton(i-1,j);
+            if(j > 0)
+            	inspecterTuilePourMoton(i-1,j-1);
+            if(j < BOARDSIZE-1)
+            	inspecterTuilePourMoton(i-1,j+1);
+        }
+
+        if(i < BOARDSIZE-1){
+        	inspecterTuilePourMoton(i+1,j);
+            if(j > 0)
+            	inspecterTuilePourMoton(i+1,j-1);
+            if(j < BOARDSIZE-1)
+            	inspecterTuilePourMoton(i+1,j+1);
+        }
+
+        if(j > 0)
+        	inspecterTuilePourMoton(i,j-1);
+        if(j < BOARDSIZE-1)
+        	inspecterTuilePourMoton(i,j+1);
+    }
+    
+    public void inspecterTuilePourMoton(int i, int j){
+    	
+    	boolean dejaVisite = false;
+    	
+    	for(int x = 0 ; x < piecesVisitees.size() ; x++)
+    	{
+    		if(piecesVisitees.get(x)[0] == i && piecesVisitees.get(x)[1] == j)
+    			dejaVisite = true;
+    	}
+    	
+    	if(playBoard[i][j] == playerNumber && !dejaVisite){
+            pieceCourantes.add(new int[]{i,j});
+    		piecesVisitees.add(new int[]{i,j});
+    		parcoursMotton(i,j);
+    	}
+    }
+    
+    
 }
