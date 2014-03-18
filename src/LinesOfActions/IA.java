@@ -616,6 +616,7 @@ public class IA implements Runnable{
         boardScore += lstPossibleMove.size();
         boardScore += getScoreForCentrality();
 
+
         return boardScore;
     }
 
