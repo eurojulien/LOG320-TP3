@@ -48,8 +48,8 @@ public class Main extends Thread{
 		
 		// Initalisation du plateau
 		int[][] board = server.getBoardSetup().clone();
-		megaMind 	= new IA(board, playerColor);
-		miniMax 	= MiniMax.initaliserMinMax(board, playerColor);
+		//megaMind 	= new IA(board, playerColor);
+		miniMax 	= MiniMax.getInstance(board, playerColor);
 		
 		if(playerColor == WHITE){
 			
@@ -59,9 +59,8 @@ public class Main extends Thread{
 			
 			miniMax.run();
 			server.sendServerCommand(miniMax.getBestMove());
-			megaMind.notifyMovementMyTeam(miniMax.getBestMove());
+			miniMax.getIA().notifyMovementMyTeam(miniMax.getBestMove());
 		}
-		
 		
 		// TODO : while true temporaire
 		// La condition de sortie de cette boucle est
@@ -70,13 +69,15 @@ public class Main extends Thread{
 		// - Partie Abandonnee
 		do{
 			
+			MiniMax.getIA().drawBoard(false);
+			
 			// Reception de la reponse du serveur
 			server.getServerCommand();
 			
 			//megaMind.notifyMovementEnemyTeam(server.getLastTurn().trim());
 			//megaMind.run();
 			
-			miniMax.getIA().notifyMovementEnemyTeam(server.getLastTurn().trim());
+			MiniMax.getIA().notifyMovementEnemyTeam(server.getLastTurn().trim());
 			miniMax.run();
 			
 			// TODO : Attente de 4500 millisecondes, temps maximum alloue a Minimax
@@ -102,8 +103,8 @@ public class Main extends Thread{
 			//server.sendServerCommand(megaMind.getBestMove());
 			//megaMind.notifyMovementMyTeam(megaMind.getBestMove());
 			
-			server.sendServerCommand(miniMax.getBestMove());
-			miniMax.getIA().notifyMovementMyTeam(miniMax.getBestMove());
+			server.sendServerCommand(MiniMax.getBestMove());
+			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
 			
 			// TODO : Traitement supplementaire lorsque l'adversaire joue
 			

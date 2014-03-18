@@ -123,8 +123,9 @@ public class IA implements Runnable{
     }
 
     public void generateMoveList(boolean fastGen){
-        if(fastGen){
-            initializePositionsList();
+        
+    	initializePositionsList();
+    	if(fastGen){
             fillInSolvingBoard();
         }
         for(int x =0; x<positionsPions.size();x++){
@@ -152,7 +153,7 @@ public class IA implements Runnable{
 
     public void generateFastTree(){
         // todo : are we keeping this ?
-        generateMoveList();
+        generateMoveList(true);
         int EnemyPlayerID = 0;
         if(playerNumber == 4){
             EnemyPlayerID = 2;
@@ -199,27 +200,43 @@ public class IA implements Runnable{
         // cette methode permet a l'algoritme de prendre compte des deplacments
         // que notre adversaire fait !
         // IMPORTANT : Le format doit toujours etre "A5_-_B5"
+    	
+    	int posJDepart = 0, posIDepart = 0, posJFin = 0, posIFin = 0;
+    	
         try{
-        char[] tabLettres = movement.toCharArray();
-        int posJDepart = getIndexFromLetter(tabLettres[0]);
-        int posIDepart = Character.getNumericValue(tabLettres[1]) -1;
-        int posJFin = getIndexFromLetter(tabLettres[5]);
-        int posIFin = Character.getNumericValue(tabLettres[6]) -1;
-
-        playBoard[posIFin][posJFin] = playBoard[posIDepart][posJDepart];
-        playBoard[posIDepart][posJDepart] = 0;
+	        char[] tabLettres = movement.toCharArray();
+	        posIDepart = getIndexFromLetter(tabLettres[0]);
+	        posJDepart = BOARDSIZE - Character.getNumericValue(tabLettres[1]);
+	        posIFin = getIndexFromLetter(tabLettres[5]);
+	        posJFin = BOARDSIZE - Character.getNumericValue(tabLettres[6]);
+	
+	        playBoard[posIFin][posJFin] = playBoard[posIDepart][posJDepart];
+	        playBoard[posIDepart][posJDepart] = 0;
         }catch (Exception ex){
             System.out.println("wtf happened ?");
         }
-
-        /*for(int i=0;i<positionsPionsEnemy.size();i++){
+        
+        for(int i=0;i<positionsPionsEnemy.size();i++){
             int[] comparaison = positionsPionsEnemy.get(i);
-            if(comparaison[0] == posIFin && comparaison[1] == posJFin){
-            	// todo : verifier si on se fait manger
+            if(comparaison[0] == posIDepart && comparaison[1] == posJDepart){
+            	// Deplacement du pion
             	positionsPionsEnemy.remove(i);
             	positionsPionsEnemy.add(new int[] {posIFin,posJFin});
             }
-        }*/
+        }
+        
+
+        for(int i=0;i<positionsPions.size();i++){
+        	
+        	int[] pion = positionsPions.get(i);
+        	for(int j=0; j<positionsPionsEnemy.size(); j++){
+        		int[] pionEnnemy = positionsPionsEnemy.get(i);
+        		
+        		if(pion[0] == pionEnnemy[0] & pion[1] == pionEnnemy[1]){
+        			positionsPions.remove(i);
+        		}
+        	}
+        }
     }
 
 
@@ -227,33 +244,35 @@ public class IA implements Runnable{
         // cette methode permet a l'algoritme de prendre compte des deplacments
         // que nous fesons
         // IMPORTANT : Le format doit toujours etre "A5_-_B5"
-        char[] tabLettres = movement.toCharArray();
-        int posJDepart = getIndexFromLetter(tabLettres[0]);
-        int posIDepart = Character.getNumericValue(tabLettres[1])-1;
-        int posJFin = getIndexFromLetter(tabLettres[5]);
-        int posIFin = Character.getNumericValue(tabLettres[6]) -1;
+    	char[] tabLettres = movement.toCharArray();
+        int posIDepart = getIndexFromLetter(tabLettres[0]);
+        int posJDepart = Character.getNumericValue(tabLettres[1]);
+        int posIFin = getIndexFromLetter(tabLettres[5]);
+        int posJFin = BOARDSIZE - Character.getNumericValue(tabLettres[6]);
         playBoard[posIDepart][posJDepart] = 0;
         playBoard[posIFin][posJFin] = playerNumber;
 
-        /*for(int i=0;i<positionsPions.size();i++){
+        
+        for(int i=0;i<positionsPions.size();i++){
             int[] comparaison = positionsPions.get(i);
             if(comparaison[0] == posIDepart && comparaison[1] == posJDepart){
                 // todo : verif
             	positionsPions.remove(i);
                 positionsPions.add(new int[] {posIFin,posJFin});
             }
-        }*/
+        }
     }
 
     public void drawBoard(boolean showSolvingBoard){
         // nous fait un dessin du board, pour le debugging
         System.out.println("====== PLAY BOARD ========");
-        for(int i =0; i < BOARDSIZE; i++){
+        for(int j =0; j < BOARDSIZE; j++){
             System.out.println("");
-            for(int j = 0; j< BOARDSIZE; j++){
+            for(int i = 0; i< BOARDSIZE; i++){
                 printASlot(playBoard[i][j]+"");
             }
         }
+
         System.out.println("");
         System.out.println("=========================");
         if(showSolvingBoard){
@@ -274,7 +293,9 @@ public class IA implements Runnable{
             System.out.println("Allie : [" + centreIDeMasseAllier + " ; " + centreJDeMasseAllier + " ]");
             System.out.println("Enemy : [" + centreIDeMasseEnemy + " ; " + centreJDeMasseEnemy + " ]");
             System.out.println("Nombre de move possible : " + lstPossibleMove.size());
+        
         }
+        
     }
 
     private void printASlot(String text){
@@ -683,7 +704,7 @@ public class IA implements Runnable{
         reduceEnemyPositions();
         applyCounterEnemy();
         trouverMotton();
-        drawBoard(true);
+        // drawBoard(true);
     }
 
     private void applyCounterEnemy(){
@@ -814,8 +835,8 @@ public class IA implements Runnable{
     private void cloneBoard(int[][] argumentBoard){
         // todo : est-ce que sa sameliore ??
         playBoard = new int[BOARDSIZE][BOARDSIZE];
-        for(int i = 0;i<BOARDSIZE;i++){
-            for(int j = 0;j<BOARDSIZE;j++){
+        for(int j = 0;j<BOARDSIZE;j++){
+            for(int i = 0;i<BOARDSIZE;i++){
                 this.playBoard[i][j] = argumentBoard[i][j];
             }
         }
