@@ -2,6 +2,8 @@ package MiniMax;
 
 import java.util.ArrayList;
 
+import LinesOfActions.IA;
+
 /**
  * 
  * @author julien
@@ -10,9 +12,7 @@ import java.util.ArrayList;
  */
 public class Feuille {
 
-	// Liste des feuilles enfant de cette feuille
-	// Cette approche a ete choisie car il est possible que deux feuilles
-	// parent aient la meme feuille enfant
+	// Pointeur sur la feuille parent
 	private ArrayList <Feuille> feuilleEnfants;
 	
 	// Vrai : Notre Pion
@@ -24,10 +24,10 @@ public class Feuille {
 	private String coupJoue;
 	
 	// Constructeur pour creer une feuille dans l'arbre MiniMax
-	public Feuille(boolean joueurAdverse, String coupJoue){
+	public Feuille(boolean joueurEstMAX, String coupJoue){
 		
 		this.feuilleEnfants = new ArrayList<Feuille>();
-		this.joueurEstMAX = joueurAdverse;
+		this.joueurEstMAX = joueurEstMAX;
 		this.score = 0;
 		this.coupJoue = coupJoue;
 	}
@@ -40,40 +40,43 @@ public class Feuille {
 	// des enfants de cette feuille
 	public void updateFeuilleScoreAvecMeilleurScoreEnfants(){
 		
-		int scoreAComparer = (int) Math.pow(10, 5);
-		
-		if (this.joueurEstMAX) { scoreAComparer = -(int) Math.pow(10, 5);}
+		String deplacementRetenu = "";
+		int scoreAComparer = 10000;
+		if (this.joueurEstMAX) { scoreAComparer = -10000 ;}
 		
 		// La condition est en dehors de la boucle.
 		// Cela oblige a avoir deux boucles, mais moins
 		// de comparason.
 		
-		// Conserve le plus petit score possible
+		// Conserve le plus grand score possible
 		if(this.joueurEstMAX){
 		
-			for (Feuille enfant : this.feuilleEnfants){
-				
-				if(scoreAComparer > enfant.getScore()){
-					
-					scoreAComparer = enfant.getScore();
-				}
-			}
-		}
-		
-		// Conserve le plus grand score possible
-		else{
-			
 			for (Feuille enfant : this.feuilleEnfants){
 				
 				if(scoreAComparer < enfant.getScore()){
 					
 					scoreAComparer = enfant.getScore();
+					deplacementRetenu = enfant.getCoupJoue();
+				}
+			}
+		}
+		
+		// Conserve le plus petit score possible
+		else{
+			
+			for (Feuille enfant : this.feuilleEnfants){
+				
+				if(scoreAComparer > enfant.getScore()){
+					
+					scoreAComparer = enfant.getScore();
+					deplacementRetenu = enfant.getCoupJoue();
 				}
 			}
 		}
 		
 		// Mise a jour de cette feuille avec le 'meilleur' score de ses enfants
 		this.setScore(scoreAComparer);
+		this.setCoupJoue(deplacementRetenu);
 	}
 	
 	public void setScore(int score){
@@ -95,6 +98,5 @@ public class Feuille {
 	public boolean isJoueurEstMAX(){
 		return this.joueurEstMAX;
 	}
-	
 	
 }
