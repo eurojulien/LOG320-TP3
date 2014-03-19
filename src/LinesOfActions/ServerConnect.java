@@ -69,16 +69,16 @@ class ServerConnect {
 	        String[] boardValues;
 	        boardValues = s.split(" ");
 	        
-	        int col=0,row=0;
+	        int x=0,y=0;
 	        int boardValuesLength = boardValues.length;
 	        for(int i = 0 ; i < boardValuesLength ; i++){
 	        	
-	            board[col][row] = Integer.parseInt(boardValues[i]);
-	            col++;
+	            board[x][y] = Integer.parseInt(boardValues[i]);
+	            y++;
 	            
-	            if(col == BOARDSIZE){
-	                col = 0;
-	                row++;
+	            if(y == BOARDSIZE){
+	                y = 0;
+	                x++;
 	            }
 	        }
 		}catch (IOException e) {
