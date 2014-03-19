@@ -55,10 +55,9 @@ public class MiniMax implements Runnable{
 		int profondeurArbre = 0;
 		
 		MiniMax.resetArbre();
-		MiniMax.feuilleSouche = new Feuille(MiniMax.megaMind, true, "");
+		MiniMax.feuilleSouche = new Feuille(true, "");
 		
 		construireArbre(MiniMax.megaMind, MiniMax.feuilleSouche, profondeurArbre, MiniMax.feuilleSouche.getScore());
-	
 	}
 	
 	// Fonction recursive de construction d'arbre
@@ -68,56 +67,31 @@ public class MiniMax implements Runnable{
 		if (profondeurArbre == profondeurMaximalePermise){
 
 			// Genere la list des mouvements
-			feuille.getIA().generateMoveList();
+			nextIA.generateMoveList(true);
 			
 			// Conserve les meilleurs score
-			feuille.setScore(feuille.getIA().getMeilleurScore());
+			feuille.setScore(nextIA.getMeilleurScore());
 
 		}		
 		else{
 			
-			// IA
-			IA newIA = null;
-			
-			if (MiniMax.currentPlayer == 4 && feuille.isJoueurEstMAX()) {newIA = new IA(tableauDeJeu, 4);}
-			else if (MiniMax.currentPlayer == 2 && feuille.isJoueurEstMAX()) {newIA = new IA(tableauDeJeu, 2);}
-			else if (MiniMax.currentPlayer == 4 && !feuille.isJoueurEstMAX()) {newIA = new IA(tableauDeJeu, 2);}
-			else if (MiniMax.currentPlayer == 2 && !feuille.isJoueurEstMAX()) {newIA = new IA(tableauDeJeu, 4);}
-			 
-			newIA.generateMoveList();
-			
-			for (String deplacement : newIA.getListeMouvements()){
-
-				IA feuilleIA = null;
+			// Genere la list des mouvements
+			nextIA.generateMoveList(false);
 						
-				if (MiniMax.currentPlayer == 4 && feuille.isJoueurEstMAX()) {
-					feuilleIA = new IA(tableauDeJeu, 4);
-					feuilleIA.notifyMovementMyTeam(deplacement);
-				}
-				
-				else if (MiniMax.currentPlayer == 2 && feuille.isJoueurEstMAX()) {
-					feuilleIA = new IA(tableauDeJeu, 2);
-					feuilleIA.notifyMovementMyTeam(deplacement);
-				}
-				
-				else if (MiniMax.currentPlayer == 4 && !feuille.isJoueurEstMAX()) {
-					feuilleIA = new IA(tableauDeJeu, 2);
-					feuilleIA.notifyMovementEnemyTeam(deplacement);
-				}
-				
-				else if (MiniMax.currentPlayer == 2 && !feuille.isJoueurEstMAX()) {
-					feuilleIA = new IA(tableauDeJeu, 4);
-					feuilleIA.notifyMovementEnemyTeam(deplacement);
-				}
-				
+			for (String deplacement : nextIA.getListeMouvements()){
+
 				// Construction d'une feuille enfant
-				Feuille feuilleEnfant = new Feuille(feuilleIA, !feuille.isJoueurEstMAX(), deplacement);
+				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacement);
+				
+				// Ajout de cette feuille dans la liste des enfants de la feuille en cours
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
-				construireArbre(tableauDeJeu.clone(), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
+				
+				// Appel recursif avec la feuille enfant
+				construireArbre(nextIA.notifyAndGetNewIA(deplacement), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
 			}
 			
 			// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
-			feuille.updateFeuilleScoreAvecMeilleurScoreEnfants();
+			feuille.updateFeuilleAvecMeilleurFeuilleEnfant();
 		}
 	}
 	

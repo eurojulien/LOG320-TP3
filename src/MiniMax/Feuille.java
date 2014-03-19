@@ -20,18 +20,14 @@ public class Feuille {
 	private boolean joueurEstMAX;
 	private int score;
 	
-	// IA
-	private IA megaMind = null;
-	
 	// Coup joue pour atteindre cette feuille
 	private String coupJoue;
 	
 	// Constructeur pour creer une feuille dans l'arbre MiniMax
-	public Feuille(IA megaMind, boolean joueurEstMAX, String coupJoue){
+	public Feuille(boolean joueurEstMAX, String coupJoue){
 		
 		this.feuilleEnfants = new ArrayList<Feuille>();
 		this.joueurEstMAX = joueurEstMAX;
-		this.megaMind = megaMind;
 		this.score = 0;
 		this.coupJoue = coupJoue;
 	}
@@ -42,11 +38,12 @@ public class Feuille {
 	
 	// Attribue le score a cette feuille selon le meilleur score
 	// des enfants de cette feuille
-	public void updateFeuilleScoreAvecMeilleurScoreEnfants(){
+	public void updateFeuilleAvecMeilleurFeuilleEnfant(){
 		
-		int scoreAComparer = (int) Math.pow(10, 5);
+		int scoreAComparer = 10000;
+		if (this.joueurEstMAX) { scoreAComparer = -10000;}
 		
-		if (this.joueurEstMAX) { scoreAComparer = -(int) Math.pow(10, 5);}
+		String mouvementEnregistre = "";
 		
 		// La condition est en dehors de la boucle.
 		// Cela oblige a avoir deux boucles, mais moins
@@ -57,9 +54,10 @@ public class Feuille {
 		
 			for (Feuille enfant : this.feuilleEnfants){
 				
-				if(scoreAComparer > enfant.getScore()){
+				if(scoreAComparer < enfant.getScore()){
 					
-					scoreAComparer = enfant.getScore();
+					scoreAComparer 		= enfant.getScore();
+					mouvementEnregistre	= enfant.getCoupJoue();
 				}
 			}
 		}
@@ -69,15 +67,17 @@ public class Feuille {
 			
 			for (Feuille enfant : this.feuilleEnfants){
 				
-				if(scoreAComparer < enfant.getScore()){
+				if(scoreAComparer > enfant.getScore()){
 					
 					scoreAComparer = enfant.getScore();
+					mouvementEnregistre	= enfant.getCoupJoue();
 				}
 			}
 		}
 		
 		// Mise a jour de cette feuille avec le 'meilleur' score de ses enfants
 		this.setScore(scoreAComparer);
+		this.setCoupJoue(mouvementEnregistre);
 	}
 	
 	public void setScore(int score){
@@ -99,9 +99,4 @@ public class Feuille {
 	public boolean isJoueurEstMAX(){
 		return this.joueurEstMAX;
 	}
-	
-	public IA getIA(){
-		return this.megaMind; 
-	}
-	
 }
