@@ -1,6 +1,7 @@
 package LinesOfActions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class IA implements Runnable{
 
@@ -48,7 +49,8 @@ public class IA implements Runnable{
     private ArrayList<int[]> positionsPionsEnemy = new ArrayList<int[]>();
     private ArrayList<String> lstPossibleMove = new ArrayList<String>();
     
-    
+    private ArrayList<int[]> piecesCourantes = new ArrayList<int[]>();
+    private HashMap<String, Boolean> piecesVisitees = new HashMap<String, Boolean>();
 
     
     
@@ -640,7 +642,7 @@ public class IA implements Runnable{
         for(int i =0;i<positionsPions.size();i++){
             incrementAround(positionsPions.get(i)[0],positionsPions.get(i)[1]);
         }
-        // todo:ajouter la m��thode de bruno
+        // todo:ajouter la m������thode de bruno
         calculerCentreDeMasses();
         applyPositionMask();
         reduceEnemyPositions();
@@ -782,9 +784,6 @@ public class IA implements Runnable{
             }
         }
     }
-
-    private ArrayList<int[]> pieceCourantes = new ArrayList<int[]>();
-    private ArrayList<int[]> piecesVisitees = new ArrayList<int[]>();
     
     public void trouverMotton(){
     	
@@ -796,12 +795,13 @@ public class IA implements Runnable{
     			incrementAround(piecesCourantes.get(y)[0],piecesCourantes.get(y)[1]);
     		}
     		
-    		pieceCourantes.clear();
+    		piecesCourantes.clear();
     	}
     }
     
     public void parcoursMotton(int i, int j){
     	
+    	inspecterTuilePourMoton(i,j);
     	
     	if(i > 0){
     			inspecterTuilePourMoton(i-1,j);
@@ -825,19 +825,13 @@ public class IA implements Runnable{
         	inspecterTuilePourMoton(i,j+1);
     }
     
+    
     public void inspecterTuilePourMoton(int i, int j){
     	
-    	boolean dejaVisite = false;
-    	
-    	for(int x = 0 ; x < piecesVisitees.size() ; x++)
-    	{
-    		if(piecesVisitees.get(x)[0] == i && piecesVisitees.get(x)[1] == j)
-    			dejaVisite = true;
-    	}
-    	
-    	if(playBoard[i][j] == playerNumber && !dejaVisite){
+    	if(playBoard[i][j] == playerNumber && !piecesVisitees.containsKey(i+","+j)){
+    		
+    		piecesVisitees.put(i+","+j,true);
     		piecesCourantes.add(new int[]{i,j});
-    		piecesVisitees.add(new int[]{i,j});
     		parcoursMotton(i,j);
     	}
     }
