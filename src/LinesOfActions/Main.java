@@ -106,7 +106,7 @@ public class Main extends Thread{
             String move = MiniMax.getBestMove();
             System.out.println("We sent :" + move);
 			server.sendServerCommand(move);
-			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
+			MiniMax.getIA().notifyMovementMyTeam(move);
 			
 			// TODO : Traitement supplementaire lorsque l'adversaire joue
 			
