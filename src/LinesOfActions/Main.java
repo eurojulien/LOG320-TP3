@@ -3,8 +3,8 @@ import MiniMax.MiniMax;
 
 public class Main extends Thread{
 
-	private static final int BLACK = 2;
-	private static final int WHITE = 4;
+	private static final int BLACK = 4;
+	private static final int WHITE = 2;
 	
 	private static Main instance = null;
 	private static ServerConnect server;
@@ -69,7 +69,7 @@ public class Main extends Thread{
 		// - Partie Abandonnee
 		do{
 			
-			MiniMax.getIA().drawBoard(false);
+			//MiniMax.getIA().drawBoard(false);
 			
 			// Reception de la reponse du serveur
 			server.getServerCommand();
@@ -102,8 +102,10 @@ public class Main extends Thread{
 			// Envoie de la reponse
 			//server.sendServerCommand(megaMind.getBestMove());
 			//megaMind.notifyMovementMyTeam(megaMind.getBestMove());
-			
-			server.sendServerCommand(MiniMax.getBestMove());
+
+            String move = MiniMax.getBestMove();
+            System.out.println("We sent :" + move);
+			server.sendServerCommand(move);
 			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
 			
 			// TODO : Traitement supplementaire lorsque l'adversaire joue

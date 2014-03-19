@@ -110,8 +110,8 @@ public class IA implements Runnable{
 
     public void generateMoveList(boolean fastGen){
         if(!fastGen){
-            initializePositionsList();
-            fillInSolvingBoard();
+            //initializePositionsList();
+            //fillInSolvingBoard();
         }
         for(int x =0; x<positionsPions.size();x++){
             genererMouvementPiece(positionsPions.get(x)[0], positionsPions.get(x)[1]);
@@ -199,7 +199,7 @@ public class IA implements Runnable{
 
     public void drawBoard(boolean showSolvingBoard){
         // nous fait un dessin du board, pour le debugging
-        System.out.println("====== PLAY BOARD ========");
+        System.out.println("====== PLAY BOARD! ========");
         for(int i =BOARDSIZE-1; i >= 0; i--){
             System.out.println("");
             for(int j = 0; j< BOARDSIZE; j++){
@@ -338,7 +338,7 @@ public class IA implements Runnable{
                     if(playBoard[i-x][j+x] == playerNumber)
                         droite = false;
                 }
-                else if(playBoard[i-x][j+x] != playerNumber || playBoard[i-x][j+x]!= 0){
+                else if(playBoard[i-x][j+x] != playerNumber && playBoard[i-x][j+x]!= 0){
                     droite = false;
                 }
 
@@ -349,7 +349,7 @@ public class IA implements Runnable{
                     if(playBoard[i+x][j-x] == playerNumber)
                         gauche = false;
                 }
-                else if(playBoard[i+x][j-x] != playerNumber || playBoard[i+x][j-x]!= 0){
+                else if(playBoard[i+x][j-x] != playerNumber && playBoard[i+x][j-x]!= 0){
                     gauche = false;
                 }
             }
@@ -378,7 +378,7 @@ public class IA implements Runnable{
                     if(playBoard[i+x][j+x] == playerNumber)
                         droite = false;
                 }
-                else if(playBoard[i+x][j+x] != playerNumber || playBoard[i+x][j+x]!= 0)
+                else if(playBoard[i+x][j+x] != playerNumber && playBoard[i+x][j+x]!= 0)
                 {
                     droite = false;
                 }
@@ -390,7 +390,7 @@ public class IA implements Runnable{
                     if(playBoard[i-x][j-x] == playerNumber)
                         gauche = false;
                 }
-                else if(playBoard[i-x][j-x] != playerNumber || playBoard[i-x][j-x]!= 0){
+                else if(playBoard[i-x][j-x] != playerNumber && playBoard[i-x][j-x]!= 0){
                     gauche = false;
                 }
             }
