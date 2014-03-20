@@ -27,6 +27,8 @@ public class MiniMax implements Runnable{
 	
 	private static WatchDog watchDog;
 	
+	public static int nombreElagage;
+	
 	private MiniMax(){}
 	
 	// Instancie l'arbre MinMax
@@ -62,7 +64,8 @@ public class MiniMax implements Runnable{
 		// Profonfeur de construction de l'arbre
 		int profondeurArbre = 0;
 		
-		MiniMax.resetArbre();
+		MiniMax.feuilleSouche = null;
+		nombreElagage = 0;
 		MiniMax.feuilleSouche = new Feuille(true, "");
 		
 		construireArbre(MiniMax.megaMind, MiniMax.feuilleSouche, profondeurArbre, MiniMax.feuilleSouche.getScore());
@@ -74,9 +77,6 @@ public class MiniMax implements Runnable{
 		// Calcul du score
 		if (profondeurArbre == profondeurMaximalePermise){
 
-			// Genere la list des mouvements
-			//nextIA.generateMoveList(true);
-			
 			// Conserve les meilleurs score
 			feuille.setScore(nextIA.getScoreForBoard());
 
@@ -91,7 +91,7 @@ public class MiniMax implements Runnable{
 			for (String deplacement : deplacements){
 			
 				if (profondeurArbre == 0){
-					System.out.println(" 0 : " + deplacement);
+					//System.out.println(" 0 : " + deplacement);
 				}
 					
 				// Construction d'une feuille enfant
@@ -102,10 +102,28 @@ public class MiniMax implements Runnable{
 				
 				// Appel recursif avec la feuille enfant
 				construireArbre(nextIA.notifyAndGetNewIA(deplacement), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
-			}
 			
-			// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
-			feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
+				// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
+				feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
+			
+				// ELAGAGE
+				if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
+					
+					// MAX
+					// Si la valeur de mon parent est plus petite, j'arrete de creuser
+					if (feuille.isJoueurEstMAX() && feuille.getScore() >= scoreElagage){
+						nombreElagage ++;
+						break;
+					}
+					
+					// MIN
+					// Si la la valeur de mon parent est plus grande, j'arrete de creuser
+					else if (feuille.getScore() <= scoreElagage){
+						nombreElagage ++;
+						break;
+					}
+				}
+			}
 		}
 	}
 	
@@ -149,10 +167,10 @@ public class MiniMax implements Runnable{
 			
 			do{
 				try {
-					Thread.sleep(1);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {}
 				
-				waiting ++;
+				waiting += 100;
 				
 				if (watchDog[0]){
 					miniMaxIsOk = true;
