@@ -65,16 +65,16 @@ public class IA implements Runnable{
     // valeurs qui pourraient etre modifiee
     private static final int VALEUR_TUILE_ADVERSE = -4;
     private static final int TUILE_ADJACENTE_ALLIER = 1;
-    private static final int POSITION_MASK_EXTERNE = 10;
-    private static final int POSITION_MASK_MILLIEU = 17;
-    private static final int POSITION_MASK_INTERIEUR = 25;
+    private static final int POSITION_MASK_EXTERNE = 20;
+    private static final int POSITION_MASK_MILLIEU = 25;
+    private static final int POSITION_MASK_INTERIEUR = 30;
     private static final int BLOQUER_MOUVEMENT_ENEMY = 1;
     private static final int TROU_INTERMOTON = 4;
     private static final int BRISE_MOTON_ADVERSE = 10;
     private static final int NB_TOURS_DISTANCE_MASK = 10;
     private static final int NB_TOURS_BOUGER_PIECES_INITIALES = 6;
 
-    public IA(int[][] playBoard, int playerNumber){
+    public IA(int[][] playBoard, int playerNumber, int turnAt){
         cloneBoard(playBoard);
         this.playerNumber = playerNumber;
         initializeSolvingBoard();
@@ -83,6 +83,7 @@ public class IA implements Runnable{
         }else{
             enemyPlayerID = 4;
         }
+        this.compteurTour = turnAt;
     }
 
     @Override
@@ -139,7 +140,7 @@ public class IA implements Runnable{
 
 
     public void generateFastTree(){
-        // todo : are we keeping this ?
+        /*// todo : are we keeping this ?
         generateMoveList(false);
         //System.out.println("Essais de move :");
         ArrayList<IA> listeDeMoveEtageInferieure = new ArrayList<IA>();
@@ -155,14 +156,14 @@ public class IA implements Runnable{
                 bestPointage = solvingBoard[indexi][indexJ] - meilleurScoreEnfant;
                 bestMove = currentMove;
             }
-        }
+        }*/
     }
 
-    public IA notifyAndGetNewIA(String movement){
+    public IA notifyAndGetNewIA(String movement, int turnAt){
         // cette methode permet a l'algoritme de prendre compte des deplacments
         // que notre adversaire fait !
         // IMPORTANT : Le format doit toujours etre "A5_-_B5"
-        IA retour = new IA(playBoard, enemyPlayerID);
+        IA retour = new IA(playBoard, enemyPlayerID, turnAt);
         retour.notifyMovementEnemyTeam(movement);
         return retour;
     }
@@ -244,7 +245,7 @@ public class IA implements Runnable{
     }
 
     private void genererMouvementPiece(int i, int j){
-        if(compteurTour > NB_TOURS_BOUGER_PIECES_INITIALES || (i==0 || j == 0 || i== BOARDSIZE-1 || j== BOARDSIZE-1 )){
+
             int distanceEstWest = distanceMove(i,j,direction.E);
             int distanceNordSud = distanceMove(i,j,direction.N);
             int distanceNordEst = distanceMove(i,j,direction.NE);
@@ -410,7 +411,7 @@ public class IA implements Runnable{
                 String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1 + indexI);
                 lstPossibleMove.add(toAdd);
             }
-        }
+
     }
 
     private int getBestScore(){
@@ -869,7 +870,7 @@ public class IA implements Runnable{
     	}
     	
     	if(playBoard[i][j] == playerNumber && !dejaVisite){
-            if(i != 0 && j !=0 && i != BOARDSIZE-1 && j != BOARDSIZE-1){
+            if(i != 0 && j !=0 && i != BOARDSIZE-1 && j != BOARDSIZE-1 || compteurTour > 6){
                 pieceCourantes.add(new int[]{i,j});
             }
     		piecesVisitees.add(new int[]{i,j});

@@ -12,6 +12,7 @@ public class MiniMax implements Runnable{
 	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
+    public static int turnAt = 0;
 	
 	// La profondeur maximale de l'arbre MiniMax peut etre augmentee
 	// s'il y a moins de piece a calculee sur le jeu
@@ -31,12 +32,13 @@ public class MiniMax implements Runnable{
 	
 	// Instancie l'arbre MinMax
 	// Cette fonction doit etre appeler de commencer a jouer notre premier coup seulement
-	public static MiniMax initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
+	public static MiniMax initaliserMinMax(int [][] tableauJeu, int numeroJoueur,int compteurTour){
 	
 		if(occurence == null) { occurence = new MiniMax();}
-		
+
+        turnAt = compteurTour;
 		MiniMax.profondeurMaximalePermise 	= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
-		MiniMax.megaMind					= new IA(tableauJeu, numeroJoueur);
+		MiniMax.megaMind					= new IA(tableauJeu, numeroJoueur,turnAt);
 		MiniMax.currentPlayer				= numeroJoueur;
 		watchDog							= occurence.new WatchDog(bestMoveHasBeenFound);
 		
@@ -101,7 +103,7 @@ public class MiniMax implements Runnable{
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
 				
 				// Appel recursif avec la feuille enfant
-				construireArbre(nextIA.notifyAndGetNewIA(deplacement), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
+				construireArbre(nextIA.notifyAndGetNewIA(deplacement,turnAt), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
 			}
 			
 			// Mis a jour de la feuille en cours avec le meilleur score de ses enfants

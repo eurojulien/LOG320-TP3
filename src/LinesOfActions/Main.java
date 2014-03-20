@@ -47,9 +47,10 @@ public class Main extends Thread{
 		}
 		
 		// Initalisation du plateau
+        int compteurTour = 0;
 		int[][] board = server.getBoardSetup().clone();
-		megaMind 	= new IA(board, playerColor);
-		miniMax 	= MiniMax.initaliserMinMax(board, playerColor);
+		megaMind 	= new IA(board, playerColor,compteurTour);
+		miniMax 	= MiniMax.initaliserMinMax(board, playerColor, compteurTour);
 		
 		if(playerColor == WHITE){
 			
@@ -105,7 +106,8 @@ public class Main extends Thread{
 			
 			server.sendServerCommand(miniMax.getBestMove());
 			miniMax.getIA().notifyMovementMyTeam(miniMax.getBestMove());
-			miniMax.getIA().drawBoard(false);
+			miniMax.getIA().drawBoard(false); 
+            miniMax.turnAt++;
 			
 			// TODO : Traitement supplementaire lorsque l'adversaire joue
 			
@@ -113,7 +115,7 @@ public class Main extends Thread{
 	}
 	
 	public static void main(String[] args) {
-	
+
 		// Connexion au serveur
 		Main thread = Main.CreateThread();
 		
