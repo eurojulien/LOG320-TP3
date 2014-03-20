@@ -71,6 +71,9 @@ public class MiniMax implements Runnable{
 	// Fonction recursive de construction d'arbre
 	private static void construireArbre(IA nextIA, Feuille feuille, int profondeurArbre, int scoreElagage){
 		
+		// Debug
+		System.out.println("Joueur : " + nextIA.playerNumber + " Niveau Arbre : " + profondeurArbre + " Coup Feuille : " + feuille.getCoupJoue());
+		
 		// Calcul du score
 		if (profondeurArbre == profondeurMaximalePermise){
 
@@ -87,15 +90,9 @@ public class MiniMax implements Runnable{
 			nextIA.generateMoveList(false);
 			
 			ArrayList<String >deplacements = nextIA.getListeMouvements();
-			
+
 			for (String deplacement : deplacements){
-
-
-			for (String deplacement : mvList){
-				//System.out.println("Feuille : " + profondeurArbre + ":" + feuilleCpt + " Deplacement : " + deplacement);
-				feuilleCpt ++;
-				
-
+			
 				// Construction d'une feuille enfant
 				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacement);
 				

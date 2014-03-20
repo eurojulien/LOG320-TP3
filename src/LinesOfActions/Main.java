@@ -39,10 +39,10 @@ public class Main extends Thread{
 		// Les noirs attendent une reponse du serveur avant de commencer a jouer
 		switch( server.getServerCommand())
 		{
-			case '1': playerColor = BLACK;
+			case '1': playerColor = WHITE;
 					break;
 					
-			case '2': playerColor = WHITE;
+			case '2': playerColor = BLACK;
 					break;
 		}
 		
@@ -105,6 +105,7 @@ public class Main extends Thread{
 			
 			server.sendServerCommand(miniMax.getBestMove());
 			miniMax.getIA().notifyMovementMyTeam(miniMax.getBestMove());
+			miniMax.getIA().drawBoard(false);
 			
 			// TODO : Traitement supplementaire lorsque l'adversaire joue
 			

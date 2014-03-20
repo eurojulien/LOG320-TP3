@@ -340,7 +340,7 @@ public class IA implements Runnable{
                     if(playBoard[i-x][j+x] == playerNumber)
                         droite = false;
                 }
-                else if(playBoard[i-x][j+x] != playerNumber || playBoard[i-x][j+x]!= 0){
+                else if(playBoard[i-x][j+x] != playerNumber && playBoard[i-x][j+x]!= 0){
                     droite = false;
                 }
 
@@ -351,7 +351,7 @@ public class IA implements Runnable{
                     if(playBoard[i+x][j-x] == playerNumber)
                         gauche = false;
                 }
-                else if(playBoard[i+x][j-x] != playerNumber || playBoard[i+x][j-x]!= 0){
+                else if(playBoard[i+x][j-x] != playerNumber && playBoard[i+x][j-x]!= 0){
                     gauche = false;
                 }
             }
@@ -380,7 +380,7 @@ public class IA implements Runnable{
                     if(playBoard[i+x][j+x] == playerNumber)
                         droite = false;
                 }
-                else if(playBoard[i+x][j+x] != playerNumber || playBoard[i+x][j+x]!= 0)
+                else if(playBoard[i+x][j+x] != playerNumber && playBoard[i+x][j+x]!= 0)
                 {
                     droite = false;
                 }
@@ -392,7 +392,7 @@ public class IA implements Runnable{
                     if(playBoard[i-x][j-x] == playerNumber)
                         gauche = false;
                 }
-                else if(playBoard[i-x][j-x] != playerNumber || playBoard[i-x][j-x]!= 0){
+                else if(playBoard[i-x][j-x] != playerNumber && playBoard[i-x][j-x]!= 0){
                     gauche = false;
                 }
             }
