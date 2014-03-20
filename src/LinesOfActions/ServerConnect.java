@@ -73,7 +73,7 @@ class ServerConnect {
 	        int boardValuesLength = boardValues.length;
 	        for(int i = 0 ; i < boardValuesLength ; i++){
 	        	
-	            board[col][row] = Integer.parseInt(boardValues[i]);
+	            board[row][col] = Integer.parseInt(boardValues[i]);
 	            col++;
 	            
 	            if(col == BOARDSIZE){

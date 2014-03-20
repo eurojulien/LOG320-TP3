@@ -86,7 +86,8 @@ public class MiniMax implements Runnable{
 			ArrayList<String> mvList = nextIA.getListeMouvements();
 			
 			for (String deplacement : mvList){
-				//System.out.println("Feuille : " + profondeurArbre + ":" + feuilleCpt + " Deplacement : " + deplacement);
+
+		        System.out.println("Feuille : " + profondeurArbre + ":" + feuilleCpt + " Deplacement : " + deplacement);
 				feuilleCpt ++;
 				
 				// Construction d'une feuille enfant
@@ -99,7 +100,7 @@ public class MiniMax implements Runnable{
 				construireArbre(nextIA.notifyAndGetNewIA(deplacement), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
 			
 				// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
-				feuille.updateFeuilleScoreAvecMeilleurScoreEnfants();
+				feuille.updateFeuilleScoreAvecMeilleurScoreEnfants(profondeurArbre);
 			}
 		}
 	}

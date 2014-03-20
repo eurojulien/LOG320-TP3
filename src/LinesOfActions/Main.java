@@ -3,8 +3,8 @@ import MiniMax.MiniMax;
 
 public class Main extends Thread{
 
-	private static final int BLACK = 4;
-	private static final int WHITE = 2;
+	private static final int BLACK = 2;
+	private static final int WHITE = 4;
 	
 	private static Main instance = null;
 	private static ServerConnect server;

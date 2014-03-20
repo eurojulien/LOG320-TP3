@@ -38,7 +38,7 @@ public class Feuille {
 	
 	// Attribue le score a cette feuille selon le meilleur score
 	// des enfants de cette feuille
-	public void updateFeuilleScoreAvecMeilleurScoreEnfants(){
+	public void updateFeuilleScoreAvecMeilleurScoreEnfants(int profondeur){
 		
 		String deplacementRetenu = "";
 		int scoreAComparer = 10000;
@@ -56,7 +56,8 @@ public class Feuille {
 				if(scoreAComparer < enfant.getScore()){
 					
 					scoreAComparer = enfant.getScore();
-					deplacementRetenu = enfant.getCoupJoue();
+
+                    deplacementRetenu = coupJoue;
 				}
 			}
 		}
