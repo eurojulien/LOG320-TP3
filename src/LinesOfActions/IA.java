@@ -113,6 +113,8 @@ public class IA implements Runnable{
             initializePositionsList();
             fillInSolvingBoard();
         }
+        lstPossibleMove.clear();
+        initializePositionsList();
         for(int x =0; x<positionsPions.size();x++){
             genererMouvementPiece(positionsPions.get(x)[0], positionsPions.get(x)[1]);
         }

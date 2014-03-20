@@ -75,7 +75,7 @@ public class MiniMax implements Runnable{
 		if (profondeurArbre == profondeurMaximalePermise){
 
 			// Genere la list des mouvements
-			nextIA.generateMoveList(true);
+			//nextIA.generateMoveList(true);
 			
 			// Conserve les meilleurs score
 			feuille.setScore(nextIA.getScoreForBoard());
@@ -89,6 +89,12 @@ public class MiniMax implements Runnable{
 			ArrayList<String >deplacements = nextIA.getListeMouvements();
 			
 			for (String deplacement : deplacements){
+
+
+			for (String deplacement : mvList){
+				//System.out.println("Feuille : " + profondeurArbre + ":" + feuilleCpt + " Deplacement : " + deplacement);
+				feuilleCpt ++;
+				
 
 				// Construction d'une feuille enfant
 				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacement);
