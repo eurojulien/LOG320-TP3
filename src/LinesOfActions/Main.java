@@ -59,7 +59,7 @@ public class Main extends Thread{
 			
 			miniMax.run();
 			server.sendServerCommand(miniMax.getBestMove());
-			megaMind.notifyMovementMyTeam(miniMax.getBestMove());
+			miniMax.getIA().notifyMovementMyTeam(miniMax.getBestMove());
 		}
 		
 		
@@ -83,12 +83,11 @@ public class Main extends Thread{
 			// pour generer un arbre
 			// Cette attente devrait etre levee quand la classe IA le permet. Durant le temps
 			// de traitement de IA, il nous est possible de faire d'autre changements aussi.
-			try {
-				Thread.sleep(4500);
-			} catch (InterruptedException e) {
-				// TODO  Auto-generated catch block
-				e.printStackTrace();
-			}
+			do{
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {}
+			} while(!MiniMax.bestMoveHasBeenFound());
 			
 			try {
 				//megaMind.wait();
