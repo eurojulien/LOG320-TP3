@@ -8,7 +8,7 @@ public class MiniMax implements Runnable{
 
 	// Profodeur maximale de l'arbre MiniMax par defaut
 	// Toujours un multiple de DEUX !!
-	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 2;
+	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 5;
 	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
@@ -76,11 +76,12 @@ public class MiniMax implements Runnable{
 		
 		// Calcul du score
 		if (profondeurArbre == profondeurMaximalePermise){
-
+			
+			
 			// Conserve les meilleurs score
 			feuille.setScore(nextIA.getScoreForBoard());
-
-		}		
+		}
+		
 		else{
 			
 			// Genere la list des mouvements
@@ -89,10 +90,6 @@ public class MiniMax implements Runnable{
 			ArrayList<String >deplacements = nextIA.getListeMouvements();
 
 			for (String deplacement : deplacements){
-			
-				if (profondeurArbre == 0){
-					//System.out.println(" 0 : " + deplacement);
-				}
 					
 				// Construction d'une feuille enfant
 				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacement);
@@ -142,12 +139,19 @@ public class MiniMax implements Runnable{
 	@Override
 	public void run() {
 		
+		long startTime = System.nanoTime();
+		
 		MiniMax.bestMoveHasBeenFound[0] = false;
-		MiniMax.watchDog.run();
+		//MiniMax.watchDog.run();
+		
+		long endTime  = System.nanoTime();
+		System.out.println("Apres WatchDog RUN  " + (endTime - startTime)/(1000000) + " milliseconds");
 		
 		// TODO Auto-generated method stub
 		construireArbre();
 		
+		MiniMax.bestMoveHasBeenFound[0] = true;
+
 	}
 	
 	private class WatchDog implements Runnable{
