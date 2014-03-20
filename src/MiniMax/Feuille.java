@@ -38,12 +38,14 @@ public class Feuille {
 	
 	// Attribue le score a cette feuille selon le meilleur score
 	// des enfants de cette feuille
-	public void updateFeuilleAvecMeilleurFeuilleEnfant(){
+	// Parametre profondeur : Si egal a zero (Feuille parent), la feuille parent
+	// copie le score ET le mouvement relie a ce score
+	public void updateFeuilleAvecMeilleurFeuilleEnfant(int profondeur){
 		
 		int scoreAComparer = 10000;
 		if (this.joueurEstMAX) { scoreAComparer = -10000;}
 		
-		String mouvementEnregistre = "";
+		String mouvementRetenuParRacine = "";
 		
 		// La condition est en dehors de la boucle.
 		// Cela oblige a avoir deux boucles, mais moins
@@ -55,9 +57,8 @@ public class Feuille {
 			for (Feuille enfant : this.feuilleEnfants){
 				
 				if(scoreAComparer < enfant.getScore()){
-					
-					scoreAComparer 		= enfant.getScore();
-					mouvementEnregistre	= enfant.getCoupJoue();
+					scoreAComparer 				= enfant.getScore();
+					mouvementRetenuParRacine	= enfant.getCoupJoue();
 				}
 			}
 		}
@@ -68,16 +69,20 @@ public class Feuille {
 			for (Feuille enfant : this.feuilleEnfants){
 				
 				if(scoreAComparer > enfant.getScore()){
-					
-					scoreAComparer = enfant.getScore();
-					mouvementEnregistre	= enfant.getCoupJoue();
+					scoreAComparer 				= enfant.getScore();
+					mouvementRetenuParRacine	= enfant.getCoupJoue();
 				}
 			}
 		}
 		
 		// Mise a jour de cette feuille avec le 'meilleur' score de ses enfants
 		this.setScore(scoreAComparer);
-		this.setCoupJoue(mouvementEnregistre);
+		
+		// Si c'est la feuille racine, elle conserve aussi le meilleur mouvement
+		// dans le but de l'envoyer au serveur apres
+		if (profondeur == 0 ){
+			this.setCoupJoue(mouvementRetenuParRacine);
+		}
 	}
 	
 	public void setScore(int score){

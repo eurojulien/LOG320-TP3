@@ -90,6 +90,10 @@ public class MiniMax implements Runnable{
 
 			for (String deplacement : deplacements){
 			
+				if (profondeurArbre == 0){
+					System.out.println(" 0 : " + deplacement);
+				}
+					
 				// Construction d'une feuille enfant
 				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacement);
 				
@@ -101,7 +105,7 @@ public class MiniMax implements Runnable{
 			}
 			
 			// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
-			feuille.updateFeuilleAvecMeilleurFeuilleEnfant();
+			feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
 		}
 	}
 	
