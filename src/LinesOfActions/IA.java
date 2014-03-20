@@ -171,6 +171,7 @@ public class IA implements Runnable{
         // cette methode permet a l'algoritme de prendre compte des deplacments
         // que notre adversaire fait !
         // IMPORTANT : Le format doit toujours etre "A5_-_B5"
+
         try{
         char[] tabLettres = movement.toCharArray();
         int posJDepart = getIndexFromLetter(tabLettres[0]);
