@@ -641,6 +641,7 @@ public class IA implements Runnable{
     private void initializePositionsList(){
         // trouve toutes nos pieces et les ajoutes dans l'array de pieces
         positionsPions = new ArrayList<int[]>();
+        positionsPionsEnemy = new ArrayList<int[]>();
         for(int i=0;i<BOARDSIZE;i++){
             for(int j=0;j<BOARDSIZE;j++){
                 if(playBoard[i][j] == playerNumber){
