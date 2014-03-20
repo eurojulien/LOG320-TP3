@@ -110,8 +110,8 @@ public class IA implements Runnable{
 
     public void generateMoveList(boolean fastGen){
         if(!fastGen){
-            //initializePositionsList();
-            //fillInSolvingBoard();
+            initializePositionsList();
+            fillInSolvingBoard();
         }
         lstPossibleMove.clear();
         initializePositionsList();
@@ -201,7 +201,7 @@ public class IA implements Runnable{
 
     public void drawBoard(boolean showSolvingBoard){
         // nous fait un dessin du board, pour le debugging
-        System.out.println("====== PLAY BOARD! ========");
+        System.out.println("====== PLAY BOARD ========");
         for(int i =BOARDSIZE-1; i >= 0; i--){
             System.out.println("");
             for(int j = 0; j< BOARDSIZE; j++){

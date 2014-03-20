@@ -48,8 +48,8 @@ public class Main extends Thread{
 		
 		// Initalisation du plateau
 		int[][] board = server.getBoardSetup().clone();
-		//megaMind 	= new IA(board, playerColor);
-		miniMax 	= MiniMax.getInstance(board, playerColor);
+		megaMind 	= new IA(board, playerColor);
+		miniMax 	= MiniMax.initaliserMinMax(board, playerColor);
 		
 		if(playerColor == WHITE){
 			
@@ -62,6 +62,7 @@ public class Main extends Thread{
 			miniMax.getIA().notifyMovementMyTeam(miniMax.getBestMove());
 		}
 		
+		
 		// TODO : while true temporaire
 		// La condition de sortie de cette boucle est
 		// - Partie gagnee
@@ -69,27 +70,24 @@ public class Main extends Thread{
 		// - Partie Abandonnee
 		do{
 			
-			//MiniMax.getIA().drawBoard(false);
-			
 			// Reception de la reponse du serveur
 			server.getServerCommand();
 			
 			//megaMind.notifyMovementEnemyTeam(server.getLastTurn().trim());
 			//megaMind.run();
 			
-			MiniMax.getIA().notifyMovementEnemyTeam(server.getLastTurn().trim());
+			miniMax.getIA().notifyMovementEnemyTeam(server.getLastTurn().trim());
 			miniMax.run();
 			
 			// TODO : Attente de 4500 millisecondes, temps maximum alloue a Minimax
 			// pour generer un arbre
 			// Cette attente devrait etre levee quand la classe IA le permet. Durant le temps
 			// de traitement de IA, il nous est possible de faire d'autre changements aussi.
-			try {
-				Thread.sleep(4500);
-			} catch (InterruptedException e) {
-				// TODO  Auto-generated catch block
-				e.printStackTrace();
-			}
+			do{
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {}
+			} while(!MiniMax.bestMoveHasBeenFound());
 			
 			try {
 				//megaMind.wait();
@@ -102,11 +100,12 @@ public class Main extends Thread{
 			// Envoie de la reponse
 			//server.sendServerCommand(megaMind.getBestMove());
 			//megaMind.notifyMovementMyTeam(megaMind.getBestMove());
-
-            String move = MiniMax.getBestMove();
-            System.out.println("We sent :" + move);
-			server.sendServerCommand(move);
-			MiniMax.getIA().notifyMovementMyTeam(move);
+			
+			System.out.println("Coup envoye : " + miniMax.getBestMove());
+			
+			server.sendServerCommand(miniMax.getBestMove());
+			miniMax.getIA().notifyMovementMyTeam(miniMax.getBestMove());
+			miniMax.getIA().drawBoard(false);
 			
 			// TODO : Traitement supplementaire lorsque l'adversaire joue
 			

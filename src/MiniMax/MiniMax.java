@@ -7,7 +7,7 @@ import LinesOfActions.IA;
 public class MiniMax implements Runnable{
 
 	// Profodeur maximale de l'arbre MiniMax par defaut
-	// DOIT TOUJOURS ETRE UN MULTIPLE DE DEUX !!
+	// Toujours un multiple de DEUX !!
 	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 2;
 	
 	// Premiere feuille de l'arbre
@@ -19,24 +19,30 @@ public class MiniMax implements Runnable{
 	
 	private static IA megaMind;
 	
+	private static int currentPlayer;
+	
 	private static MiniMax occurence = null;
 	
-	private MiniMax(int[][] jeuDepart, int numeroJoueur){
-		MiniMax.profondeurMaximalePermise	= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
-		MiniMax.megaMind					= new IA(jeuDepart, numeroJoueur);
-		
-	}
+	private static boolean bestMoveHasBeenFound[] = {false};
+	
+	private static WatchDog watchDog;
+	
+	private MiniMax(){}
 	
 	// Instancie l'arbre MinMax
 	// Cette fonction doit etre appeler de commencer a jouer notre premier coup seulement
-	public static MiniMax getInstance(int [][] jeuDepart, int numeroJoueur){
+	public static MiniMax initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
 	
-		if(occurence == null) { occurence = new MiniMax(jeuDepart, numeroJoueur);}
+		if(occurence == null) { occurence = new MiniMax();}
+		
+		MiniMax.profondeurMaximalePermise 	= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
+		MiniMax.megaMind					= new IA(tableauJeu, numeroJoueur);
+		MiniMax.currentPlayer				= numeroJoueur;
+		watchDog							= occurence.new WatchDog(bestMoveHasBeenFound);
 		
 		return occurence;
 	}
 	
-	// TODO : Fonction a banir : Couplage
 	public static IA getIA(){
 		
 		return MiniMax.megaMind;
@@ -54,15 +60,12 @@ public class MiniMax implements Runnable{
 	public static void construireArbre(){
 		
 		// Profonfeur de construction de l'arbre
-		int profondeurArbre 	= 0;
+		int profondeurArbre = 0;
 		
 		MiniMax.resetArbre();
-		MiniMax.feuilleSouche 	= new Feuille(true, "");
+		MiniMax.feuilleSouche = new Feuille(true, "");
 		
 		construireArbre(MiniMax.megaMind, MiniMax.feuilleSouche, profondeurArbre, MiniMax.feuilleSouche.getScore());
-	
-		int test = 0;
-	
 	}
 	
 	// Fonction recursive de construction d'arbre
@@ -80,28 +83,29 @@ public class MiniMax implements Runnable{
 		}		
 		else{
 			
-			// Generation de la liste de deplacements pour cette feuille
+			// Genere la list des mouvements
 			nextIA.generateMoveList(false);
-			int feuilleCpt = 0;
-			ArrayList<String> mvList = nextIA.getListeMouvements();
 			
-			for (String deplacement : mvList){
+			ArrayList<String >deplacements = nextIA.getListeMouvements();
 
-		        System.out.println("Feuille : " + profondeurArbre + ":" + feuilleCpt + " Deplacement : " + deplacement);
-				feuilleCpt ++;
-				
+			for (String deplacement : deplacements){
+			
+				if (profondeurArbre == 0){
+					System.out.println(" 0 : " + deplacement);
+				}
+					
 				// Construction d'une feuille enfant
 				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacement);
 				
-				// Ajout de la feuille a la liste des enfants de la feuille en cours
+				// Ajout de cette feuille dans la liste des enfants de la feuille en cours
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
 				
-				// Appel recursif
+				// Appel recursif avec la feuille enfant
 				construireArbre(nextIA.notifyAndGetNewIA(deplacement), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
-			
-				// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
-				feuille.updateFeuilleScoreAvecMeilleurScoreEnfants(profondeurArbre);
 			}
+			
+			// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
+			feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
 		}
 	}
 	
@@ -112,10 +116,54 @@ public class MiniMax implements Runnable{
 	public static String getBestMove(){
 		return MiniMax.feuilleSouche.getCoupJoue();
 	}
+	
+	public static boolean bestMoveHasBeenFound(){
+		return MiniMax.bestMoveHasBeenFound[0];
+	}
 
 	@Override
 	public void run() {
+		
+		MiniMax.bestMoveHasBeenFound[0] = false;
+		MiniMax.watchDog.run();
+		
 		// TODO Auto-generated method stub
 		construireArbre();
+		
+	}
+	
+	private class WatchDog implements Runnable{
+
+		private static final int MILLISECONDS_BEFORE_WAKE_THE_DOG = 4500;
+		private boolean watchDog[];
+		
+		public WatchDog(boolean watch[]){
+			watchDog = watch;
+		}
+		
+		@Override
+		public void run() {
+			
+			boolean miniMaxIsOk = false;
+			int waiting = 0;
+			
+			do{
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {}
+				
+				waiting ++;
+				
+				if (watchDog[0]){
+					miniMaxIsOk = true;
+				}
+				
+			}while(!miniMaxIsOk && waiting < MILLISECONDS_BEFORE_WAKE_THE_DOG);
+			
+			
+			if (!miniMaxIsOk) {this.watchDog[0] = true;}
+			
+		}
+		
 	}
 }

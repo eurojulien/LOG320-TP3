@@ -38,46 +38,51 @@ public class Feuille {
 	
 	// Attribue le score a cette feuille selon le meilleur score
 	// des enfants de cette feuille
-	public void updateFeuilleScoreAvecMeilleurScoreEnfants(int profondeur){
+	// Parametre profondeur : Si egal a zero (Feuille parent), la feuille parent
+	// copie le score ET le mouvement relie a ce score
+	public void updateFeuilleAvecMeilleurFeuilleEnfant(int profondeur){
 		
-		String deplacementRetenu = "";
 		int scoreAComparer = 10000;
-		if (this.joueurEstMAX) { scoreAComparer = -10000 ;}
+		if (this.joueurEstMAX) { scoreAComparer = -10000;}
+		
+		String mouvementRetenuParRacine = "";
 		
 		// La condition est en dehors de la boucle.
 		// Cela oblige a avoir deux boucles, mais moins
 		// de comparason.
 		
-		// Conserve le plus grand score possible
+		// Conserve le plus petit score possible
 		if(this.joueurEstMAX){
 		
 			for (Feuille enfant : this.feuilleEnfants){
 				
 				if(scoreAComparer < enfant.getScore()){
-					
-					scoreAComparer = enfant.getScore();
-
-                    deplacementRetenu = coupJoue;
+					scoreAComparer 				= enfant.getScore();
+					mouvementRetenuParRacine	= enfant.getCoupJoue();
 				}
 			}
 		}
 		
-		// Conserve le plus petit score possible
+		// Conserve le plus grand score possible
 		else{
 			
 			for (Feuille enfant : this.feuilleEnfants){
 				
 				if(scoreAComparer > enfant.getScore()){
-					
-					scoreAComparer = enfant.getScore();
-					deplacementRetenu = enfant.getCoupJoue();
+					scoreAComparer 				= enfant.getScore();
+					mouvementRetenuParRacine	= enfant.getCoupJoue();
 				}
 			}
 		}
 		
 		// Mise a jour de cette feuille avec le 'meilleur' score de ses enfants
 		this.setScore(scoreAComparer);
-		this.setCoupJoue(deplacementRetenu);
+		
+		// Si c'est la feuille racine, elle conserve aussi le meilleur mouvement
+		// dans le but de l'envoyer au serveur apres
+		if (profondeur == 0 ){
+			this.setCoupJoue(mouvementRetenuParRacine);
+		}
 	}
 	
 	public void setScore(int score){
@@ -99,5 +104,4 @@ public class Feuille {
 	public boolean isJoueurEstMAX(){
 		return this.joueurEstMAX;
 	}
-	
 }
