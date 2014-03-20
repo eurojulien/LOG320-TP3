@@ -39,10 +39,10 @@ public class Main extends Thread{
 		// Les noirs attendent une reponse du serveur avant de commencer a jouer
 		switch( server.getServerCommand())
 		{
-			case '1': playerColor = WHITE;
+			case '1': playerColor = BLACK;
 					break;
 					
-			case '2': playerColor = BLACK;
+			case '2': playerColor = WHITE;
 					break;
 		}
 		
@@ -100,6 +100,8 @@ public class Main extends Thread{
 			// Envoie de la reponse
 			//server.sendServerCommand(megaMind.getBestMove());
 			//megaMind.notifyMovementMyTeam(megaMind.getBestMove());
+			
+			System.out.println("Coup envoye : " + miniMax.getBestMove());
 			
 			server.sendServerCommand(miniMax.getBestMove());
 			miniMax.getIA().notifyMovementMyTeam(miniMax.getBestMove());
