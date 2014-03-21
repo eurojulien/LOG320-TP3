@@ -1,6 +1,7 @@
 package LinesOfActions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class IA implements Runnable{
 
@@ -49,9 +50,8 @@ public class IA implements Runnable{
     private ArrayList<int[]> positionsPions = new ArrayList<int[]>();
     private ArrayList<int[]> positionsPionsEnemy = new ArrayList<int[]>();
     private ArrayList<String> lstPossibleMove = new ArrayList<String>();
-    private ArrayList<int[]> pieceCourantes = new ArrayList<int[]>();
-    private ArrayList<int[]> piecesVisitees = new ArrayList<int[]>();
-    
+    private ArrayList<int[]> piecesCourantes = new ArrayList<int[]>();
+    private HashMap<String, Boolean> piecesVisitees = new HashMap<String, Boolean>();
 
     
     
@@ -285,11 +285,14 @@ public class IA implements Runnable{
                 lstPossibleMove.add(toAdd);
             }
 
-            if(gauche){
-                String toAdd = getLetterFromIndex(j) + "" + (1 + i) + " - " + getLetterFromIndex(j - distanceEstWest) + (i+1);
-                lstPossibleMove.add(toAdd);
-            }
-
+        if(droite){
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(j + distanceEstWest) + (i+1);
+            lstPossibleMove.add(toAdd);
+        }
+        if(gauche){
+            String toAdd = getLetterFromIndex(j) + "" + (1 + i) + " - " + getLetterFromIndex(j - distanceEstWest) + (i+1);
+            lstPossibleMove.add(toAdd);
+        }
             Boolean up = true;
             Boolean down = true;
             for(int x = 1; x <= distanceNordSud;x++){
@@ -413,6 +416,12 @@ public class IA implements Runnable{
                 lstPossibleMove.add(toAdd);
             }
 
+        if(gauche){
+            int indexI = i - distanceNordWest;
+            int indexJ = j - distanceNordWest;
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1 + indexI);
+            lstPossibleMove.add(toAdd);
+        }
     }
 
     private int getBestScore(){
@@ -818,28 +827,25 @@ public class IA implements Runnable{
     }
 
 
+    
     public void trouverMotton(){
-    	pieceCourantes.clear();
-        piecesVisitees.clear();
+    	
+    	for(int x =0; x<positionsPions.size();x++){
 
-
-
-        for(int x =0; x<positionsPions.size();x++){
-
-            parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1]);
-
-            for(int y = 0 ; y < pieceCourantes.size() ; y++){
-                incrementAround(pieceCourantes.get(y)[0],pieceCourantes.get(y)[1],pieceCourantes.size()*2);
-            }
-
-            pieceCourantes.clear();
-        }
-
+    		parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1]);
+    		
+    		for(int y = 0 ; y < piecesCourantes.size() ; y++){
+    			incrementAround(piecesCourantes.get(y)[0],piecesCourantes.get(y)[1]);
+    		}
+    		
+    		piecesCourantes.clear();
+    	}
     }
     
     public void parcoursMotton(int i, int j){
-
-        inspecterTuilePourMoton(i,j);
+    	
+    	inspecterTuilePourMoton(i,j);
+    	
     	if(i > 0){
     			inspecterTuilePourMoton(i-1,j);
             if(j > 0)
@@ -862,20 +868,13 @@ public class IA implements Runnable{
         	inspecterTuilePourMoton(i,j+1);
     }
     
+    
     public void inspecterTuilePourMoton(int i, int j){
     	
-    	boolean dejaVisite = false;
-    	for(int x = 0 ; x < piecesVisitees.size() ; x++)
-    	{
-    		if(piecesVisitees.get(x)[0] == i && piecesVisitees.get(x)[1] == j)
-    			dejaVisite = true;
-    	}
-    	
-    	if(playBoard[i][j] == playerNumber && !dejaVisite){
-            if(i != 0 && j !=0 && i != BOARDSIZE-1 && j != BOARDSIZE-1 || compteurTour > 6){
-                pieceCourantes.add(new int[]{i,j});
-            }
-    		piecesVisitees.add(new int[]{i,j});
+    	if(playBoard[i][j] == playerNumber && !piecesVisitees.containsKey(i+","+j)){
+    		
+    		piecesVisitees.put(i+","+j,true);
+    		piecesCourantes.add(new int[]{i,j});
     		parcoursMotton(i,j);
     	}
     }
