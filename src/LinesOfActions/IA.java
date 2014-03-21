@@ -65,9 +65,9 @@ public class IA implements Runnable{
     // valeurs qui pourraient etre modifiee
     private static final int VALEUR_TUILE_ADVERSE = -4;
     private static final int TUILE_ADJACENTE_ALLIER = 1;
-    private static final int POSITION_MASK_EXTERNE = 20;
-    private static final int POSITION_MASK_MILLIEU = 25;
-    private static final int POSITION_MASK_INTERIEUR = 30;
+    private static final int POSITION_MASK_EXTERNE = 80;
+    private static final int POSITION_MASK_MILLIEU = 90;
+    private static final int POSITION_MASK_INTERIEUR = 100;
     private static final int BLOQUER_MOUVEMENT_ENEMY = 1;
     private static final int TROU_INTERMOTON = 4;
     private static final int BRISE_MOTON_ADVERSE = 10;
@@ -816,12 +816,12 @@ public class IA implements Runnable{
 
     public int obtenirScoreMoton(){
         int retour = 0;
-        pieceCourantes.clear();
+        piecesCourantes.clear();
         piecesVisitees.clear();
         for(int x =0; x<positionsPions.size();x++){
             parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1]);
-            retour += Math.pow(pieceCourantes.size(), 2);
-            pieceCourantes.clear();
+            retour += Math.pow(piecesCourantes.size(), 2);
+            piecesCourantes.clear();
         }
         return retour;
     }
@@ -835,7 +835,7 @@ public class IA implements Runnable{
     		parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1]);
     		
     		for(int y = 0 ; y < piecesCourantes.size() ; y++){
-    			incrementAround(piecesCourantes.get(y)[0],piecesCourantes.get(y)[1]);
+    			incrementAround(piecesCourantes.get(y)[0],piecesCourantes.get(y)[1], piecesCourantes.size());
     		}
     		
     		piecesCourantes.clear();
@@ -872,9 +872,10 @@ public class IA implements Runnable{
     public void inspecterTuilePourMoton(int i, int j){
     	
     	if(playBoard[i][j] == playerNumber && !piecesVisitees.containsKey(i+","+j)){
-    		
-    		piecesVisitees.put(i+","+j,true);
-    		piecesCourantes.add(new int[]{i,j});
+            if( i != 0 && j != 0 && i != BOARDSIZE-1 && j!= BOARDSIZE-1 || compteurTour>10){
+                piecesCourantes.add(new int[]{i,j});
+            }
+            piecesVisitees.put(i+","+j,true);
     		parcoursMotton(i,j);
     	}
     }
