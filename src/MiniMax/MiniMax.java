@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import LinesOfActions.IA;
 
-public class MiniMax implements Runnable{
+public class MiniMax extends Thread{
 
 	// Profodeur maximale de l'arbre MiniMax par defaut
 	// Toujours un multiple de DEUX !!
-	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 5;
+	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 2;
 	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
@@ -21,28 +21,20 @@ public class MiniMax implements Runnable{
 	
 	private static int currentPlayer;
 	
-	private static MiniMax occurence = null;
-	
 	private static boolean bestMoveHasBeenFound[] = {false};
-	
-	private static WatchDog watchDog;
 	
 	public static int nombreElagage;
 	
-	private MiniMax(){}
+	public MiniMax(){ this.setPriority(MAX_PRIORITY); }
 	
 	// Instancie l'arbre MinMax
 	// Cette fonction doit etre appeler de commencer a jouer notre premier coup seulement
-	public static MiniMax initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
+	public static void initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
 	
-		if(occurence == null) { occurence = new MiniMax();}
-		
 		MiniMax.profondeurMaximalePermise 	= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
 		MiniMax.megaMind					= new IA(tableauJeu, numeroJoueur);
 		MiniMax.currentPlayer				= numeroJoueur;
-		watchDog							= occurence.new WatchDog(bestMoveHasBeenFound);
-		
-		return occurence;
+
 	}
 	
 	public static IA getIA(){
@@ -59,7 +51,7 @@ public class MiniMax implements Runnable{
 	// Trouve tous les deplacement permis pour un etat du tableau de jeu
 	// Creer une feuille par deplacement permis
 	// Repete le traitement pour le nombre maximal de profondeur permise
-	public static void construireArbre(){
+	private static void construireArbre(){
 		
 		// Profonfeur de construction de l'arbre
 		int profondeurArbre = 0;
@@ -142,25 +134,28 @@ public class MiniMax implements Runnable{
 		long startTime = System.nanoTime();
 		
 		MiniMax.bestMoveHasBeenFound[0] = false;
-		//MiniMax.watchDog.run();
 		
-		long endTime  = System.nanoTime();
-		System.out.println("Apres WatchDog RUN  " + (endTime - startTime)/(1000000) + " milliseconds");
+		new WatchDog(MiniMax.bestMoveHasBeenFound).start();
 		
 		// TODO Auto-generated method stub
 		construireArbre();
 		
 		MiniMax.bestMoveHasBeenFound[0] = true;
 
+		long endTime  = System.nanoTime();
+		System.out.println("Apres WatchDog RUN  " + (endTime - startTime)/(1000000) + " milliseconds");
 	}
-	
-	private class WatchDog implements Runnable{
+
+	// Classe qui verifie si le calcul de l'arbre depasse 4500 Millisecondes.
+	// Si oui, elle permet d'avertir le Main qu'il faut envoyer immediatement le meilleur coup trouve
+	private class WatchDog extends Thread {
 
 		private static final int MILLISECONDS_BEFORE_WAKE_THE_DOG = 4500;
 		private boolean watchDog[];
 		
 		public WatchDog(boolean watch[]){
 			watchDog = watch;
+			this.setPriority(NORM_PRIORITY);
 		}
 		
 		@Override
@@ -182,10 +177,7 @@ public class MiniMax implements Runnable{
 				
 			}while(!miniMaxIsOk && waiting < MILLISECONDS_BEFORE_WAKE_THE_DOG);
 			
-			
 			if (!miniMaxIsOk) {this.watchDog[0] = true;}
-			
 		}
-		
 	}
 }
