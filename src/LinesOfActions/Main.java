@@ -1,5 +1,5 @@
 package LinesOfActions;
-import MiniMax.MiniMax;
+import MiniMax.*;
 
 public class Main{
 
@@ -51,7 +51,7 @@ public class Main{
 		
 		if(playerColor == WHITE){
 
-			new MiniMax().start();
+			new WatchDog().start();
 			server.sendServerCommand(MiniMax.getBestMove());
 			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
 		}
@@ -65,12 +65,13 @@ public class Main{
 			startTime = System.nanoTime();
 			
 			MiniMax.getIA().notifyMovementEnemyTeam(server.getLastTurn().trim());
-			new MiniMax().start();
-			
+			new WatchDog().start();
 			// TODO : Attente de 4500 millisecondes, temps maximum alloue a Minimax
 			// pour generer un arbre
 			// Cette attente devrait etre levee quand la classe IA le permet. Durant le temps
 			// de traitement de IA, il nous est possible de faire d'autre changements aussi.
+			
+			//
 			do{
 				try {
 					Thread.sleep(100);
@@ -88,6 +89,7 @@ public class Main{
 			System.out.println("Nombre d'elagage 	: " + MiniMax.nombreElagage);
 			System.out.println("Temps de calcul		: " + (endTime - startTime)/(1000000) + " milliseconds");
 			System.out.println("Profondeur Arbre 	: " + MiniMax.getProfondeurArbre());
+			System.out.println("Nombre de feuilles  : " + MiniMax.getNbFeuillesCreees());
 			
 		}while(true);
 	}

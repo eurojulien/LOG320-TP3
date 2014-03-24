@@ -15,17 +15,21 @@ public class MiniMax extends Thread{
 	
 	// La profondeur maximale de l'arbre MiniMax peut etre augmentee
 	// s'il y a moins de piece a calculee sur le jeu
-	private static int profondeurMaximalePermise[] = {0};
+	private static int profondeurMaximalePermise[] = SyncThread.currentMaxTreeDepth;
 	
 	private static IA megaMind;
 	
 	private static int currentPlayer;
 	
-	private static boolean bestMoveHasBeenFound[] = {false};
+	private static boolean bestMoveHasBeenFound[] = SyncThread.bestMoveHasBeenFound;
 	
 	public static int nombreElagage;
 	
-	public MiniMax(){ this.setPriority(MAX_PRIORITY); }
+	private static int nbFeuillesCreees;
+	
+	public MiniMax(){ 
+		this.setPriority(Thread.NORM_PRIORITY); 
+	}
 	
 	// Instancie l'arbre MinMax
 	// Cette fonction doit etre appeler de commencer a jouer notre premier coup seulement
@@ -40,11 +44,6 @@ public class MiniMax extends Thread{
 	public static IA getIA(){
 		
 		return MiniMax.megaMind;
-	}
-	
-	// Donne une nouvelle profondeur de recherche de l'arbre MiniMax
-	public static void setArbreProfondeurMaximale(int nouvelleProfondeurPermise){
-		profondeurMaximalePermise[0] = nouvelleProfondeurPermise;
 	}
 	
 	// Cree un arbre MiniMax vide
@@ -66,6 +65,7 @@ public class MiniMax extends Thread{
 	// Fonction recursive de construction d'arbre
 	private static void construireArbre(IA nextIA, Feuille feuille, int profondeurArbre, int scoreElagage){
 		
+		nbFeuillesCreees ++;
 		// Calcul du score
 		if (profondeurArbre == profondeurMaximalePermise[0]){
 			
@@ -145,60 +145,18 @@ public class MiniMax extends Thread{
 		return MiniMax.bestMoveHasBeenFound[0];
 	}
 
+	public static int getNbFeuillesCreees(){
+		return nbFeuillesCreees;
+	}
+	
 	@Override
 	public void run() {	
-		MiniMax.bestMoveHasBeenFound[0] = false;
-		
-		new WatchDog(MiniMax.bestMoveHasBeenFound).start();
+	
+		MiniMax.nbFeuillesCreees = 0;
 		
 		// TODO Auto-generated method stub
 		construireArbre();
 		
 		MiniMax.bestMoveHasBeenFound[0] = true;
-	}
-
-	// Classe qui verifie si le calcul de l'arbre depasse 4500 Millisecondes.
-	// Si oui, elle permet d'avertir le Main qu'il faut envoyer immediatement le meilleur coup trouve
-	private class WatchDog extends Thread {
-
-		private static final int MILLISECONDS_BEFORE_WAKE_THE_DOG = 4500;
-		private boolean watchDog[];
-		private int profondeurMaximalePermise[] = {0};
-		
-		public WatchDog(boolean watch[]){
-			this.setPriority(NORM_PRIORITY);
-			watchDog = watch;
-			this.profondeurMaximalePermise = MiniMax.profondeurMaximalePermise;
-			
-		}
-		
-		@Override
-		public void run() {
-			
-			boolean miniMaxIsOk = false;
-			int waiting = 0;
-			
-			do{
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {}
-				
-				waiting += 100;
-				
-				if (watchDog[0]){
-					miniMaxIsOk = true;
-				}
-				
-			}while(!miniMaxIsOk && waiting < MILLISECONDS_BEFORE_WAKE_THE_DOG);
-			
-			if (!miniMaxIsOk) {
-				this.watchDog[0] = true;
-				this.profondeurMaximalePermise[0] --;
-			}
-			else if (waiting * 3 < MILLISECONDS_BEFORE_WAKE_THE_DOG){
-				this.profondeurMaximalePermise[0] ++;
-			}
-			
-		}
 	}
 }
