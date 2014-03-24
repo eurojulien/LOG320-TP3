@@ -4,47 +4,37 @@ import java.util.ArrayList;
 
 import LinesOfActions.IA;
 
-public class MiniMax implements Runnable{
+public class MiniMax extends Thread{
 
 	// Profodeur maximale de l'arbre MiniMax par defaut
 	// Toujours un multiple de DEUX !!
-	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 5;
+	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 2;
 	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
 	
 	// La profondeur maximale de l'arbre MiniMax peut etre augmentee
 	// s'il y a moins de piece a calculee sur le jeu
-	private static int profondeurMaximalePermise;
+	private static int profondeurMaximalePermise[] = {0};
 	
 	private static IA megaMind;
-
-    public static int turnAt = 0;
 	
 	private static int currentPlayer;
 	
-	private static MiniMax occurence = null;
-	
 	private static boolean bestMoveHasBeenFound[] = {false};
-	
-	private static WatchDog watchDog;
 	
 	public static int nombreElagage;
 	
-	private MiniMax(){}
+	public MiniMax(){ this.setPriority(MAX_PRIORITY); }
 	
 	// Instancie l'arbre MinMax
 	// Cette fonction doit etre appeler de commencer a jouer notre premier coup seulement
-	public static MiniMax initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
+	public static void initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
 	
-		if(occurence == null) { occurence = new MiniMax();}
-		
-		MiniMax.profondeurMaximalePermise 	= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
-		MiniMax.megaMind					= new IA(tableauJeu, numeroJoueur,turnAt);
-		MiniMax.currentPlayer				= numeroJoueur;
-		watchDog							= occurence.new WatchDog(bestMoveHasBeenFound);
-		
-		return occurence;
+		MiniMax.profondeurMaximalePermise[0]	= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
+		MiniMax.megaMind						= new IA(tableauJeu, numeroJoueur);
+		MiniMax.currentPlayer					= numeroJoueur;
+
 	}
 	
 	public static IA getIA(){
@@ -54,14 +44,14 @@ public class MiniMax implements Runnable{
 	
 	// Donne une nouvelle profondeur de recherche de l'arbre MiniMax
 	public static void setArbreProfondeurMaximale(int nouvelleProfondeurPermise){
-		profondeurMaximalePermise = nouvelleProfondeurPermise;
+		profondeurMaximalePermise[0] = nouvelleProfondeurPermise;
 	}
 	
 	// Cree un arbre MiniMax vide
 	// Trouve tous les deplacement permis pour un etat du tableau de jeu
 	// Creer une feuille par deplacement permis
 	// Repete le traitement pour le nombre maximal de profondeur permise
-	public static void construireArbre(){
+	private static void construireArbre(){
 		
 		// Profonfeur de construction de l'arbre
 		int profondeurArbre = 0;
@@ -77,7 +67,7 @@ public class MiniMax implements Runnable{
 	private static void construireArbre(IA nextIA, Feuille feuille, int profondeurArbre, int scoreElagage){
 		
 		// Calcul du score
-		if (profondeurArbre == profondeurMaximalePermise){
+		if (profondeurArbre == profondeurMaximalePermise[0]){
 			
 			
 			// Conserve les meilleurs score
@@ -86,11 +76,18 @@ public class MiniMax implements Runnable{
 		
 		else{
 			
-			// Genere la list des mouvements
+			// Genere la liste des mouvements
 			nextIA.generateMoveList(false);
 			
 			ArrayList<String >deplacements = nextIA.getListeMouvements();
 
+			// Securite
+			// Si le calcul depasse 4500 MilliSecondes et qu'il
+			// faut renvoyer un mouvement, ce mouvement sera renvoye
+			if (profondeurArbre == 0){
+				feuille.setCoupJoue(deplacements.get(0));
+			}
+			
 			for (String deplacement : deplacements){
 					
 				// Construction d'une feuille enfant
@@ -100,7 +97,7 @@ public class MiniMax implements Runnable{
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
 				
 				// Appel recursif avec la feuille enfant
-				construireArbre(nextIA.notifyAndGetNewIA(deplacement,MiniMax.turnAt), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
+				construireArbre(nextIA.notifyAndGetNewIA(deplacement), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
 			
 				// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
 				feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
@@ -134,35 +131,45 @@ public class MiniMax implements Runnable{
 		return MiniMax.feuilleSouche.getCoupJoue();
 	}
 	
+	// DEBUG : Affichage a la console
+	public static int getScoreFromBestMove(){
+		return MiniMax.feuilleSouche.getScore();
+	}
+	
+	// DEBUG : Affichage a la console
+	public static int getProfondeurArbre(){
+		return MiniMax.profondeurMaximalePermise[0];
+	}
+	
 	public static boolean bestMoveHasBeenFound(){
 		return MiniMax.bestMoveHasBeenFound[0];
 	}
 
 	@Override
-	public void run() {
-		
-		long startTime = System.nanoTime();
-		
+	public void run() {	
 		MiniMax.bestMoveHasBeenFound[0] = false;
-		//MiniMax.watchDog.run();
 		
-		long endTime  = System.nanoTime();
-		System.out.println("Apres WatchDog RUN  " + (endTime - startTime)/(1000000) + " milliseconds");
+		new WatchDog(MiniMax.bestMoveHasBeenFound).start();
 		
 		// TODO Auto-generated method stub
 		construireArbre();
 		
 		MiniMax.bestMoveHasBeenFound[0] = true;
-
 	}
-	
-	private class WatchDog implements Runnable{
+
+	// Classe qui verifie si le calcul de l'arbre depasse 4500 Millisecondes.
+	// Si oui, elle permet d'avertir le Main qu'il faut envoyer immediatement le meilleur coup trouve
+	private class WatchDog extends Thread {
 
 		private static final int MILLISECONDS_BEFORE_WAKE_THE_DOG = 4500;
 		private boolean watchDog[];
+		private int profondeurMaximalePermise[] = {0};
 		
 		public WatchDog(boolean watch[]){
+			this.setPriority(NORM_PRIORITY);
 			watchDog = watch;
+			this.profondeurMaximalePermise = MiniMax.profondeurMaximalePermise;
+			
 		}
 		
 		@Override
@@ -184,10 +191,14 @@ public class MiniMax implements Runnable{
 				
 			}while(!miniMaxIsOk && waiting < MILLISECONDS_BEFORE_WAKE_THE_DOG);
 			
-			
-			if (!miniMaxIsOk) {this.watchDog[0] = true;}
+			if (!miniMaxIsOk) {
+				this.watchDog[0] = true;
+				this.profondeurMaximalePermise[0] --;
+			}
+			else if (waiting * 3 < MILLISECONDS_BEFORE_WAKE_THE_DOG){
+				this.profondeurMaximalePermise[0] ++;
+			}
 			
 		}
-		
 	}
 }
