@@ -81,9 +81,13 @@ public class Main{
 			
 			server.sendServerCommand(MiniMax.getBestMove());
 			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
-			System.out.println("Coup envoye : " + MiniMax.getBestMove());
-			System.out.println("Temps demande : " + + (endTime - startTime)/(1000000) + " milliseconds");
-			System.out.println("Nombre d'elagage : " + MiniMax.nombreElagage);
+			
+			// DEBUG
+			System.out.println("Mouvement			: " + MiniMax.getBestMove());
+			System.out.println("Score 				: " + MiniMax.getScoreFromBestMove());		
+			System.out.println("Nombre d'elagage 	: " + MiniMax.nombreElagage);
+			System.out.println("Temps de calcul		: " + (endTime - startTime)/(1000000) + " milliseconds");
+			System.out.println("Profondeur Arbre 	: " + MiniMax.getProfondeurArbre());
 			
 		}while(true);
 	}
