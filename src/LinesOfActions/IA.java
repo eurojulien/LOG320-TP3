@@ -556,23 +556,28 @@ public class IA{
     }
 
     public int getScoreForBoard(int playerToScore){
-        generateMoveList(true,playerToScore);
-        //drawBoard(false);
         int boardScore = 0;
-        boardScore += obtenirScoreMoton(playerToScore);
-        //boardScore += lstPossibleMove.size();
-        boardScore += getScoreForCentrality(playerToScore);
-        boardScore += devalueEnemyEatenPawns(playerToScore);
+        initializePositionsList();
 
+        int motonScore = obtenirScoreMoton(playerToScore);
+        int centrality = getScoreForCentrality(playerToScore);
+        int eatenPawn =  devalueEnemyEatenPawns(playerToScore);
+
+        boardScore = centrality + motonScore + eatenPawn;
+
+        if(boardScore < 0){
+            //drawBoard(false);
+            //System.out.println("yoooooo");
+        }
         return boardScore;
     }
 
     private int devalueEnemyEatenPawns(int playerToScore){
         int retour = 0;
         if(playerToScore == playerNumber){
-            retour = (positionsPionsEnemy.size()-12)*100;
+            retour = (positionsPionsEnemy.size()-12)*20;
         }else{
-            retour = (positionsPions.size()-12)*100;
+            retour = (positionsPions.size()-12)*20;
         }
         return retour;
 
@@ -692,16 +697,13 @@ public class IA{
         // on applique sur le solving board le masque de position ou le centre est plus favorable
         for(int i =0; i < BOARDSIZE; i++){
             for(int j = 0; j< BOARDSIZE; j++){
-                if(i > (centreIDeMasseAllier-2) && j > (centreJDeMasseAllier-2)
-                        && i < (centreIDeMasseAllier) && j < (centreJDeMasseAllier)){
+                if(i > 2 && j > 2 && i < 5 && j < 5){
                     incrementPositionWithValidation(i,j, POSITION_MASK_INTERIEUR);
                 }
-                else if(i > (centreIDeMasseAllier-3) && j > (centreJDeMasseAllier-3)
-                        && i < (centreIDeMasseAllier+1) && j < (centreJDeMasseAllier+1)){
+                else if(i > 1 && j > 1 && i < 6 && j < 6){
                     incrementPositionWithValidation(i,j, POSITION_MASK_MILLIEU);
                 }
-                else if(i > (centreIDeMasseAllier-4) && j > (centreJDeMasseAllier-4)
-                        && i < (centreIDeMasseAllier+2) && j < (centreJDeMasseAllier+2)){
+                else if(i > 0&& j > 0 && i < 7 && j < 7){
                     incrementPositionWithValidation(i,j, POSITION_MASK_EXTERNE);
                 }
             }
