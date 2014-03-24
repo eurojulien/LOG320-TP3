@@ -8,11 +8,10 @@ public class MiniMax implements Runnable{
 
 	// Profodeur maximale de l'arbre MiniMax par defaut
 	// Toujours un multiple de DEUX !!
-	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 2;
+	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 5;
 	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
-    public static int turnAt = 0;
 	
 	// La profondeur maximale de l'arbre MiniMax peut etre augmentee
 	// s'il y a moins de piece a calculee sur le jeu
@@ -28,17 +27,18 @@ public class MiniMax implements Runnable{
 	
 	private static WatchDog watchDog;
 	
+	public static int nombreElagage;
+	
 	private MiniMax(){}
 	
 	// Instancie l'arbre MinMax
 	// Cette fonction doit etre appeler de commencer a jouer notre premier coup seulement
-	public static MiniMax initaliserMinMax(int [][] tableauJeu, int numeroJoueur,int compteurTour){
+	public static MiniMax initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
 	
 		if(occurence == null) { occurence = new MiniMax();}
-
-        turnAt = compteurTour;
+		
 		MiniMax.profondeurMaximalePermise 	= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
-		MiniMax.megaMind					= new IA(tableauJeu, numeroJoueur,turnAt);
+		MiniMax.megaMind					= new IA(tableauJeu, numeroJoueur);
 		MiniMax.currentPlayer				= numeroJoueur;
 		watchDog							= occurence.new WatchDog(bestMoveHasBeenFound);
 		
@@ -64,7 +64,8 @@ public class MiniMax implements Runnable{
 		// Profonfeur de construction de l'arbre
 		int profondeurArbre = 0;
 		
-		MiniMax.resetArbre();
+		MiniMax.feuilleSouche = null;
+		nombreElagage = 0;
 		MiniMax.feuilleSouche = new Feuille(true, "");
 		
 		construireArbre(MiniMax.megaMind, MiniMax.feuilleSouche, profondeurArbre, MiniMax.feuilleSouche.getScore());
@@ -75,14 +76,12 @@ public class MiniMax implements Runnable{
 		
 		// Calcul du score
 		if (profondeurArbre == profondeurMaximalePermise){
-
-			// Genere la list des mouvements
-			//nextIA.generateMoveList(true);
+			
 			
 			// Conserve les meilleurs score
 			feuille.setScore(nextIA.getScoreForBoard());
-
-		}		
+		}
+		
 		else{
 			
 			// Genere la list des mouvements
@@ -91,10 +90,6 @@ public class MiniMax implements Runnable{
 			ArrayList<String >deplacements = nextIA.getListeMouvements();
 
 			for (String deplacement : deplacements){
-			
-				if (profondeurArbre == 0){
-					System.out.println(" 0 : " + deplacement);
-				}
 					
 				// Construction d'une feuille enfant
 				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacement);
@@ -103,11 +98,29 @@ public class MiniMax implements Runnable{
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
 				
 				// Appel recursif avec la feuille enfant
-				construireArbre(nextIA.notifyAndGetNewIA(deplacement,turnAt), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
-			}
+				construireArbre(nextIA.notifyAndGetNewIA(deplacement), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
 			
-			// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
-			feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
+				// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
+				feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
+			
+				// ELAGAGE
+				if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
+					
+					// MAX
+					// Si la valeur de mon parent est plus petite, j'arrete de creuser
+					if (feuille.isJoueurEstMAX() && feuille.getScore() >= scoreElagage){
+						nombreElagage ++;
+						break;
+					}
+					
+					// MIN
+					// Si la la valeur de mon parent est plus grande, j'arrete de creuser
+					else if (feuille.getScore() <= scoreElagage){
+						nombreElagage ++;
+						break;
+					}
+				}
+			}
 		}
 	}
 	
@@ -126,12 +139,19 @@ public class MiniMax implements Runnable{
 	@Override
 	public void run() {
 		
+		long startTime = System.nanoTime();
+		
 		MiniMax.bestMoveHasBeenFound[0] = false;
-		MiniMax.watchDog.run();
+		//MiniMax.watchDog.run();
+		
+		long endTime  = System.nanoTime();
+		System.out.println("Apres WatchDog RUN  " + (endTime - startTime)/(1000000) + " milliseconds");
 		
 		// TODO Auto-generated method stub
 		construireArbre();
 		
+		MiniMax.bestMoveHasBeenFound[0] = true;
+
 	}
 	
 	private class WatchDog implements Runnable{
@@ -151,10 +171,10 @@ public class MiniMax implements Runnable{
 			
 			do{
 				try {
-					Thread.sleep(1);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {}
 				
-				waiting ++;
+				waiting += 100;
 				
 				if (watchDog[0]){
 					miniMaxIsOk = true;

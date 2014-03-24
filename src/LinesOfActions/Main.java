@@ -12,6 +12,8 @@ public class Main extends Thread{
 	private static IA megaMind = null;
 	private static MiniMax miniMax;
 	private static int playerColor = 0;
+	private static long startTime = 0;
+	private static long endTime = 0;
 	
 	private static String theirLastMove = "";
 	private static String ourLastMove	= "";
@@ -47,10 +49,9 @@ public class Main extends Thread{
 		}
 		
 		// Initalisation du plateau
-        int compteurTour = 0;
 		int[][] board = server.getBoardSetup().clone();
-		megaMind 	= new IA(board, playerColor,compteurTour);
-		miniMax 	= MiniMax.initaliserMinMax(board, playerColor, compteurTour);
+		megaMind 	= new IA(board, playerColor);
+		miniMax 	= MiniMax.initaliserMinMax(board, playerColor);
 		
 		if(playerColor == WHITE){
 			
@@ -74,6 +75,9 @@ public class Main extends Thread{
 			// Reception de la reponse du serveur
 			server.getServerCommand();
 			
+			// Demarrage du timer
+			startTime = System.nanoTime();
+			
 			//megaMind.notifyMovementEnemyTeam(server.getLastTurn().trim());
 			//megaMind.run();
 			
@@ -86,7 +90,7 @@ public class Main extends Thread{
 			// de traitement de IA, il nous est possible de faire d'autre changements aussi.
 			do{
 				try {
-					Thread.sleep(1);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {}
 			} while(!MiniMax.bestMoveHasBeenFound());
 			
@@ -101,21 +105,20 @@ public class Main extends Thread{
 			// Envoie de la reponse
 			//server.sendServerCommand(megaMind.getBestMove());
 			//megaMind.notifyMovementMyTeam(megaMind.getBestMove());
-			
-			System.out.println("Coup envoye : " + miniMax.getBestMove());
+			endTime = System.nanoTime();
 			
 			server.sendServerCommand(miniMax.getBestMove());
 			miniMax.getIA().notifyMovementMyTeam(miniMax.getBestMove());
-			miniMax.getIA().drawBoard(false); 
-            miniMax.turnAt++;
-			
-			// TODO : Traitement supplementaire lorsque l'adversaire joue
+			System.out.println("Coup envoye : " + miniMax.getBestMove());
+			System.out.println("Temps demande : " + + (endTime - startTime)/(1000000) + " milliseconds");
+			System.out.println("Nombre d'elagage : " + MiniMax.nombreElagage);
+			//miniMax.getIA().drawBoard(false);
 			
 		}while(true);
 	}
 	
 	public static void main(String[] args) {
-
+	
 		// Connexion au serveur
 		Main thread = Main.CreateThread();
 		
