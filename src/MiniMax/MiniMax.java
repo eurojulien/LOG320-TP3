@@ -15,17 +15,20 @@ public class MiniMax extends Thread{
 	
 	// La profondeur maximale de l'arbre MiniMax peut etre augmentee
 	// s'il y a moins de piece a calculee sur le jeu
-	private static int profondeurMaximalePermise[] = SyncThread.currentMaxTreeDepth;
+	private static int profondeurMaximalePermise[] 	= SyncThread.currentMaxTreeDepth;
 	
 	private static IA megaMind;
 	
 	private static int currentPlayer;
 	
-	private static boolean bestMoveHasBeenFound[] = SyncThread.bestMoveHasBeenFound;
+	private static boolean bestMoveHasBeenFound[] 	= SyncThread.bestMoveHasBeenFound;
+	
+	private static boolean interruptMinMax[]		= SyncThread.interruptMinMax;
 	
 	public static int nombreElagage;
 	
 	private static int nbFeuillesCreees;
+
 	
 	public MiniMax(){ 
 		this.setPriority(Thread.NORM_PRIORITY); 
@@ -65,13 +68,21 @@ public class MiniMax extends Thread{
 	// Fonction recursive de construction d'arbre
 	private static void construireArbre(IA nextIA, Feuille feuille, int profondeurArbre, int scoreElagage){
 		
+		// Si une erreur est levee, l'arbre MinMax doit etre arrete
+		if(MiniMax.interruptMinMax[0]){
+			return;
+		}
+		
+		
 		nbFeuillesCreees ++;
-		// Calcul du score
+		
 		if (profondeurArbre == profondeurMaximalePermise[0]){
-			
-			
+		
+
 			// Conserve les meilleurs score
 			feuille.setScore(nextIA.getScoreForBoard());
+
+
 		}
 		
 		else{
@@ -96,13 +107,21 @@ public class MiniMax extends Thread{
 				// Ajout de cette feuille dans la liste des enfants de la feuille en cours
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
 				
-				// Appel recursif avec la feuille enfant
-				construireArbre(nextIA.notifyAndGetNewIA(deplacement), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
-			
+				try{
+					// Appel recursif avec la feuille enfant
+					construireArbre(nextIA.notifyAndGetNewIA(deplacement), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
+				}
+				
+				catch(Exception e){
+					System.out.println(" !!!!!!!!!! Interruption = true !!!!!!!!!! ");
+					MiniMax.interruptMinMax[0] = true;
+					break;
+				}
+				
 				// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
 				feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
 			
-				// ELAGAGE
+				/*// ELAGAGE
 				if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
 					
 					// MAX
@@ -118,7 +137,7 @@ public class MiniMax extends Thread{
 						nombreElagage ++;
 						break;
 					}
-				}
+				}*/
 			}
 		}
 	}
@@ -152,11 +171,12 @@ public class MiniMax extends Thread{
 	@Override
 	public void run() {	
 	
+		MiniMax.bestMoveHasBeenFound[0] = false;
 		MiniMax.nbFeuillesCreees = 0;
 		
-		// TODO Auto-generated method stub
 		construireArbre();
 		
+		System.out.println(" ********** Arbre MiniMax termine ! ********** ");
 		MiniMax.bestMoveHasBeenFound[0] = true;
 	}
 }

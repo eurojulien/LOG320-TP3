@@ -11,6 +11,7 @@ public class WatchDog extends Thread {
 	private static MiniMax miniMax;
 	private static boolean bestMoveHasBeenFound[]				= SyncThread.bestMoveHasBeenFound;
 	private static boolean victoryOrDefautHasBeenFound[]		= SyncThread.victoryOrDefautHasBeenFound;
+	private static boolean interruptMinMax[]					= SyncThread.interruptMinMax;
 	private static int currentMaxTreeDepth[] 					= SyncThread.currentMaxTreeDepth;
 	
 	// Thread lance par le main
@@ -20,10 +21,11 @@ public class WatchDog extends Thread {
 	}
 	
 	@Override
-	public void run() {
+	public void run(){
 		
 		// Initalisation des flags
 		WatchDog.bestMoveHasBeenFound[0] 			= false;
+		WatchDog.interruptMinMax[0]					= false;
 		WatchDog.victoryOrDefautHasBeenFound[0] 	= false;
 		
 		
@@ -49,6 +51,8 @@ public class WatchDog extends Thread {
 		
 		// Temps de cacul suffisament rapide pour augmenter la profondeur de l'arbre
 		if (!minMaxHasFinished) {
+			
+			System.out.println(" xxxxxxxxxx WatchDog Interrupt ! xxxxxxxxxx ");
 			
 			miniMax.interrupt();
 			WatchDog.bestMoveHasBeenFound[0] = true;
