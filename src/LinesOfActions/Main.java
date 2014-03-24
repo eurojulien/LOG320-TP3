@@ -50,7 +50,7 @@ public class Main extends Thread{
 		
 		// Initalisation du plateau
 		int[][] board = server.getBoardSetup().clone();
-		megaMind 	= new IA(board, playerColor);
+		megaMind 	= new IA(board, playerColor, 0 );
 		miniMax 	= MiniMax.initaliserMinMax(board, playerColor);
 		
 		if(playerColor == WHITE){
@@ -113,6 +113,7 @@ public class Main extends Thread{
 			System.out.println("Temps demande : " + + (endTime - startTime)/(1000000) + " milliseconds");
 			System.out.println("Nombre d'elagage : " + MiniMax.nombreElagage);
 			//miniMax.getIA().drawBoard(false);
+            MiniMax.turnAt++;
 			
 		}while(true);
 	}

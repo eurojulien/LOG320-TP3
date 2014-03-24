@@ -18,6 +18,8 @@ public class MiniMax implements Runnable{
 	private static int profondeurMaximalePermise;
 	
 	private static IA megaMind;
+
+    public static int turnAt = 0;
 	
 	private static int currentPlayer;
 	
@@ -38,7 +40,7 @@ public class MiniMax implements Runnable{
 		if(occurence == null) { occurence = new MiniMax();}
 		
 		MiniMax.profondeurMaximalePermise 	= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
-		MiniMax.megaMind					= new IA(tableauJeu, numeroJoueur);
+		MiniMax.megaMind					= new IA(tableauJeu, numeroJoueur,turnAt);
 		MiniMax.currentPlayer				= numeroJoueur;
 		watchDog							= occurence.new WatchDog(bestMoveHasBeenFound);
 		
@@ -98,7 +100,7 @@ public class MiniMax implements Runnable{
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
 				
 				// Appel recursif avec la feuille enfant
-				construireArbre(nextIA.notifyAndGetNewIA(deplacement), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
+				construireArbre(nextIA.notifyAndGetNewIA(deplacement,MiniMax.turnAt), feuilleEnfant, profondeurArbre + 1, feuille.getScore());
 			
 				// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
 				feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
