@@ -41,7 +41,6 @@ public class IA{
     // 0X0
 
     // ceci devrais etre 2 ou 4
-    private int compteurTour = 0;
     private static final int BOARDSIZE = 8;
     private int playerNumber;
     private int enemyPlayerID;
@@ -65,16 +64,16 @@ public class IA{
     // valeurs qui pourraient etre modifiee
     private static final int VALEUR_TUILE_ADVERSE = -4;
     private static final int TUILE_ADJACENTE_ALLIER = 1;
-    private static final int POSITION_MASK_EXTERNE = 80;
-    private static final int POSITION_MASK_MILLIEU = 90;
-    private static final int POSITION_MASK_INTERIEUR = 100;
+    private static final int POSITION_MASK_EXTERNE = 10;
+    private static final int POSITION_MASK_MILLIEU = 12;
+    private static final int POSITION_MASK_INTERIEUR = 15;
     private static final int BLOQUER_MOUVEMENT_ENEMY = 1;
     private static final int TROU_INTERMOTON = 4;
     private static final int BRISE_MOTON_ADVERSE = 10;
     private static final int NB_TOURS_DISTANCE_MASK = 10;
     private static final int NB_TOURS_BOUGER_PIECES_INITIALES = 6;
 
-    public IA(int[][] playBoard, int playerNumber, int turnAt){
+    public IA(int[][] playBoard, int playerNumber){
         cloneBoard(playBoard);
         this.playerNumber = playerNumber;
         initializeSolvingBoard();
@@ -83,7 +82,6 @@ public class IA{
         }else{
             enemyPlayerID = 4;
         }
-        this.compteurTour = turnAt;
     }
 
     public void generateMoveList(boolean fastGen,int playerToScore){
@@ -107,11 +105,11 @@ public class IA{
         return this.lstPossibleMove;
     }
 
-    public IA notifyAndGetNewIA(String movement, int turnAt){
+    public IA notifyAndGetNewIA(String movement){
         // cette methode permet a l'algoritme de prendre compte des deplacments
         // que notre adversaire fait !
         // IMPORTANT : Le format doit toujours etre "A5_-_B5"
-        IA retour = new IA(playBoard, enemyPlayerID, turnAt);
+        IA retour = new IA(playBoard, enemyPlayerID);
         retour.notifyMovementEnemyTeam(movement);
         return retour;
     }
@@ -488,9 +486,6 @@ public class IA{
 
     private void removePiecesFromSolvingBoard(){
         // methode qui enleve (met a -1) toutes les pieces de notre jeux du solving board
-        for(int i = 0 ; i < positionsPions.size(); i++){
-            solvingBoard[positionsPions.get(i)[0]][positionsPions.get(i)[1]] = -10;
-        }
     }
 
     private char getLetterFromIndex(int letter){
@@ -562,9 +557,10 @@ public class IA{
 
     public int getScoreForBoard(int playerToScore){
         generateMoveList(true,playerToScore);
+        //drawBoard(false);
         int boardScore = 0;
         boardScore += obtenirScoreMoton(playerToScore);
-        boardScore += lstPossibleMove.size();
+        //boardScore += lstPossibleMove.size();
         boardScore += getScoreForCentrality(playerToScore);
         boardScore += devalueEnemyEatenPawns(playerToScore);
 
@@ -586,15 +582,21 @@ public class IA{
         int retour =0;
         calculerCentreDeMasses();
         applyPositionMask();
-        if(playerToScore == enemyPlayerID){
+
             for(int x = 0; x < positionsPionsEnemy.size(); x++){
-                retour+= solvingBoard[positionsPionsEnemy.get(x)[0]][positionsPionsEnemy.get(x)[1]];
+                if(playerToScore == enemyPlayerID)
+                    retour+= solvingBoard[positionsPionsEnemy.get(x)[0]][positionsPionsEnemy.get(x)[1]];
+                else
+                    retour-= solvingBoard[positionsPionsEnemy.get(x)[0]][positionsPionsEnemy.get(x)[1]];
             }
-        }else{
+
             for(int x = 0; x < positionsPions.size(); x++){
-                retour+= solvingBoard[positionsPions.get(x)[0]][positionsPions.get(x)[1]];
+                if(playerToScore != enemyPlayerID)
+                    retour += solvingBoard[positionsPions.get(x)[0]][positionsPions.get(x)[1]];
+                else
+                    retour-= solvingBoard[positionsPions.get(x)[0]][positionsPions.get(x)[1]];
             }
-        }
+
         return retour;
     }
 
@@ -612,7 +614,6 @@ public class IA{
             for(int j=0;j<BOARDSIZE;j++){
                 if(playBoard[i][j] == playerNumber){
                     positionsPions.add(new int[] {i,j});
-                    solvingBoard[i][j] = -10;
                 }else if(playBoard[i][j] != 0){
                     positionsPionsEnemy.add(new int[] {i,j});
                 }
@@ -736,8 +737,7 @@ public class IA{
 
     private void incrementPositionWithValidation(int i, int j,int value){
         // incremente la valeur d'une tuile en s'assurant que cette tuile n'est pas un de nos pions
-        if(solvingBoard[i][j] != -10)
-            solvingBoard[i][j]+= value;
+        solvingBoard[i][j]+= value;
     }
 
     // 4500 * 100 donne 500 millisecondes pour l'envoie des donnees
@@ -759,73 +759,67 @@ public class IA{
         int retour = 0;
         piecesCourantes.clear();
         piecesVisitees.clear();
-        if(playerToScore == playerNumber){
+
+        int playerThem = 0;
+        if(playerToScore != playerNumber)
+            playerThem = playerNumber;
+        else
+            playerThem = enemyPlayerID;
+
             for(int x =0; x<positionsPions.size();x++){
-                parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1]);
-                retour += Math.pow(piecesCourantes.size(), 2);
+                parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1],playerToScore);
+                if(playerToScore != playerNumber)
+                    retour -= Math.pow(piecesCourantes.size(), 2);
+                else
+                    retour += Math.pow(piecesCourantes.size(), 2);
                 piecesCourantes.clear();
             }
-        }else{
+
             for(int x =0; x<positionsPionsEnemy.size();x++){
-                parcoursMotton(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1]);
-                retour += Math.pow(piecesCourantes.size(), 2);
+                parcoursMotton(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],playerThem);
+                if(playerToScore == playerNumber)
+                    retour -= Math.pow(piecesCourantes.size(), 2);
+                else
+                    retour += Math.pow(piecesCourantes.size(), 2);
                 piecesCourantes.clear();
             }
-        }
+
         return retour;
     }
-
-
     
-    public void trouverMotton(){
+    public void parcoursMotton(int i, int j, int playerToScore){
     	
-    	for(int x =0; x<positionsPions.size();x++){
-
-    		parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1]);
-    		
-    		for(int y = 0 ; y < piecesCourantes.size() ; y++){
-    			incrementAround(piecesCourantes.get(y)[0],piecesCourantes.get(y)[1], piecesCourantes.size());
-    		}
-    		
-    		piecesCourantes.clear();
-    	}
-    }
-    
-    public void parcoursMotton(int i, int j){
-    	
-    	inspecterTuilePourMoton(i,j);
+    	inspecterTuilePourMoton(i,j,playerToScore);
     	
     	if(i > 0){
-    			inspecterTuilePourMoton(i-1,j);
+    			inspecterTuilePourMoton(i-1,j,playerToScore);
             if(j > 0)
-            	inspecterTuilePourMoton(i-1,j-1);
+            	inspecterTuilePourMoton(i-1,j-1,playerToScore);
             if(j < BOARDSIZE-1)
-            	inspecterTuilePourMoton(i-1,j+1);
+            	inspecterTuilePourMoton(i-1,j+1,playerToScore);
         }
 
         if(i < BOARDSIZE-1){
-        	inspecterTuilePourMoton(i+1,j);
+        	inspecterTuilePourMoton(i+1,j,playerToScore);
             if(j > 0)
-            	inspecterTuilePourMoton(i+1,j-1);
+            	inspecterTuilePourMoton(i+1,j-1,playerToScore);
             if(j < BOARDSIZE-1)
-            	inspecterTuilePourMoton(i+1,j+1);
+            	inspecterTuilePourMoton(i+1,j+1,playerToScore);
         }
 
         if(j > 0)
-        	inspecterTuilePourMoton(i,j-1);
+        	inspecterTuilePourMoton(i,j-1,playerToScore);
         if(j < BOARDSIZE-1)
-        	inspecterTuilePourMoton(i,j+1);
+        	inspecterTuilePourMoton(i,j+1,playerToScore);
     }
     
     
-    public void inspecterTuilePourMoton(int i, int j){
+    public void inspecterTuilePourMoton(int i, int j, int playerToScore){
     	
-    	if(playBoard[i][j] == enemyPlayerID && !piecesVisitees.containsKey(i+","+j)){
-            if( i != 0 && j != 0 && i != BOARDSIZE-1 && j!= BOARDSIZE-1 || compteurTour>20){
-                piecesCourantes.add(new int[]{i,j});
-            }
+    	if(!piecesVisitees.containsKey(i+","+j) && playBoard[i][j] == playerToScore){
+            piecesCourantes.add(new int[]{i,j});
             piecesVisitees.put(i+","+j,true);
-    		parcoursMotton(i,j);
+    		parcoursMotton(i,j,playerToScore);
     	}
     }
     

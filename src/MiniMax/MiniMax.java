@@ -12,7 +12,7 @@ public class MiniMax extends Thread{
 	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
-	
+
 	// La profondeur maximale de l'arbre MiniMax peut etre augmentee
 	// s'il y a moins de piece a calculee sur le jeu
 	private static int profondeurMaximalePermise[] = {0};
@@ -71,13 +71,13 @@ public class MiniMax extends Thread{
 			
 			
 			// Conserve les meilleurs score
-			feuille.setScore(nextIA.getScoreForBoard());
+			feuille.setScore(nextIA.getScoreForBoard(currentPlayer));
 		}
 		
 		else{
 			
 			// Genere la liste des mouvements
-			nextIA.generateMoveList(false);
+			nextIA.generateMoveList(false,currentPlayer);
 			
 			ArrayList<String >deplacements = nextIA.getListeMouvements();
 
