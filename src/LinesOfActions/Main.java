@@ -52,6 +52,14 @@ public class Main{
 		if(playerColor == WHITE){
 
 			new WatchDog().start();
+			
+			// Attente de calcul de l'arbre MinMax
+			do{
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {}
+			} while(!MiniMax.bestMoveHasBeenFound());
+			
 			server.sendServerCommand(MiniMax.getBestMove());
 			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
 		}
@@ -71,7 +79,7 @@ public class Main{
 			// Cette attente devrait etre levee quand la classe IA le permet. Durant le temps
 			// de traitement de IA, il nous est possible de faire d'autre changements aussi.
 			
-			//
+			// Attente de calcul de l'arbre MinMax
 			do{
 				try {
 					Thread.sleep(100);
@@ -84,12 +92,12 @@ public class Main{
 			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
 			
 			// DEBUG
-			System.out.println("Mouvement			: " + MiniMax.getBestMove());
-			System.out.println("Score 				: " + MiniMax.getScoreFromBestMove());		
-			System.out.println("Nombre d'elagage 	: " + MiniMax.nombreElagage);
+			System.out.println("Mouvement		: " + MiniMax.getBestMove());
+			System.out.println("Score			: " + MiniMax.getScoreFromBestMove());		
+			System.out.println("Nombre d'elagage	: " + MiniMax.nombreElagage);
 			System.out.println("Temps de calcul		: " + (endTime - startTime)/(1000000) + " milliseconds");
-			System.out.println("Profondeur Arbre 	: " + MiniMax.getProfondeurArbre());
-			System.out.println("Nombre de feuilles  : " + MiniMax.getNbFeuillesCreees());
+			System.out.println("Profondeur Arbre	: " + MiniMax.getProfondeurArbre());
+			System.out.println("Nombre de feuilles	: " + MiniMax.getNbFeuillesCreees());
 			
 		}while(true);
 	}

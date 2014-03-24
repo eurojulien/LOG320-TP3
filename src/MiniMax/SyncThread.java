@@ -6,5 +6,4 @@ public class SyncThread {
 	public static boolean bestMoveHasBeenFound[] 		= {false};
 	public static boolean victoryOrDefautHasBeenFound[] = {false};
 	public static int currentMaxTreeDepth[] 			= {2};
-	public static boolean interruptMinMax[]				= {false};
-}
+	}

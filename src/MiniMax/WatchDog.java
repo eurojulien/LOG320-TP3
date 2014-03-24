@@ -11,7 +11,6 @@ public class WatchDog extends Thread {
 	private static MiniMax miniMax;
 	private static boolean bestMoveHasBeenFound[]				= SyncThread.bestMoveHasBeenFound;
 	private static boolean victoryOrDefautHasBeenFound[]		= SyncThread.victoryOrDefautHasBeenFound;
-	private static boolean interruptMinMax[]					= SyncThread.interruptMinMax;
 	private static int currentMaxTreeDepth[] 					= SyncThread.currentMaxTreeDepth;
 	
 	// Thread lance par le main
@@ -25,7 +24,6 @@ public class WatchDog extends Thread {
 		
 		// Initalisation des flags
 		WatchDog.bestMoveHasBeenFound[0] 			= false;
-		WatchDog.interruptMinMax[0]					= false;
 		WatchDog.victoryOrDefautHasBeenFound[0] 	= false;
 		
 		
