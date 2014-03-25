@@ -1105,13 +1105,13 @@ public class IA{
                         //DEFAITE DETECTEE
                         retour -= 1000;
                     }
-                    retour -= Math.pow(piecesCourantes.size(), 2);
+                    retour += Math.pow(piecesCourantes.size(), 2);
                 }else{
                     if(sizeMoton == positionsPionsEnemy.size()){
                         //VICTOIRE DETECTEE
                         retour += 1000;
                     }
-                    retour += Math.pow(piecesCourantes.size(), 2);
+                    retour -= Math.pow(piecesCourantes.size(), 2);
                 }
                 piecesCourantes.clear();
             }
