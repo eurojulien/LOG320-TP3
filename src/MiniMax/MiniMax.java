@@ -77,7 +77,7 @@ public class MiniMax extends Thread{
 		else{
 			
 			// Genere la liste des mouvements
-			nextIA.generateMoveList(false,currentPlayer);
+			nextIA.generateMoveList(false,0);
 			
 			ArrayList<String >deplacements = nextIA.getListeMouvements();
 

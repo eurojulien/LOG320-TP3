@@ -50,7 +50,7 @@ public class Main{
 		MiniMax.initaliserMinMax(server.getBoardSetup(), playerColor);
 		
 		if(playerColor == WHITE){
-
+            startTime = System.nanoTime();
 			new MiniMax().start();
 			server.sendServerCommand(MiniMax.getBestMove());
 			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
