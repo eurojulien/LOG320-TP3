@@ -79,9 +79,7 @@ public class MiniMax extends Thread{
 		
 
 			// Conserve les meilleurs score
-			feuille.setScore(nextIA.getScoreForBoard());
-
-
+			feuille.setScore(nextIA.getScoreForBoard(currentPlayer));
 		}
 		
 		else{
@@ -89,7 +87,7 @@ public class MiniMax extends Thread{
 
 			// Genere la liste des mouvements
 			// TODO : Lance un StackOverFlow Error !
-			nextIA.generateMoveList(false);
+			nextIA.generateMoveList(false, currentPlayer);
 			
 			ArrayList<String >deplacements = nextIA.getListeMouvements();
 
