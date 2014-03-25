@@ -46,6 +46,7 @@ public class IA{
     private int enemyPlayerID;
     private int[][] playBoard;
     private int[][] solvingBoard;
+
     private ArrayList<int[]> positionsPions = new ArrayList<int[]>();
     private ArrayList<int[]> positionsPionsEnemy = new ArrayList<int[]>();
     private ArrayList<String> lstPossibleMove = new ArrayList<String>();
@@ -107,68 +108,6 @@ public class IA{
 
     public ArrayList<String> getListeMouvements(){
         return this.lstPossibleMove;
-    }
-
-    public static boolean verifyWinLoseConditions(int[][] playBoard,int playerCheckup){
-        return MotonWinLose(playerCheckup,playBoard);
-    }
-
-
-    private static boolean MotonWinLose(int playerToScore, int[][] playBoard){
-        piecesCourantesWinLose.clear();
-        piecesVisiteesWinLose.clear();
-        ArrayList<int[]> lstPions =new ArrayList<int[]>();
-        for(int i = 0; i<BOARDSIZE;i++){
-            for(int j = 0; j<BOARDSIZE;j++){
-                if(playBoard[i][j] == playerToScore){
-                    lstPions.add(new int[] {i,j});
-                }
-            }
-        }
-
-        for(int x = 0; x<lstPions.size();x++){
-                parcoursMottonWinLose(lstPions.get(x)[0],lstPions.get(x)[1],playerToScore,playBoard);
-                if(piecesCourantesWinLose.size() == lstPions.size()){
-                    return true;
-                }
-                piecesCourantesWinLose.clear();
-            }
-
-
-        return false;
-    }
-    private static void parcoursMottonWinLose(int i, int j, int playerToScore, int[][] playBoard){
-
-        inspecterTuilePourMotonWinLose(i,j,playerToScore,playBoard);
-        if(i > 0){
-            inspecterTuilePourMotonWinLose(i-1,j,playerToScore,playBoard);
-            if(j > 0)
-                inspecterTuilePourMotonWinLose(i-1,j-1,playerToScore,playBoard);
-            if(j < BOARDSIZE-1)
-                inspecterTuilePourMotonWinLose(i - 1, j + 1, playerToScore, playBoard);
-        }
-
-        if(i < BOARDSIZE-1){
-            inspecterTuilePourMotonWinLose(i + 1, j, playerToScore, playBoard);
-            if(j > 0)
-                inspecterTuilePourMotonWinLose(i + 1, j - 1, playerToScore, playBoard);
-            if(j < BOARDSIZE-1)
-                inspecterTuilePourMotonWinLose(i + 1, j + 1, playerToScore, playBoard);
-        }
-
-        if(j > 0)
-            inspecterTuilePourMotonWinLose(i, j - 1, playerToScore, playBoard);
-        if(j < BOARDSIZE-1)
-            inspecterTuilePourMotonWinLose(i, j + 1, playerToScore, playBoard);
-    }
-
-
-    private static void inspecterTuilePourMotonWinLose(int i, int j, int playerToScore, int[][] playBoard){
-        if(!piecesVisiteesWinLose.containsKey(i+","+j) && playBoard[i][j] == playerToScore){
-            piecesCourantesWinLose.add(new int[]{i,j});
-            piecesVisiteesWinLose.put(i+","+j,true);
-            parcoursMottonWinLose(i,j,playerToScore, playBoard);
-        }
     }
 
     public IA notifyAndGetNewIA(String movement){
@@ -712,10 +651,6 @@ public class IA{
         return retour;
     }
 
-    private void removePiecesFromSolvingBoard(){
-        // methode qui enleve (met a -1) toutes les pieces de notre jeux du solving board
-    }
-
     private char getLetterFromIndex(int letter){
         // retourne la lettre liee a l'index donne
         letter++;
@@ -787,22 +722,68 @@ public class IA{
         int boardScore = 0;
         //calculerCentreDeMasses();
         initializePositionsList();
-
-
         int bloquage = blockadeScore(playerToScore);
-
-
         int motonScore = obtenirScoreMoton(playerToScore);
         int centrality = getScoreForCentrality(playerToScore);
         int eatenPawn =  devalueEnemyEatenPawns(playerToScore);
+        //int areaScore = globalDistanceScore(playerToScore);
+        boardScore = centrality + motonScore + eatenPawn + bloquage /*+ areaScore*/;
 
-        boardScore = centrality + motonScore + eatenPawn + bloquage;
-
-        if(boardScore < 0){
-            //drawBoard(false);
-            //System.out.println("yoooooo");
-        }
+        /*if(boardScore < 0){
+            drawBoard(false);
+            System.out.println("yoooooo");
+        }*/
         return boardScore;
+    }
+
+
+    private int globalDistanceScore(int playerToScore){
+        //drawBoard(false);
+        int retour = 0;
+        int minimumI = 8;
+        int minimumJ = 8;
+        int maximumI = 0;
+        int maximumJ = 0;
+
+        for(int x= 0; x<positionsPions.size();x++){
+            int i = positionsPions.get(x)[0];
+            int j = positionsPions.get(x)[0];
+
+            if(i < minimumI)
+                minimumI = i;
+            if(j < minimumJ)
+                minimumJ = j;
+            if(i > maximumI)
+                maximumI = i;
+            if(j > maximumJ)
+                maximumJ = j;
+        }
+        int scorePlayerID = (maximumI-minimumI) * (maximumJ-minimumJ);
+        minimumI = 8;
+        minimumJ = 8;
+        maximumI = 0;
+        maximumJ = 0;
+        for(int x= 0; x<positionsPionsEnemy.size();x++){
+            int i = positionsPionsEnemy.get(x)[0];
+            int j = positionsPionsEnemy.get(x)[0];
+
+            if(i < minimumI)
+                minimumI = i;
+            if(j < minimumJ)
+                minimumJ = j;
+            if(i > maximumI)
+                maximumI = i;
+            if(j > maximumJ)
+                maximumJ = j;
+        }
+        int scoreEnemyID = (maximumI-minimumI) * (maximumJ-minimumJ);
+
+        if(playerToScore == playerNumber){
+            retour = scoreEnemyID - scorePlayerID;
+        }else{
+            retour = scorePlayerID - scoreEnemyID;
+        }
+        return retour;
     }
 
     private int blockadeScore(int playerToScore){
@@ -960,6 +941,7 @@ public class IA{
     private void initializeSolvingBoard(){
         // initialise le solving board
         solvingBoard = new int[8][8];
+
     }
 
     private void initializePositionsList(){
@@ -1067,7 +1049,56 @@ public class IA{
         }
     }
 
-    public int obtenirScoreMoton(int playerToScore){
+    public int findMateThreat(int playerToScore){
+        int retour = 0;
+        piecesCourantes.clear();
+        piecesVisitees.clear();
+
+        int playerThem = 0;
+        if(playerToScore != playerNumber)
+            playerThem = playerNumber;
+        else
+            playerThem = enemyPlayerID;
+
+        for(int x =0; x<positionsPions.size();x++){
+            parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1],playerToScore);
+            int sizeMoton = piecesCourantes.size();
+            if(playerToScore == playerNumber){
+                if(sizeMoton == positionsPions.size()){
+                    //VICTOIRE DETECTEE
+                    return 1;
+                }
+            }else{
+                if(sizeMoton == positionsPions.size()){
+                    //DEFAITE DETECTEE
+                    return -1;
+                }
+            }
+            piecesCourantes.clear();
+        }
+
+        for(int x =0; x<positionsPionsEnemy.size();x++){
+            parcoursMotton(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],playerThem);
+            int sizeMoton = piecesCourantes.size();
+            if(playerToScore == enemyPlayerID){
+                if(sizeMoton == positionsPionsEnemy.size()){
+                    //VICTOIRE DETECTEE
+                    return 1;
+                }
+
+            }else{
+                if(sizeMoton == positionsPionsEnemy.size()){
+                    //DEFAITE DETECTEE
+                    return -1;
+                }
+
+            }
+            piecesCourantes.clear();
+        }
+        return retour;
+    }
+
+    private int obtenirScoreMoton(int playerToScore){
         int retour = 0;
         piecesCourantes.clear();
         piecesVisitees.clear();
@@ -1119,7 +1150,7 @@ public class IA{
         return retour;
     }
 
-    public void parcoursMotton(int i, int j, int playerToScore){
+    private void parcoursMotton(int i, int j, int playerToScore){
 
     	inspecterTuilePourMoton(i,j,playerToScore);
 
@@ -1146,7 +1177,7 @@ public class IA{
     }
 
 
-    public void inspecterTuilePourMoton(int i, int j, int playerToScore){
+    private void inspecterTuilePourMoton(int i, int j, int playerToScore){
 
     	if(!piecesVisitees.containsKey(i+","+j) && playBoard[i][j] == playerToScore){
             piecesCourantes.add(new int[]{i,j});
