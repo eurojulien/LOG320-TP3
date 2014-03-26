@@ -730,7 +730,6 @@ public class IA{
         int boardScore = 0;
         //calculerCentreDeMasses();
         initializePositionsList();
-        asdsaas
         int bloquage = blockadeScore(playerToScore);
         int motonScore = obtenirScoreMoton(playerToScore);
         int centrality = getScoreForCentrality(playerToScore);
