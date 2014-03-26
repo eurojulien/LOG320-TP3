@@ -65,12 +65,12 @@ public class IA{
     private double centreJDeMasseEnemy = 4.5;
 
     // valeurs qui pourraient etre modifiee
-    private static final int POSITION_MASK_EXTERNE = 15;
-    private static final int POSITION_MASK_MILLIEU = 20;
-    private static final int POSITION_MASK_INTERIEUR = 40;
+    private static final int POSITION_MASK_EXTERNE = 12;
+    private static final int POSITION_MASK_MILLIEU = 15;
+    private static final int POSITION_MASK_INTERIEUR = 20;
     private static final int BLOQUER_MOUVEMENT_ENEMY = 1;
     private static final int BOX_EFFECT = 50;
-
+    private static final int MULT_IMPORTANCE_PIECE = 20;
 
     public IA(int[][] playBoard, int playerNumber){
         cloneBoard(playBoard);
@@ -730,6 +730,7 @@ public class IA{
         int boardScore = 0;
         //calculerCentreDeMasses();
         initializePositionsList();
+        asdsaas
         int bloquage = blockadeScore(playerToScore);
         int motonScore = obtenirScoreMoton(playerToScore);
         int centrality = getScoreForCentrality(playerToScore);
@@ -820,9 +821,9 @@ public class IA{
     private int devalueEnemyEatenPawns(int playerToScore){
         int retour = 0;
         if(playerToScore == playerNumber){
-            retour = (positionsPionsEnemy.size() - positionsPions.size())*40;
+            retour = (positionsPionsEnemy.size() - positionsPions.size())*MULT_IMPORTANCE_PIECE;
         }else{
-            retour = (positionsPions.size() - positionsPionsEnemy.size())*40;
+            retour = (positionsPions.size() - positionsPionsEnemy.size())*MULT_IMPORTANCE_PIECE;
         }
         return retour;
     }
