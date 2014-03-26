@@ -65,10 +65,11 @@ public class IA{
     private double centreJDeMasseEnemy = 4.5;
 
     // valeurs qui pourraient etre modifiee
-    private static final int POSITION_MASK_EXTERNE = 10;
-    private static final int POSITION_MASK_MILLIEU = 15;
-    private static final int POSITION_MASK_INTERIEUR = 20;
+    private static final int POSITION_MASK_EXTERNE = 15;
+    private static final int POSITION_MASK_MILLIEU = 20;
+    private static final int POSITION_MASK_INTERIEUR = 40;
     private static final int BLOQUER_MOUVEMENT_ENEMY = 1;
+    private static final int BOX_EFFECT = 50;
 
 
     public IA(int[][] playBoard, int playerNumber){
@@ -199,176 +200,184 @@ public class IA{
         System.out.print(" ");
     }
 
-    private void genererMouvementPiece(int i, int j, boolean US){
+    private int genererMouvementPiece(int i, int j, boolean US){
+        int retour = 0;
+        int playerUS = playerNumber;
+        if(!US){
+            playerUS = enemyPlayerID;
+        }
+        int distanceEstWest = distanceMove(i,j,direction.E);
+        int distanceNordSud = distanceMove(i,j,direction.N);
+        int distanceNordEst = distanceMove(i,j,direction.NE);
+        int distanceNordWest = distanceMove(i, j, direction.NW);
 
-            int playerUS = playerNumber;
-            if(!US){
-                playerUS = enemyPlayerID;
+        Boolean gauche = true;
+        Boolean droite = true;
+        // todo : watch for impossible move
+        for(int x = 1; x <= distanceEstWest;x++){
+
+            if(x+j >= BOARDSIZE){
+                droite = false;
             }
-            int distanceEstWest = distanceMove(i,j,direction.E);
-            int distanceNordSud = distanceMove(i,j,direction.N);
-            int distanceNordEst = distanceMove(i,j,direction.NE);
-            int distanceNordWest = distanceMove(i, j, direction.NW);
-
-            Boolean gauche = true;
-            Boolean droite = true;
-            // todo : watch for impossible move
-            for(int x = 1; x <= distanceEstWest;x++){
-
-                if(x+j >= BOARDSIZE){
+            else if(x == distanceEstWest){
+                if(playBoard[i][j+x] == playerUS)
                     droite = false;
-                }
-                else if(x == distanceEstWest){
-                    if(playBoard[i][j+x] == playerUS)
-                        droite = false;
-                }
-                else if(playBoard[i][j+x] != playerUS && playBoard[i][j+x]!= 0){
-                    droite = false;
-                }
-
-                if(j-x < 0){
-                    gauche = false;
-                }
-                else if(x == distanceEstWest){
-                    if(playBoard[i][j-x] == playerUS)
-                        gauche = false;
-                }
-                else if(playBoard[i][j-x] != playerUS && playBoard[i][j-x]!= 0){
-                    gauche = false;
-                }
             }
+            else if(playBoard[i][j+x] != playerUS && playBoard[i][j+x]!= 0){
+                droite = false;
+            }
+
+            if(j-x < 0){
+                gauche = false;
+            }
+            else if(x == distanceEstWest){
+                if(playBoard[i][j-x] == playerUS)
+                    gauche = false;
+            }
+            else if(playBoard[i][j-x] != playerUS && playBoard[i][j-x]!= 0){
+                gauche = false;
+            }
+        }
 
         if(droite){
             String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(j + distanceEstWest) + (i+1);
             lstPossibleMove.add(toAdd);
+            retour++;
         }
         if(gauche){
             String toAdd = getLetterFromIndex(j) + "" + (1 + i) + " - " + getLetterFromIndex(j - distanceEstWest) + (i+1);
             lstPossibleMove.add(toAdd);
+            retour++;
         }
-            Boolean up = true;
-            Boolean down = true;
-            for(int x = 1; x <= distanceNordSud;x++){
+        Boolean up = true;
+        Boolean down = true;
+        for(int x = 1; x <= distanceNordSud;x++){
 
-                if(x+i >= BOARDSIZE){
+            if(x+i >= BOARDSIZE){
+                down = false;
+            }
+            else if(x == distanceNordSud){
+                if(playBoard[i+x][j] == playerUS)
                     down = false;
-                }
-                else if(x == distanceNordSud){
-                    if(playBoard[i+x][j] == playerUS)
-                        down = false;
-                }
-                else if(playBoard[i+x][j] != playerUS && playBoard[i+x][j]!= 0){
-                    down = false;
-                }
+            }
+            else if(playBoard[i+x][j] != playerUS && playBoard[i+x][j]!= 0){
+                down = false;
+            }
 
-                if(i-x < 0){
+            if(i-x < 0){
+                up = false;
+            }
+            else if(x == distanceNordSud){
+                if(playBoard[i-x][j] == playerUS)
                     up = false;
-                }
-                else if(x == distanceNordSud){
-                    if(playBoard[i-x][j] == playerUS)
-                        up = false;
-                }
-                else if(playBoard[i-x][j] != playerUS && playBoard[i-x][j]!= 0){
-                    up = false;
-                }
-
             }
-            if(down){
-                int indexI = i + distanceNordSud +1;
-                String toAdd = getLetterFromIndex(j)+ "" + (i +1) + " - " + getLetterFromIndex(j) + indexI;
-                lstPossibleMove.add(toAdd);
+            else if(playBoard[i-x][j] != playerUS && playBoard[i-x][j]!= 0){
+                up = false;
             }
 
-            if(up){
-                int indexI = i - distanceNordSud +1;
-                String toAdd = getLetterFromIndex(j)+ "" + (i +1) + " - " + getLetterFromIndex(j) + indexI;
-                lstPossibleMove.add(toAdd);
+        }
+        if(down){
+            int indexI = i + distanceNordSud +1;
+            String toAdd = getLetterFromIndex(j)+ "" + (i +1) + " - " + getLetterFromIndex(j) + indexI;
+            lstPossibleMove.add(toAdd);
+            retour++;
+        }
+
+        if(up){
+            int indexI = i - distanceNordSud +1;
+            String toAdd = getLetterFromIndex(j)+ "" + (i +1) + " - " + getLetterFromIndex(j) + indexI;
+            lstPossibleMove.add(toAdd);
+            retour++;
+        }
+
+
+        // todo : optimiser
+        // todo : make sure it works !!
+        gauche = true;
+        droite = true;
+        for(int x = 1; x <= distanceNordEst;x++){
+            if(x+j >= BOARDSIZE || i-x < 0){
+                droite = false;
             }
-
-
-            // todo : optimiser
-            // todo : make sure it works !!
-            gauche = true;
-            droite = true;
-            for(int x = 1; x <= distanceNordEst;x++){
-                if(x+j >= BOARDSIZE || i-x < 0){
+            else if(x == distanceNordEst) {
+                if(playBoard[i-x][j+x] == playerUS)
                     droite = false;
-                }
-                else if(x == distanceNordEst) {
-                    if(playBoard[i-x][j+x] == playerUS)
-                        droite = false;
-                }
-                else if(playBoard[i-x][j+x] != playerUS && playBoard[i-x][j+x]!= 0){
+            }
+            else if(playBoard[i-x][j+x] != playerUS && playBoard[i-x][j+x]!= 0){
+                droite = false;
+            }
+
+            if(j-x < 0 || x+i >= BOARDSIZE ){
+                gauche = false;
+            }
+            else if(x == distanceNordEst){
+                if(playBoard[i+x][j-x] == playerUS)
+                    gauche = false;
+            }
+            else if(playBoard[i+x][j-x] != playerUS && playBoard[i+x][j-x]!= 0){
+                gauche = false;
+            }
+        }
+
+        if(droite){
+            int indexI = i - distanceNordEst;
+            int indexJ = j + distanceNordEst;
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1+indexI);
+            lstPossibleMove.add(toAdd);
+            retour++;
+        }
+
+        if(gauche){
+            int indexI = i + distanceNordEst;
+            int indexJ = j - distanceNordEst;
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1+indexI);
+            lstPossibleMove.add(toAdd);
+            retour++;
+        }
+
+        gauche = true;
+        droite = true;
+        for(int x = 1; x <= distanceNordWest;x++){
+            if(x+j >= BOARDSIZE || i+x >= BOARDSIZE){
+                droite = false;
+            }
+            else if(x == distanceNordWest){
+                if(playBoard[i+x][j+x] == playerUS)
                     droite = false;
-                }
+            }
+            else if(playBoard[i+x][j+x] != playerUS && playBoard[i+x][j+x]!= 0)
+            {
+                droite = false;
+            }
 
-                if(j-x < 0 || x+i >= BOARDSIZE ){
+            if(j-x < 0 || i-x < 0 ){
+                gauche = false;
+            }
+            else if(x == distanceNordWest){
+                if(playBoard[i-x][j-x] == playerUS)
                     gauche = false;
-                }
-                else if(x == distanceNordEst){
-                    if(playBoard[i+x][j-x] == playerUS)
-                        gauche = false;
-                }
-                else if(playBoard[i+x][j-x] != playerUS && playBoard[i+x][j-x]!= 0){
-                    gauche = false;
-                }
             }
-
-            if(droite){
-                int indexI = i - distanceNordEst;
-                int indexJ = j + distanceNordEst;
-                String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1+indexI);
-                lstPossibleMove.add(toAdd);
+            else if(playBoard[i-x][j-x] != playerUS && playBoard[i-x][j-x]!= 0){
+                gauche = false;
             }
+        }
 
-            if(gauche){
-                int indexI = i + distanceNordEst;
-                int indexJ = j - distanceNordEst;
-                String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1+indexI);
-                lstPossibleMove.add(toAdd);
-            }
+        if(droite){
+            int indexI = i + distanceNordWest;
+            int indexJ = j + distanceNordWest;
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (indexI +1);
+            lstPossibleMove.add(toAdd);
+            retour++;
+        }
 
-            gauche = true;
-            droite = true;
-            for(int x = 1; x <= distanceNordWest;x++){
-                if(x+j >= BOARDSIZE || i+x >= BOARDSIZE){
-                    droite = false;
-                }
-                else if(x == distanceNordWest){
-                    if(playBoard[i+x][j+x] == playerUS)
-                        droite = false;
-                }
-                else if(playBoard[i+x][j+x] != playerUS && playBoard[i+x][j+x]!= 0)
-                {
-                    droite = false;
-                }
-
-                if(j-x < 0 || i-x < 0 ){
-                    gauche = false;
-                }
-                else if(x == distanceNordWest){
-                    if(playBoard[i-x][j-x] == playerUS)
-                        gauche = false;
-                }
-                else if(playBoard[i-x][j-x] != playerUS && playBoard[i-x][j-x]!= 0){
-                    gauche = false;
-                }
-            }
-
-            if(droite){
-                int indexI = i + distanceNordWest;
-                int indexJ = j + distanceNordWest;
-                String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (indexI +1);
-                lstPossibleMove.add(toAdd);
-            }
-
-            if(gauche){
-                int indexI = i - distanceNordWest;
-                int indexJ = j - distanceNordWest;
-                String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1 + indexI);
-                lstPossibleMove.add(toAdd);
-            }
-
+        if(gauche){
+            int indexI = i - distanceNordWest;
+            int indexJ = j - distanceNordWest;
+            String toAdd = getLetterFromIndex(j)+ "" + (i+1) + " - " + getLetterFromIndex(indexJ) + (1 + indexI);
+            lstPossibleMove.add(toAdd);
+            retour++;
+        }
+        return retour;
     }
 
     private void genererMouvementPieceEnemy(int i, int j, boolean US){
@@ -422,7 +431,6 @@ public class IA{
         Boolean up = true;
         Boolean down = true;
         for(int x = 1; x <= distanceNordSud;x++){
-
             if(x+i >= BOARDSIZE){
                 down = false;
             }
@@ -726,8 +734,8 @@ public class IA{
         int motonScore = obtenirScoreMoton(playerToScore);
         int centrality = getScoreForCentrality(playerToScore);
         int eatenPawn =  devalueEnemyEatenPawns(playerToScore);
-        //int areaScore = globalDistanceScore(playerToScore);
-        boardScore = centrality + motonScore + eatenPawn + bloquage /*+ areaScore*/;
+        int areaScore = globalDistanceScore(playerToScore);
+        boardScore = centrality + motonScore + eatenPawn + bloquage + areaScore;
 
         /*if(boardScore < 0){
             drawBoard(false);
@@ -735,7 +743,6 @@ public class IA{
         }*/
         return boardScore;
     }
-
 
     private int globalDistanceScore(int playerToScore){
         //drawBoard(false);
@@ -808,116 +815,20 @@ public class IA{
         return retour;
     }
 
-    private int getBlockadePiece(int i, int j,int playerToScore,boolean add){
-        int retour = 0;
-        int numberAdverse = -1;
-        double comparatifI = 0;
-        double comparatifJ = 0;
-
-        if(playerToScore == playerNumber){
-            comparatifI = centreIDeMasseEnemy;
-            comparatifJ = centreJDeMasseEnemy;
-        }else{
-            comparatifI = centreIDeMasseAllier;
-            comparatifJ = centreJDeMasseAllier;
-        }
-
-        if(playerToScore == 4){
-            numberAdverse = 2;
-        }else{
-            numberAdverse = 4;
-        }
-        if(playerToScore == playerNumber){
-            // nous somme le joueur playerNumber
-            if(j<comparatifJ){
-                if(i-1 >= 0 && j+1 < BOARDSIZE && i-1 >= comparatifI){
-                    if(playBoard[i-1][j+1] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-
-                if(j+1 < BOARDSIZE){
-                    if(playBoard[i][j+1] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-
-                if(i+1 < BOARDSIZE && j+1 < BOARDSIZE && i+1 <= comparatifI){
-                    if(playBoard[i+1][j+1] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-            }
-            if(j>comparatifJ){
-                if(i-1 >= 0 && j-1 >= 0 && i-1 >= comparatifI){
-                    if(playBoard[i-1][j-1] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-
-                if(j-1 >= 0){
-                    if(playBoard[i][j-1] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-
-                if(i+1 < BOARDSIZE && j-1 >= 0 && i+1 <= comparatifI){
-                    if(playBoard[i+1][j-1] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-            }
-
-            if(i<comparatifI){
-                if(i+1 < BOARDSIZE && j+1 < BOARDSIZE && j+1 <= comparatifJ){
-                    if(playBoard[i+1][j+1] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-
-                if(i+1 < BOARDSIZE){
-                    if(playBoard[i+1][j] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-
-                if(i+1 < BOARDSIZE && j-1 > 0 && j-1 >= comparatifJ){
-                    if(playBoard[i+1][j-1] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-            }
-            if(i>comparatifI){
-                if(i-1 > 0 && j+1 < BOARDSIZE && j+1 <= comparatifJ){
-                    if(playBoard[i-1][j+1] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-
-                if(i-1 > 0){
-                    if(playBoard[i-1][j] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-
-                if(i-1 > 0 && j-1>0 && j-1 >= comparatifJ){
-                    if(playBoard[i-1][j-1] == numberAdverse)
-                        retour += BLOQUER_MOUVEMENT_ENEMY;
-                }
-            }
-        }
-
-
-        if(!add){
-            retour = retour * - 1;
-        }
-        return retour;
-    }
 
 
     private int devalueEnemyEatenPawns(int playerToScore){
         int retour = 0;
         if(playerToScore == playerNumber){
-            retour = (positionsPionsEnemy.size()-12)*20;
+            retour = (positionsPionsEnemy.size() - positionsPions.size())*40;
         }else{
-            retour = (positionsPions.size()-12)*20;
+            retour = (positionsPions.size() - positionsPionsEnemy.size())*40;
         }
         return retour;
-
     }
 
     public int getScoreForCentrality(int playerToScore){
         int retour =0;
-        calculerCentreDeMasses();
         applyPositionMask();
 
             for(int x = 0; x < positionsPionsEnemy.size(); x++){
@@ -936,7 +847,6 @@ public class IA{
 
         return retour;
     }
-
 
     private void initializeSolvingBoard(){
         // initialise le solving board
@@ -959,59 +869,6 @@ public class IA{
         }
     }
 
-    private void applyCounterEnemy(){
-        for(int i=0;i<BOARDSIZE ; i++){
-            for(int j=0; j<BOARDSIZE;j++){
-                if(playBoard[i][j] == 0){
-                    for(int x = 0; x < positionsPionsEnemy.size();x++){
-
-                        int posEnemyI = positionsPionsEnemy.get(x)[0];
-                        int posEnemyJ = positionsPionsEnemy.get(x)[1];
-
-                        if((posEnemyI+1 ==i || posEnemyI-1 == i || posEnemyI == i)
-                                && (posEnemyJ+1 == j || posEnemyJ-1 == j || posEnemyJ == j)){
-                            // la tuile est adjacente a une tuile enemie
-                            if((posEnemyI < i && centreIDeMasseEnemy > i)
-                                || (posEnemyI > i && centreIDeMasseEnemy < i)
-                                || (posEnemyJ < j && centreJDeMasseEnemy > j)
-                                || (posEnemyJ > j && centreJDeMasseEnemy < j)){
-
-                                // la tuile se situe entre la piece examinee et le centre de masse de l'adversaire
-                                incrementPositionWithValidation(i,j, BLOQUER_MOUVEMENT_ENEMY);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    private void calculerCentreDeMasses(){
-        // cette methode calcule le centre de masse des joueurs
-        double cummulateurI = 0;
-        double cummulateurJ = 0;
-        for(int x = 0; x < positionsPions.size();x++){
-            cummulateurI += positionsPions.get(x)[0] + 1;
-            cummulateurJ += positionsPions.get(x)[1] + 1;
-        }
-
-        centreIDeMasseAllier = cummulateurI / positionsPions.size();
-        centreJDeMasseAllier = cummulateurJ / positionsPions.size();
-
-
-        cummulateurI = 0;
-        cummulateurJ = 0;
-        for(int x = 0; x < positionsPionsEnemy.size();x++){
-            cummulateurI += positionsPionsEnemy.get(x)[0] + 1;
-            cummulateurJ += positionsPionsEnemy.get(x)[1] + 1;
-        }
-
-        centreIDeMasseEnemy = cummulateurI / positionsPionsEnemy.size();
-        centreJDeMasseEnemy = cummulateurJ / positionsPionsEnemy.size();
-    }
-
-
     private void applyPositionMask(){
         // on applique sur le solving board le masque de position ou le centre est plus favorable
         for(int i =0; i < BOARDSIZE; i++){
@@ -1033,11 +890,6 @@ public class IA{
         // incremente la valeur d'une tuile en s'assurant que cette tuile n'est pas un de nos pions
         solvingBoard[i][j]+= value;
     }
-
-    // 4500 * 100 donne 500 millisecondes pour l'envoie des donnees
-	private final double COMPUTING_TIME_LIMIT_IN_NANOSECONDS = 4.0 * Math.pow(10, 9);
-	private long startTime 	= 0;
-
 
     private void cloneBoard(int[][] argumentBoard){
         // todo : est-ce que sa sameliore ??
@@ -1112,18 +964,30 @@ public class IA{
             for(int x =0; x<positionsPions.size();x++){
                 parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1],playerToScore);
                 int sizeMoton = piecesCourantes.size();
-                if(playerToScore == enemyPlayerID){
-                    if(sizeMoton == positionsPions.size()){
-                        //DEFAITE DETECTEE
-                        retour -= 1000;
-                    }
-                    retour -= Math.pow(piecesCourantes.size(), 2);
-                }else{
+                if(playerToScore == playerNumber){
                     if(sizeMoton == positionsPions.size()){
                         //VICTOIRE DETECTEE
                         retour += 1000;
+                    }else if(sizeMoton == 1){
+                        int nbMouvements = genererMouvementPiece(positionsPions.get(x)[0],positionsPions.get(x)[1],true);
+                        if(nbMouvements == 0){
+                            // piece boxed in !
+                            retour-= BOX_EFFECT;
+                        }
                     }
                     retour += Math.pow(piecesCourantes.size(), 2);
+                }else{
+                    if(sizeMoton == positionsPions.size()){
+                        //DEFAITE DETECTEE
+                        retour -= 1000;
+                    }else if(sizeMoton == 1){
+                        int nbMouvements = genererMouvementPiece(positionsPions.get(x)[0],positionsPions.get(x)[1],false);
+                        if(nbMouvements == 0){
+                            // piece boxed in !
+                            retour+= BOX_EFFECT;
+                        }
+                    }
+                    retour -= Math.pow(piecesCourantes.size(), 2);
                 }
                 piecesCourantes.clear();
             }
@@ -1133,20 +997,34 @@ public class IA{
                 int sizeMoton = piecesCourantes.size();
                 if(playerToScore == enemyPlayerID){
                     if(sizeMoton == positionsPionsEnemy.size()){
-                        //DEFAITE DETECTEE
-                        retour -= 1000;
+                        //VICTOIRE DETECTEE
+                        retour += 1000;
+                    }else if(sizeMoton ==0){
+                        int nbMouvements = genererMouvementPiece(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],true);
+                        if(nbMouvements == 0){
+                            // piece boxed in !
+                            retour -= BOX_EFFECT;
+                        }
                     }
                     retour += Math.pow(piecesCourantes.size(), 2);
                 }else{
                     if(sizeMoton == positionsPionsEnemy.size()){
-                        //VICTOIRE DETECTEE
-                        retour += 1000;
+                        // DEFAITE DETECTEE
+                        retour -= 1000;
+                    }else if(sizeMoton == 1){
+                        int nbMouvements = genererMouvementPiece(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],true);
+                        if(nbMouvements == 0){
+                            // piece boxed in !
+                            retour -= BOX_EFFECT;
+                        }
                     }
                     retour -= Math.pow(piecesCourantes.size(), 2);
                 }
                 piecesCourantes.clear();
             }
 
+        //drawBoard(false);
+        //System.out.println("Score pour moton :" + retour);
         return retour;
     }
 
@@ -1176,7 +1054,6 @@ public class IA{
         	inspecterTuilePourMoton(i,j+1,playerToScore);
     }
 
-
     private void inspecterTuilePourMoton(int i, int j, int playerToScore){
 
     	if(!piecesVisitees.containsKey(i+","+j) && playBoard[i][j] == playerToScore){
@@ -1185,6 +1062,4 @@ public class IA{
     		parcoursMotton(i,j,playerToScore);
     	}
     }
-
-    
 }
