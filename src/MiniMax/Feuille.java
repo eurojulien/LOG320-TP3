@@ -60,6 +60,11 @@ public class Feuille {
 					scoreAComparer 				= enfant.getScore();
 					mouvementRetenuParRacine	= enfant.getCoupJoue();
 				}
+				
+				else if(scoreAComparer == enfant.getScore() && Math.random() > 0.5d){
+					scoreAComparer 				= enfant.getScore();
+					mouvementRetenuParRacine	= enfant.getCoupJoue();
+				}
 			}
 		}
 		
@@ -69,6 +74,11 @@ public class Feuille {
 			for (Feuille enfant : this.feuilleEnfants){
 				
 				if(scoreAComparer > enfant.getScore()){
+					scoreAComparer 				= enfant.getScore();
+					mouvementRetenuParRacine	= enfant.getCoupJoue();
+				}
+			
+				else if(scoreAComparer == enfant.getScore() && Math.random() > 0.5d){
 					scoreAComparer 				= enfant.getScore();
 					mouvementRetenuParRacine	= enfant.getCoupJoue();
 				}
