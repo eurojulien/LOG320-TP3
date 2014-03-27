@@ -94,10 +94,8 @@ public class Main{
 			// DEBUG
 			System.out.println("Mouvement		: " + MiniMax.getBestMove());
 			System.out.println("Score			: " + MiniMax.getScoreFromBestMove());		
-			System.out.println("Nombre d'elagage	: " + MiniMax.nombreElagage);
 			System.out.println("Temps de calcul		: " + (endTime - startTime)/(1000000) + " milliseconds");
 			System.out.println("Profondeur Arbre	: " + MiniMax.getProfondeurArbre());
-			System.out.println("Nombre de feuilles	: " + MiniMax.getNbFeuillesCreees());
 			
 		}while(true);
 	}
