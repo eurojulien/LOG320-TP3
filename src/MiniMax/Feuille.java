@@ -20,6 +20,9 @@ public class Feuille {
 	private boolean joueurEstMAX;
 	private int score;
 	
+	// Moyenne du score des enfants
+	private int moyenneScoreEnfants;
+	
 	// Coup joue pour atteindre cette feuille
 	private String coupJoue;
 	
@@ -30,6 +33,8 @@ public class Feuille {
 		this.joueurEstMAX = joueurEstMAX;
 		this.score = 0;
 		this.coupJoue = coupJoue;
+		
+		this.moyenneScoreEnfants = 0;
 	}
 	
 	public void ajouterFeuilleEnfant(Feuille feuilleEnfant){
@@ -42,56 +47,104 @@ public class Feuille {
 	// copie le score ET le mouvement relie a ce score
 	public void updateFeuilleAvecMeilleurFeuilleEnfant(int profondeur){
 		
-		int scoreAComparer = 10000;
-		if (this.joueurEstMAX) { scoreAComparer = -10000;}
+		Feuille feuilleAComparer = new Feuille(true,"");
+	
+		if (this.joueurEstMAX) { 
+			feuilleAComparer.setScore(-10000);
+		}
 		
-		String mouvementRetenuParRacine = "";
+		else{
+			feuilleAComparer.setScore(10000);
+		}
+		
+		this.moyenneScoreEnfants	= 0;
 		
 		// La condition est en dehors de la boucle.
 		// Cela oblige a avoir deux boucles, mais moins
-		// de comparason.
+		// de comparaison.
 		
-		// Conserve le plus petit score possible
+		// Conserve le plus grand score possible
 		if(this.joueurEstMAX){
 		
 			for (Feuille enfant : this.feuilleEnfants){
 				
-				if(scoreAComparer < enfant.getScore()){
-					scoreAComparer 				= enfant.getScore();
-					mouvementRetenuParRacine	= enfant.getCoupJoue();
+				// Meilleur score
+				if(feuilleAComparer.getScore() < enfant.getScore()){
+					
+					feuilleAComparer.setScore(enfant.getScore());
+					feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+					feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
+					
 				}
 				
-				else if(scoreAComparer == enfant.getScore() && Math.random() > 0.5d){
-					scoreAComparer 				= enfant.getScore();
-					mouvementRetenuParRacine	= enfant.getCoupJoue();
+				// En cas d'egalite
+				else if(feuilleAComparer.getScore() == enfant.getScore()){
+				
+					if (feuilleAComparer.getMoyenneScoreEnfant() == 0 && Math.random() > 0.5d){
+						
+						feuilleAComparer.setScore(enfant.getScore());
+						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+						feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
+					}
+					
+					else if(feuilleAComparer.getMoyenneScoreEnfant() < enfant.getMoyenneScoreEnfant()){
+						
+						feuilleAComparer.setScore(enfant.getScore());
+						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+						feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
+					}
+					
 				}
+				
+				this.moyenneScoreEnfants += enfant.getScore();
 			}
 		}
 		
-		// Conserve le plus grand score possible
+		// Conserve le plus petit score possible
 		else{
 			
+
 			for (Feuille enfant : this.feuilleEnfants){
 				
-				if(scoreAComparer > enfant.getScore()){
-					scoreAComparer 				= enfant.getScore();
-					mouvementRetenuParRacine	= enfant.getCoupJoue();
+				// Meilleur score
+				if(feuilleAComparer.getScore() > enfant.getScore()){
+					
+					feuilleAComparer.setScore(enfant.getScore());
+					feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+					feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
 				}
-			
-				else if(scoreAComparer == enfant.getScore() && Math.random() > 0.5d){
-					scoreAComparer 				= enfant.getScore();
-					mouvementRetenuParRacine	= enfant.getCoupJoue();
+				
+				// En cas d'egalite
+				else if(feuilleAComparer.getScore() == enfant.getScore()){
+				
+					if (feuilleAComparer.getMoyenneScoreEnfant() == 0 && Math.random() > 0.5d){
+						
+						feuilleAComparer.setScore(enfant.getScore());
+						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+						feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
+					}
+					
+					else if(feuilleAComparer.getMoyenneScoreEnfant() > enfant.getMoyenneScoreEnfant()){
+						
+						feuilleAComparer.setScore(enfant.getScore());
+						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+						feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
+					}	
 				}
+				
+				this.moyenneScoreEnfants += enfant.getScore();
 			}
 		}
 		
 		// Mise a jour de cette feuille avec le 'meilleur' score de ses enfants
-		this.setScore(scoreAComparer);
+		this.setScore(feuilleAComparer.getScore());
+		
+		this.moyenneScoreEnfants /= this.feuilleEnfants.size();
 		
 		// Si c'est la feuille racine, elle conserve aussi le meilleur mouvement
 		// dans le but de l'envoyer au serveur apres
 		if (profondeur == 0 ){
-			this.setCoupJoue(mouvementRetenuParRacine);
+			this.setCoupJoue(feuilleAComparer.getCoupJoue());
 		}
 	}
 	
@@ -113,5 +166,13 @@ public class Feuille {
 	
 	public boolean isJoueurEstMAX(){
 		return this.joueurEstMAX;
+	}
+	
+	private int getMoyenneScoreEnfant(){
+		return this.moyenneScoreEnfants;
+	}
+	
+	private void setMoyenneScoreEnfant(int moyenne){
+		this.moyenneScoreEnfants = moyenne;
 	}
 }
