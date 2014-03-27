@@ -35,8 +35,8 @@ public class VictoryOrDefeat extends Thread{
 				break;
 			}
 			
-			if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
-				System.out.println(" ++++++++ V O D : " + this.currentTreeDepth + " ++++++++ ");
+			else if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
+				System.out.println("V-O-D : " + this.currentTreeDepth);
 				SyncThread.currentMaxTreeDepth[0] = this.currentTreeDepth;
 				SyncThread.victoryOrDefautHasBeenFound[0] = true;
 				break;
