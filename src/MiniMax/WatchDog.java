@@ -8,6 +8,8 @@ public class WatchDog extends Thread {
 	private static final int TIME_NEEDED_FOR_CALCULATION		= 3;
 	private static final int WAITING_STEP_TIME					= 100;
 	
+	private static final int STEP_TO_KEEP_MAX					= 2;
+	
 	private static MiniMax miniMax;
 
 	// Thread lance par le main
@@ -47,12 +49,23 @@ public class WatchDog extends Thread {
 		if (!minMaxHasFinished) {
 			
 			SyncThread.bestMoveHasBeenFound[0] = true;
-			SyncThread.currentMaxTreeDepth[0] --;
+			
+			
+			// Conserve les dernieres feuilles comme MAX
+			do{
+				SyncThread.currentMaxTreeDepth[0] --;
+			}while(SyncThread.currentMaxTreeDepth[0] % STEP_TO_KEEP_MAX == 0);
+			
 		}
 		
 		// Temps de cacul suffisament rapide pour augmenter la profondeur de l'arbre
 		else if (elapsedTime * TIME_NEEDED_FOR_CALCULATION < MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound[0]){
-			SyncThread.currentMaxTreeDepth[0] ++;
+
+			// Conserve les dernieres feuilles comme MAX
+			do{
+				SyncThread.currentMaxTreeDepth[0] ++;
+			}while(SyncThread.currentMaxTreeDepth[0] % STEP_TO_KEEP_MAX == 0);
+						
 		}
 	}
 }
