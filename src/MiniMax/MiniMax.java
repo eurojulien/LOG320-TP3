@@ -87,7 +87,7 @@ public class MiniMax extends Thread{
 
 			// Genere la liste des mouvements
 			// TODO : Lance un StackOverFlow Error !
-			nextIA.generateMoveList(false, currentPlayer);
+			nextIA.generateMoveList(false,0);
 			
 			ArrayList<String >deplacements = nextIA.getListeMouvements();
 
