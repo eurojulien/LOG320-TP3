@@ -7,8 +7,8 @@ import LinesOfActions.IA;
 public class MiniMax extends Thread{
 
 	// Profodeur maximale de l'arbre MiniMax par defaut
-	// Toujours un multiple de DEUX !!
-	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 2;
+	// Toujours un nombre impair pour que les avant dernieres feuilles soient MAX
+	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 1;
 	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
