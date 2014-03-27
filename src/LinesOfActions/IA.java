@@ -54,8 +54,11 @@ public class IA{
     private ArrayList<int[]> piecesCourantes = new ArrayList<int[]>();
     private HashMap<String, Boolean> piecesVisitees = new HashMap<String, Boolean>();
 
-    private static ArrayList<int[]> piecesCourantesWinLose = new ArrayList<int[]>();
-    private static HashMap<String, Boolean> piecesVisiteesWinLose = new HashMap<String, Boolean>();
+
+    private ArrayList<int[]> positionsPionsWinLose = new ArrayList<int[]>();
+    private ArrayList<int[]> positionsPionsEnemyWinLose = new ArrayList<int[]>();
+    private ArrayList<int[]> piecesCourantesWinLose = new ArrayList<int[]>();
+    private HashMap<String, Boolean> piecesVisiteesWinLose = new HashMap<String, Boolean>();
 
     private String bestMove = "";
     private int bestPointage = -100;
@@ -84,11 +87,8 @@ public class IA{
     }
 
     public void generateMoveList(boolean fastGen,int playerToScore){
-        if(!fastGen){
+        if(positionsPions.size() == 0)
             initializePositionsList();
-        }
-
-        initializePositionsList();
 
         if(playerToScore == 0){
             playerToScore = playerNumber;
@@ -854,16 +854,41 @@ public class IA{
 
     }
 
+    boolean hasBeenGeneratedWinLose = false;
+    private void initializePositionsListWinLose(){
+        // trouve toutes nos pieces et les ajoutes dans l'array de pieces
+
+        if(!hasBeenGeneratedWinLose){
+            hasBeenGeneratedWinLose = true;
+            positionsPionsWinLose = new ArrayList<int[]>();
+            positionsPionsEnemyWinLose = new ArrayList<int[]>();
+            for(int i=0;i<BOARDSIZE;i++){
+                for(int j=0;j<BOARDSIZE;j++){
+                    if(playBoard[i][j] == playerNumber){
+                        positionsPionsWinLose.add(new int[] {i,j});
+                    }else if(playBoard[i][j] != 0){
+                        positionsPionsEnemyWinLose.add(new int[] {i,j});
+                    }
+                }
+            }
+        }
+    }
+
+    boolean hasBeenGenerated = false;
     private void initializePositionsList(){
         // trouve toutes nos pieces et les ajoutes dans l'array de pieces
-        positionsPions = new ArrayList<int[]>();
-        positionsPionsEnemy = new ArrayList<int[]>();
-        for(int i=0;i<BOARDSIZE;i++){
-            for(int j=0;j<BOARDSIZE;j++){
-                if(playBoard[i][j] == playerNumber){
-                    positionsPions.add(new int[] {i,j});
-                }else if(playBoard[i][j] != 0){
-                    positionsPionsEnemy.add(new int[] {i,j});
+
+        if(!hasBeenGenerated){
+            hasBeenGenerated = true;
+            positionsPions = new ArrayList<int[]>();
+            positionsPionsEnemy = new ArrayList<int[]>();
+            for(int i=0;i<BOARDSIZE;i++){
+                for(int j=0;j<BOARDSIZE;j++){
+                    if(playBoard[i][j] == playerNumber){
+                        positionsPions.add(new int[] {i,j});
+                    }else if(playBoard[i][j] != 0){
+                        positionsPionsEnemy.add(new int[] {i,j});
+                    }
                 }
             }
         }
@@ -903,8 +928,8 @@ public class IA{
 
     public int findMateThreat(int playerToScore){
         int retour = 0;
-        piecesCourantes.clear();
-        piecesVisitees.clear();
+        piecesCourantesWinLose.clear();
+        piecesVisiteesWinLose.clear();
 
         int playerThem = 0;
         if(playerToScore != playerNumber)
@@ -912,48 +937,85 @@ public class IA{
         else
             playerThem = enemyPlayerID;
 
-        for(int x =0; x<positionsPions.size();x++){
-            parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1],playerToScore);
-            int sizeMoton = piecesCourantes.size();
-            if(playerToScore == playerNumber){
-                if(sizeMoton == positionsPions.size()){
-                    //VICTOIRE DETECTEE
-                    return 1;
-                }
-            }else{
-                if(sizeMoton == positionsPions.size()){
-                    //DEFAITE DETECTEE
-                    return -1;
-                }
+        initializePositionsListWinLose();
+        parcoursMottonWinLose(positionsPionsWinLose.get(0)[0], positionsPionsWinLose.get(0)[1], playerToScore);
+
+        if(playerToScore == playerNumber){
+            if(piecesCourantesWinLose.size() == positionsPionsWinLose.size()){
+                //VICTOIRE DETECTEE
+                return 1;
             }
-            piecesCourantes.clear();
-        }
-
-        for(int x =0; x<positionsPionsEnemy.size();x++){
-            parcoursMotton(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],playerThem);
-            int sizeMoton = piecesCourantes.size();
-            if(playerToScore == enemyPlayerID){
-                if(sizeMoton == positionsPionsEnemy.size()){
-                    //VICTOIRE DETECTEE
-                    return 1;
-                }
-
-            }else{
-                if(sizeMoton == positionsPionsEnemy.size()){
-                    //DEFAITE DETECTEE
-                    return -1;
-                }
-
+        }else{
+            if(piecesCourantesWinLose.size() == positionsPionsWinLose.size()){
+                //DEFAITE DETECTEE
+                return -1;
             }
-            piecesCourantes.clear();
         }
+        piecesCourantesWinLose.clear();
+        piecesVisiteesWinLose.clear();
+
+
+        parcoursMottonWinLose(positionsPionsEnemyWinLose.get(0)[0], positionsPionsEnemyWinLose.get(0)[1], playerThem);
+
+        if(playerToScore == enemyPlayerID){
+            if(piecesCourantesWinLose.size() == positionsPionsEnemyWinLose.size()){
+                //VICTOIRE DETECTEE
+                return 1;
+            }
+
+        }else{
+            if(piecesCourantesWinLose.size() == positionsPionsEnemyWinLose.size()){
+                //DEFAITE DETECTEE
+                return -1;
+            }
+
+        }
+        piecesCourantesWinLose.clear();
+        piecesVisiteesWinLose.clear();
+
         return retour;
+    }
+
+    private void parcoursMottonWinLose(int i, int j, int playerToScore){
+
+        inspecterTuilePourMotonWinLose(i, j, playerToScore);
+
+        if(i > 0){
+            inspecterTuilePourMotonWinLose(i - 1, j, playerToScore);
+            if(j > 0)
+                inspecterTuilePourMotonWinLose(i - 1, j - 1, playerToScore);
+            if(j < BOARDSIZE-1)
+                inspecterTuilePourMotonWinLose(i - 1, j + 1, playerToScore);
+        }
+
+        if(i < BOARDSIZE-1){
+            inspecterTuilePourMotonWinLose(i + 1, j, playerToScore);
+            if(j > 0)
+                inspecterTuilePourMotonWinLose(i + 1, j - 1, playerToScore);
+            if(j < BOARDSIZE-1)
+                inspecterTuilePourMotonWinLose(i + 1, j + 1, playerToScore);
+        }
+
+        if(j > 0)
+            inspecterTuilePourMotonWinLose(i, j - 1, playerToScore);
+        if(j < BOARDSIZE-1)
+            inspecterTuilePourMotonWinLose(i, j + 1, playerToScore);
+    }
+
+    private void inspecterTuilePourMotonWinLose(int i, int j, int playerToScore){
+
+        if(!piecesVisiteesWinLose.containsKey(i+","+j) && playBoard[i][j] == playerToScore){
+            piecesCourantesWinLose.add(new int[]{i,j});
+            piecesVisiteesWinLose.put(i+","+j,true);
+            parcoursMottonWinLose(i, j, playerToScore);
+        }
     }
 
     private int obtenirScoreMoton(int playerToScore){
         int retour = 0;
         piecesCourantes.clear();
         piecesVisitees.clear();
+        initializePositionsList();
 
         int playerThem = 0;
         if(playerToScore != playerNumber)
@@ -1027,6 +1089,7 @@ public class IA{
         //System.out.println("Score pour moton :" + retour);
         return retour;
     }
+
 
     private void parcoursMotton(int i, int j, int playerToScore){
 

@@ -47,12 +47,12 @@ public class WatchDog extends Thread {
 		if (!minMaxHasFinished) {
 			
 			SyncThread.bestMoveHasBeenFound[0] = true;
-			SyncThread.currentMaxTreeDepth[0] --;
+			//SyncThread.currentMaxTreeDepth[0] --;
 		}
 		
 		// Temps de cacul suffisament rapide pour augmenter la profondeur de l'arbre
 		else if (elapsedTime * TIME_NEEDED_FOR_CALCULATION < MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound[0]){
-			SyncThread.currentMaxTreeDepth[0] ++;
+			//SyncThread.currentMaxTreeDepth[0] ++;
 		}
 	}
 }

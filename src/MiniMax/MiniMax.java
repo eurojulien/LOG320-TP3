@@ -154,7 +154,7 @@ public class MiniMax extends Thread{
 	public void run() {	
 		construireArbre();
 		
-		System.out.println(" ********** Arbre MiniMax termine ! ********** ");
+		//System.out.println(" ********** Arbre MiniMax termine ! ********** ");
 		SyncThread.bestMoveHasBeenFound[0] = true;
 	}
 }

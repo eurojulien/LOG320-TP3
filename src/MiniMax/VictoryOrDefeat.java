@@ -30,13 +30,15 @@ public class VictoryOrDefeat extends Thread{
 		
 		for (IA VoD : this.IAList){
 			victoryOrDefeat = VoD.findMateThreat(this.player);
-		
 			if(SyncThread.victoryOrDefautHasBeenFound[0]){
 				break;
 			}
 			
 			else if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
-				System.out.println("Victory or Defeat | Niveau Arbre : " + this.currentTreeDepth);
+                if(victoryOrDefeat == VICTORY)
+				    System.out.println("Victory detected! | Niveau Arbre : " + this.currentTreeDepth);
+                if(victoryOrDefeat == DEFEAT)
+                    System.out.println("Defeat detected!  | Niveau Arbre : " + this.currentTreeDepth);
 				SyncThread.currentMaxTreeDepth[0] = this.currentTreeDepth;
 				SyncThread.victoryOrDefautHasBeenFound[0] = true;
 				break;

@@ -92,10 +92,11 @@ public class Main{
 			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
 			
 			// DEBUG
-			System.out.println("Mouvement		: " + MiniMax.getBestMove());
-			System.out.println("Score			: " + MiniMax.getScoreFromBestMove());		
-			System.out.println("Temps de calcul		: " + (endTime - startTime)/(1000000) + " milliseconds");
-			System.out.println("Profondeur Arbre	: " + MiniMax.getProfondeurArbre());
+			//System.out.println("Mouvement		: " + MiniMax.getBestMove());
+			//System.out.println("Score			: " + MiniMax.getScoreFromBestMove());
+			//System.out.println("Temps de calcul		: " + (endTime - startTime)/(1000000) + " milliseconds");
+			//
+			// System.out.println("Profondeur Arbre	: " + MiniMax.getProfondeurArbre());
 			
 		}while(true);
 	}
