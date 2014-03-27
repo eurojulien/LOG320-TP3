@@ -124,6 +124,7 @@ public class MiniMax extends Thread{
 			}
 		}
 
+		// Calcul du score de la derniere feuille de l'arbre
 		else if (profondeurArbre == SyncThread.currentMaxTreeDepth[0]){
 		
 			// Conserve les meilleurs score
