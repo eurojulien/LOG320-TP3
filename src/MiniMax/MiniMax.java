@@ -193,10 +193,10 @@ public class MiniMax extends Thread{
 			
 			if (!miniMaxIsOk) {
 				this.watchDog[0] = true;
-				this.profondeurMaximalePermise[0] --;
+				//this.profondeurMaximalePermise[0] --;
 			}
 			else if (waiting * 3 < MILLISECONDS_BEFORE_WAKE_THE_DOG){
-				this.profondeurMaximalePermise[0] ++;
+				//this.profondeurMaximalePermise[0] ++;
 			}
 			
 		}
