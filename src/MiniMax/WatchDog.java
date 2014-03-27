@@ -8,11 +8,10 @@ public class WatchDog extends Thread {
 	private static final int TIME_NEEDED_FOR_CALCULATION		= 3;
 	private static final int WAITING_STEP_TIME					= 100;
 	
-	private static MiniMax miniMax;
-	private static boolean bestMoveHasBeenFound[]				= SyncThread.bestMoveHasBeenFound;
-	private static boolean victoryOrDefautHasBeenFound[]		= SyncThread.victoryOrDefautHasBeenFound;
-	private static int currentMaxTreeDepth[] 					= SyncThread.currentMaxTreeDepth;
+	private static final int STEP_TO_KEEP_MAX					= 2;
 	
+	private static MiniMax miniMax;
+
 	// Thread lance par le main
 	// S'assure que le temps de traitement de l'arbre ne depasse pas : MILLISECONDS_BEFORE_WAKE_THE_DOG
 	public WatchDog(){
@@ -23,9 +22,8 @@ public class WatchDog extends Thread {
 	public void run(){
 		
 		// Initalisation des flags
-		WatchDog.bestMoveHasBeenFound[0] 			= false;
-		WatchDog.victoryOrDefautHasBeenFound[0] 	= false;
-		
+		SyncThread.bestMoveHasBeenFound[0] 			= false;
+		SyncThread.victoryOrDefautHasBeenFound[0] 	= false;
 		
 		// Lancement du thread de MinMax
 		miniMax = new MiniMax();
@@ -47,19 +45,27 @@ public class WatchDog extends Thread {
 			
 		}while(!minMaxHasFinished && elapsedTime < MILLISECONDS_BEFORE_WAKE_THE_DOG);
 		
-		// Temps de cacul suffisament rapide pour augmenter la profondeur de l'arbre
+		// Temps de calcul trop lent pour profondeur actuelle de l'arbre, on remonte de 1
 		if (!minMaxHasFinished) {
 			
-			System.out.println(" xxxxxxxxxx WatchDog Interrupt ! xxxxxxxxxx ");
+			SyncThread.bestMoveHasBeenFound[0] = true;
 			
-			miniMax.interrupt();
-			WatchDog.bestMoveHasBeenFound[0] = true;
-			WatchDog.currentMaxTreeDepth[0] --;
+			
+			// Conserve les dernieres feuilles comme MAX
+			do{
+				SyncThread.currentMaxTreeDepth[0] --;
+			}while(SyncThread.currentMaxTreeDepth[0] % STEP_TO_KEEP_MAX == 0);
+			
 		}
 		
-		// Temps de calcul trop lent pour profondeur actuelle de l'arbre, on remonte de 1
-		else if (elapsedTime * TIME_NEEDED_FOR_CALCULATION < MILLISECONDS_BEFORE_WAKE_THE_DOG){
-			WatchDog.currentMaxTreeDepth[0] ++;
+		// Temps de cacul suffisament rapide pour augmenter la profondeur de l'arbre
+		else if (elapsedTime * TIME_NEEDED_FOR_CALCULATION < MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound[0]){
+
+			// Conserve les dernieres feuilles comme MAX
+			do{
+				SyncThread.currentMaxTreeDepth[0] ++;
+			}while(SyncThread.currentMaxTreeDepth[0] % STEP_TO_KEEP_MAX == 0);
+						
 		}
 	}
 }
