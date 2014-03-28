@@ -22,8 +22,8 @@ public class WatchDog extends Thread {
 	public void run(){
 		
 		// Initalisation des flags
-		SyncThread.bestMoveHasBeenFound[0] 			= false;
-		SyncThread.victoryOrDefautHasBeenFound[0] 	= false;
+		SyncThread.bestMoveHasBeenFound 			= false;
+		SyncThread.victoryOrDefautHasBeenFound	 	= false;
 		
 		// Lancement du thread de MinMax
 		miniMax = new MiniMax();
@@ -48,23 +48,23 @@ public class WatchDog extends Thread {
 		// Temps de calcul trop lent pour profondeur actuelle de l'arbre, on remonte de 1
 		if (!minMaxHasFinished) {
 			
-			SyncThread.bestMoveHasBeenFound[0] = true;
+			SyncThread.bestMoveHasBeenFound	 = true;
 			
 			
 			// Conserve les dernieres feuilles comme MAX
 			do{
-				SyncThread.currentMaxTreeDepth[0] --;
-			}while(SyncThread.currentMaxTreeDepth[0] % STEP_TO_KEEP_MAX == 0);
+				SyncThread.currentMaxTreeDepth --;
+			}while(SyncThread.currentMaxTreeDepth % STEP_TO_KEEP_MAX == 0);
 			
 		}
 		
 		// Temps de cacul suffisament rapide pour augmenter la profondeur de l'arbre
-		else if (elapsedTime * TIME_NEEDED_FOR_CALCULATION < MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound[0]){
+		else if (elapsedTime * TIME_NEEDED_FOR_CALCULATION < MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound){
 
 			// Conserve les dernieres feuilles comme MAX
 			do{
-				SyncThread.currentMaxTreeDepth[0] ++;
-			}while(SyncThread.currentMaxTreeDepth[0] % STEP_TO_KEEP_MAX == 0);
+				SyncThread.currentMaxTreeDepth ++;
+			}while(SyncThread.currentMaxTreeDepth % STEP_TO_KEEP_MAX == 0);
 						
 		}
 	}

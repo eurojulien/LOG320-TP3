@@ -25,7 +25,7 @@ public class MiniMax extends Thread{
 	// Cette fonction doit etre appeler de commencer a jouer notre premier coup seulement
 	public static void initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
 	
-		SyncThread.currentMaxTreeDepth[0]		= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
+		SyncThread.currentMaxTreeDepth			= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
 		MiniMax.megaMind						= new IA(tableauJeu, numeroJoueur);
 		MiniMax.currentPlayer					= numeroJoueur;
 	}
@@ -57,12 +57,12 @@ public class MiniMax extends Thread{
 		
 		// Si watchdog a atteint 4500 millisecondes
 		// L'arbre arrete de calculer
-		if(SyncThread.bestMoveHasBeenFound[0]){
+		if(SyncThread.bestMoveHasBeenFound){
 			return;
 		}
 		
 
-		if (profondeurArbre < SyncThread.currentMaxTreeDepth[0]){
+		if (profondeurArbre < SyncThread.currentMaxTreeDepth){
 			
 			// Genere la liste des mouvements
 			// TODO : Lance un StackOverFlow Error !
@@ -84,8 +84,8 @@ public class MiniMax extends Thread{
 				IAs.add(nextIA.notifyAndGetNewIA(deplacement));
 			}
 			
-			if (!SyncThread.victoryOrDefautHasBeenFound[0]){
-				new VictoryOrDefeat(IAs, MiniMax.currentPlayer, profondeurArbre+1).start();
+			if (!SyncThread.victoryOrDefautHasBeenFound){
+				//new VictoryOrDefeat(IAs, MiniMax.currentPlayer, profondeurArbre+1).start();
 			}
 			
 			int index = 0;
@@ -100,11 +100,6 @@ public class MiniMax extends Thread{
 				
 				// Appel recursif avec la feuille enfant
 				construireArbre(ia, feuilleEnfant, profondeurArbre + 1, feuille.getScore());
-
-				
-				// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
-				feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
-				
 				
 				// ELAGAGE
 				if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
@@ -122,14 +117,16 @@ public class MiniMax extends Thread{
 					}
 				}
 			}
+		
+			feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
 		}
 
 		// Calcul du score de la derniere feuille de l'arbre
-		else if (profondeurArbre == SyncThread.currentMaxTreeDepth[0]){
+		else if (profondeurArbre == SyncThread.currentMaxTreeDepth){
 		
 			// Conserve les meilleurs score
 			feuille.setScore(nextIA.getScoreForBoard(currentPlayer));
-		}
+		}	
 	}
 
 	public static String getBestMove(){
@@ -143,11 +140,11 @@ public class MiniMax extends Thread{
 	
 	// DEBUG : Affichage a la console
 	public static int getProfondeurArbre(){
-		return SyncThread.currentMaxTreeDepth[0];
+		return SyncThread.currentMaxTreeDepth;
 	}
 	
 	public static boolean bestMoveHasBeenFound(){
-		return SyncThread.bestMoveHasBeenFound[0];
+		return SyncThread.bestMoveHasBeenFound;
 	}
 	
 	@Override
@@ -155,6 +152,6 @@ public class MiniMax extends Thread{
 		construireArbre();
 		
 		System.out.println(" ********** Arbre MiniMax termine ! ********** ");
-		SyncThread.bestMoveHasBeenFound[0] = true;
+		SyncThread.bestMoveHasBeenFound = true;
 	}
 }
