@@ -82,12 +82,16 @@ public class Feuille {
 				
 					if (feuilleAComparer.getMoyenneScoreEnfant() == 0 && Math.random() > 0.5d){
 						
+						System.out.println(" RANDOM MAX [" + profondeur + "] " + feuilleAComparer.getCoupJoue() + " > " + enfant.getCoupJoue());
+						
 						feuilleAComparer.setScore(enfant.getScore());
 						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
 						feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
 					}
 					
 					else if(feuilleAComparer.getMoyenneScoreEnfant() < enfant.getMoyenneScoreEnfant()){
+						
+						System.out.println(" MAX [" + profondeur + "] " + feuilleAComparer.getCoupJoue() + " > " + enfant.getCoupJoue());
 						
 						feuilleAComparer.setScore(enfant.getScore());
 						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
@@ -119,12 +123,16 @@ public class Feuille {
 				
 					if (feuilleAComparer.getMoyenneScoreEnfant() == 0 && Math.random() > 0.5d){
 						
+						System.out.println(" RANDOM MIN [" + profondeur + "] " + feuilleAComparer.getCoupJoue() + " > " + enfant.getCoupJoue());
+						
 						feuilleAComparer.setScore(enfant.getScore());
 						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
 						feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
 					}
 					
 					else if(feuilleAComparer.getMoyenneScoreEnfant() > enfant.getMoyenneScoreEnfant()){
+						
+						System.out.println(" MIN [" + profondeur + "] " + feuilleAComparer.getCoupJoue() + " > " + enfant.getCoupJoue());
 						
 						feuilleAComparer.setScore(enfant.getScore());
 						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
