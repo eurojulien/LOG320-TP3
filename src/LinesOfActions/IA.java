@@ -55,6 +55,7 @@ public class IA{
     private HashMap<String, Boolean> piecesVisitees = new HashMap<String, Boolean>();
 
 
+    private double distanceParcourue = 0;
     private ArrayList<int[]> positionsPionsWinLose = new ArrayList<int[]>();
     private ArrayList<int[]> positionsPionsEnemyWinLose = new ArrayList<int[]>();
     private ArrayList<int[]> piecesCourantesWinLose = new ArrayList<int[]>();
@@ -70,15 +71,15 @@ public class IA{
     // valeurs qui pourraient etre modifiee
     private static final int POSITION_MASK_EXTERNE = 12;
     private static final int POSITION_MASK_MILLIEU = 15;
-    private static final int POSITION_MASK_INTERIEUR = 20;
+    private static final int POSITION_MASK_INTERIEUR = 40;
     private static final int BLOQUER_MOUVEMENT_ENEMY = 1;
     private static final int BOX_EFFECT = 50;
-    private static final int MULT_IMPORTANCE_PIECE = 20;
+    private static final int MULT_IMPORTANCE_PIECE = 40;
 
     public IA(int[][] playBoard, int playerNumber){
         cloneBoard(playBoard);
-        this.playerNumber = playerNumber;
         initializeSolvingBoard();
+        this.playerNumber = playerNumber;
         if(playerNumber == 4){
             enemyPlayerID = 2;
         }else{
@@ -87,8 +88,7 @@ public class IA{
     }
 
     public void generateMoveList(boolean fastGen,int playerToScore){
-        if(positionsPions.size() == 0)
-            initializePositionsList();
+        initializePositionsList();
 
         if(playerToScore == 0){
             playerToScore = playerNumber;
@@ -131,10 +131,11 @@ public class IA{
         int posIDepart = Character.getNumericValue(tabLettres[1]) -1;
         int posJFin = getIndexFromLetter(tabLettres[5]);
         int posIFin = Character.getNumericValue(tabLettres[6]) -1;
-
+        updateDistance(posIDepart,posJDepart,posIFin,posJFin);
         playBoard[posIFin][posJFin] = playBoard[posIDepart][posJDepart];
         playBoard[posIDepart][posJDepart] = 0;
         }catch (Exception ex){
+            drawBoard(false);
             System.out.println("wtf happened ?");
         }
     }
@@ -149,13 +150,18 @@ public class IA{
         int posIDepart = Character.getNumericValue(tabLettres[1])-1;
         int posJFin = getIndexFromLetter(tabLettres[5]);
         int posIFin = Character.getNumericValue(tabLettres[6]) -1;
+        updateDistance(posIDepart,posJDepart,posIFin,posJFin);
+        playBoard[posIFin][posJFin] = playBoard[posIDepart][posJDepart];
         playBoard[posIDepart][posJDepart] = 0;
-        playBoard[posIFin][posJFin] = playerNumber;
         }catch (Exception ex){
             System.out.println("wtf happened ?");
         }
     }
 
+
+    private void updateDistance(int i, int j, int iFinal,int jFinal){
+        distanceParcourue = Math.pow(i-iFinal,2) + Math.pow(j-jFinal,2);
+    }
     public void drawBoard(boolean showSolvingBoard){
         // nous fait un dessin du board, pour le debugging
         System.out.println("====== PLAY BOARD ========");
@@ -734,8 +740,7 @@ public class IA{
         int motonScore = obtenirScoreMoton(playerToScore);
         int centrality = getScoreForCentrality(playerToScore);
         int eatenPawn =  devalueEnemyEatenPawns(playerToScore);
-        int areaScore = globalDistanceScore(playerToScore);
-        boardScore = centrality + motonScore + eatenPawn + bloquage + areaScore;
+        boardScore = centrality + motonScore + eatenPawn + bloquage;
 
         /*if(boardScore < 0){
             drawBoard(false);
@@ -874,21 +879,17 @@ public class IA{
         }
     }
 
-    boolean hasBeenGenerated = false;
+
     private void initializePositionsList(){
         // trouve toutes nos pieces et les ajoutes dans l'array de pieces
-
-        if(!hasBeenGenerated){
-            hasBeenGenerated = true;
-            positionsPions = new ArrayList<int[]>();
-            positionsPionsEnemy = new ArrayList<int[]>();
-            for(int i=0;i<BOARDSIZE;i++){
-                for(int j=0;j<BOARDSIZE;j++){
-                    if(playBoard[i][j] == playerNumber){
-                        positionsPions.add(new int[] {i,j});
-                    }else if(playBoard[i][j] != 0){
-                        positionsPionsEnemy.add(new int[] {i,j});
-                    }
+        positionsPions = new ArrayList<int[]>();
+        positionsPionsEnemy = new ArrayList<int[]>();
+        for(int i=0;i<BOARDSIZE;i++){
+            for(int j=0;j<BOARDSIZE;j++){
+                if(playBoard[i][j] == playerNumber){
+                    positionsPions.add(new int[] {i,j});
+                }else if(playBoard[i][j] != 0){
+                    positionsPionsEnemy.add(new int[] {i,j});
                 }
             }
         }

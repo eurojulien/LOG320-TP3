@@ -87,9 +87,17 @@ public class Main{
 			} while(!MiniMax.bestMoveHasBeenFound());
 			
 			endTime = System.nanoTime();
-			
-			server.sendServerCommand(MiniMax.getBestMove());
-			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
+
+
+            String move = MiniMax.getBestMove();
+
+            if(move.equals("")){
+                System.out.println("D00000DE!");
+            }else{
+                System.out.println(move);
+            }
+			server.sendServerCommand(move);
+			MiniMax.getIA().notifyMovementMyTeam(move);
 			
 			// DEBUG
 			//System.out.println("Mouvement		: " + MiniMax.getBestMove());

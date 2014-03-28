@@ -18,6 +18,7 @@ public class Feuille {
 	// Vrai : Notre Pion
 	// Faux : Pion adverse
 	private boolean joueurEstMAX;
+    private static int compteurProfondeur = -1;
 	private int score;
 	
 	// Moyenne du score des enfants
@@ -48,8 +49,13 @@ public class Feuille {
 	public void updateFeuilleAvecMeilleurFeuilleEnfant(int profondeur){
 		
 		Feuille feuilleAComparer = new Feuille(true,"");
-	
-		if (this.joueurEstMAX) { 
+
+        if(compteurProfondeur == -1){
+            compteurProfondeur = profondeur % 2;
+        }
+        boolean shouldMax = profondeur % 2 == compteurProfondeur;
+
+		if (shouldMax) {
 			feuilleAComparer.setScore(-10000);
 		}
 		
@@ -64,7 +70,7 @@ public class Feuille {
 		// de comparaison.
 		
 		// Conserve le plus grand score possible
-		if(this.joueurEstMAX){
+		if(shouldMax){
 		
 			for (Feuille enfant : this.feuilleEnfants){
 				

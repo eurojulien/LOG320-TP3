@@ -52,9 +52,9 @@ public class WatchDog extends Thread {
 			
 			
 			// Conserve les dernieres feuilles comme MAX
-			do{
+
 				SyncThread.currentMaxTreeDepth[0] --;
-			}while(SyncThread.currentMaxTreeDepth[0] % STEP_TO_KEEP_MAX == 0);
+
 			
 		}
 		
@@ -62,9 +62,9 @@ public class WatchDog extends Thread {
 		else if (elapsedTime * TIME_NEEDED_FOR_CALCULATION < MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound[0]){
 
 			// Conserve les dernieres feuilles comme MAX
-			do{
+
 				SyncThread.currentMaxTreeDepth[0] ++;
-			}while(SyncThread.currentMaxTreeDepth[0] % STEP_TO_KEEP_MAX == 0);
+
 						
 		}
 	}
