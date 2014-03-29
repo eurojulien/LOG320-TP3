@@ -18,7 +18,6 @@ public class Main{
 	private static long endTime = 0;
 	
 	private Main(){
-
 		server = new ServerConnect();
 	}
 	
@@ -29,7 +28,6 @@ public class Main{
 		}
 		
 		return instance;
-		
 	}
 	
 	// Thread Principal
@@ -62,6 +60,7 @@ public class Main{
 			
 			server.sendServerCommand(MiniMax.getBestMove());
 			MiniMax.getIA().notifyMovementMyTeam(MiniMax.getBestMove());
+            SyncThread.bestMoveHasBeenFound[0] = true;
 		}
 		
 		do{
@@ -96,6 +95,7 @@ public class Main{
             }
 			server.sendServerCommand(move);
 			MiniMax.getIA().notifyMovementMyTeam(move);
+            SyncThread.bestMoveHasBeenFound[0] = true;
 			
 			// DEBUG
 			//System.out.println("Mouvement		: " + MiniMax.getBestMove());

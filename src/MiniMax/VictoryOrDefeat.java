@@ -7,47 +7,66 @@ import LinesOfActions.IA;
 public class VictoryOrDefeat extends Thread{
 
 	private ArrayList<Feuille> FeuilleList 		= null;
-	private int currentTreeDepth		= 0;
 	private int player					= 0;
-	
+
+    public ArrayList<String> winningMoves = new ArrayList<String>();
+    public ArrayList<String> losinggMoves = new ArrayList<String>();
+
 	public static final int VICTORY		= 1;
 	public static final int DEFEAT		= -1;
 	public static final int NOTHING		= 0;
-	
-	public VictoryOrDefeat(ArrayList<Feuille> FeuilleList, int player, int currentTreeDepth){
-		
+    public static boolean started = false;
+
+    public VictoryOrDefeat(int player){
 		Thread.currentThread().setPriority(NORM_PRIORITY);
-		this.FeuilleList 			= FeuilleList;
-		this.player				= player;
-		this.currentTreeDepth	= currentTreeDepth;
+		this.player				    = player;
 	}
-	
+
+    public void addToList(ArrayList<Feuille> FeuilleList){
+        if(this.FeuilleList == null){
+            this.FeuilleList = new ArrayList<Feuille>();
+        }
+        this.FeuilleList.addAll(FeuilleList);
+    }
+
+    public void clearLists(){
+        losinggMoves.clear();
+        winningMoves.clear();
+        FeuilleList.clear();
+    }
+
+
 	// Thread
 	public void run(){
-		
+        if(FeuilleList == null){
+            FeuilleList = new ArrayList<Feuille>();
+        }
+		started = true;
 		int victoryOrDefeat = 0;
-		
-		for (Feuille feuil : this.FeuilleList){
-            IA VoD = feuil.mindForFeuille;
-			victoryOrDefeat = VoD.findMateThreat(this.player);
-			if(SyncThread.victoryOrDefautHasBeenFound[0]){
-				break;
-			}
-			
-			else if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
-                if(victoryOrDefeat == VICTORY){
-				    System.out.println("Victory detected! | Niveau Arbre : " + this.currentTreeDepth);
-                    feuil.setScore(1000);
+        // on va essayer d'utiliser le thread avec une liste variable plutôt
+        while(!SyncThread.bestMoveHasBeenFound[0]){
+            for (int i = 0; i < FeuilleList.size(); i++){
+                Feuille feuille = FeuilleList.get(i);
+                IA VoD = feuille.mindForFeuille;
+                victoryOrDefeat = VoD.findMateThreat(this.player);
+
+
+                //todo : mettre breakpoints ici julien
+               if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
+                    if(victoryOrDefeat == VICTORY){
+                        System.out.println("Victory detected! | Niveau Arbre : " + feuille.profondeurArbre + " --- move primordial: " + feuille.getPremierCoupJouer());
+                        winningMoves.add(feuille.getPremierCoupJouer());
+                    }
+                    if(victoryOrDefeat == DEFEAT)
+                    {
+                        System.out.println("Defeat detected!  | Niveau Arbre : " + feuille.profondeurArbre + " --- move primordial: " + feuille.getPremierCoupJouer());
+                        losinggMoves.add(feuille.getPremierCoupJouer());
+                    }
+                    //SyncThread.currentMaxTreeDepth[0] = this.currentTreeDepth;
+                    //SyncThread.victoryOrDefautHasBeenFound[0] = true;
+                    break;
                 }
-                if(victoryOrDefeat == DEFEAT)
-                {
-                    System.out.println("Defeat detected!  | Niveau Arbre : " + this.currentTreeDepth);
-                    feuil.setScore(-1000);
-                }
-				//SyncThread.currentMaxTreeDepth[0] = this.currentTreeDepth;
-				//SyncThread.victoryOrDefautHasBeenFound[0] = true;
-				break;
-			}
-		}
+            }
+        }
 	}
 }

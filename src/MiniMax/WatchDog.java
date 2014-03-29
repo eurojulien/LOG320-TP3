@@ -24,7 +24,8 @@ public class WatchDog extends Thread {
 		// Initalisation des flags
 		SyncThread.bestMoveHasBeenFound[0] 			= false;
 		SyncThread.victoryOrDefautHasBeenFound[0] 	= false;
-		
+        SyncThread.currentMaxTreeDepth[0] = 3;
+
 		// Lancement du thread de MinMax
 		miniMax = new MiniMax();
 		miniMax.start();
@@ -49,10 +50,8 @@ public class WatchDog extends Thread {
 		if (!minMaxHasFinished) {
 			
 			SyncThread.bestMoveHasBeenFound[0] = true;
-			
-			
-			// Conserve les dernieres feuilles comme MAX
 
+			// Conserve les dernieres feuilles comme MAX
 				SyncThread.currentMaxTreeDepth[0] --;
 
 			

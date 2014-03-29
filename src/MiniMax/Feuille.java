@@ -18,25 +18,26 @@ public class Feuille {
 
 	// Vrai : Notre Pion
 	// Faux : Pion adverse
-	private boolean joueurEstMAX;
     private static int compteurProfondeur = -1;
 	private int score;
+    public int profondeurArbre;
 	
 	// Moyenne du score des enfants
 	private int moyenneScoreEnfants;
 	
 	// Coup joue pour atteindre cette feuille
 	private String coupJoue;
+    private String premierCoupJouer;
 	
 	// Constructeur pour creer une feuille dans l'arbre MiniMax
-	public Feuille(boolean joueurEstMAX, String coupJoue, IA mindForFeuille){
+	public Feuille(String coupJoue, IA mindForFeuille, int profondeurArbre, String premierCoupJouer){
 
+        this.premierCoupJouer = premierCoupJouer;
         this.mindForFeuille = mindForFeuille;
 		this.feuilleEnfants = new ArrayList<Feuille>();
-		this.joueurEstMAX = joueurEstMAX;
 		this.score = 0;
 		this.coupJoue = coupJoue;
-		
+		this.profondeurArbre=profondeurArbre;
 		this.moyenneScoreEnfants = 0;
 	}
 	
@@ -50,29 +51,26 @@ public class Feuille {
 	// copie le score ET le mouvement relie a ce score
 	public void updateFeuilleAvecMeilleurFeuilleEnfant(int profondeur){
 		
-		Feuille feuilleAComparer = new Feuille(true,"",null);
+		Feuille feuilleAComparer = new Feuille("",null,profondeur,this.premierCoupJouer);
 
         if(compteurProfondeur == -1){
             compteurProfondeur = profondeur % 2;
         }
-        boolean shouldMax = profondeur % 2 == compteurProfondeur;
-
-		if (shouldMax) {
-			feuilleAComparer.setScore(-10000);
-		}
-		
-		else{
-			feuilleAComparer.setScore(10000);
-		}
 		
 		this.moyenneScoreEnfants	= 0;
 		
 		// La condition est en dehors de la boucle.
 		// Cela oblige a avoir deux boucles, mais moins
 		// de comparaison.
-		
+        if (isJoueurEstMAX(profondeur)) {
+            feuilleAComparer.setScore(-10000);
+        }
+
+        else{
+            feuilleAComparer.setScore(10000);
+        }
 		// Conserve le plus grand score possible
-		if(shouldMax){
+		if(isJoueurEstMAX(profondeur)){
 		
 			for (Feuille enfant : this.feuilleEnfants){
 				
@@ -110,7 +108,6 @@ public class Feuille {
 		
 		// Conserve le plus petit score possible
 		else{
-			
 
 			for (Feuille enfant : this.feuilleEnfants){
 				
@@ -171,11 +168,17 @@ public class Feuille {
 	public String getCoupJoue(){
 		return this.coupJoue;
 	}
-	
-	public boolean isJoueurEstMAX(){
-		return this.joueurEstMAX;
-	}
-	
+
+    public boolean isJoueurEstMAX(int profondeur){
+        if(profondeur == 0){
+            //pour que les addition de 1000 ou soustranction de 1000 fonctionne (win lose) la branche la plus haute doit etre un max
+            return true;
+        }
+
+        // la branche la plus basse sera un max aussi puisque sinon on coupe serieusement nos chances
+        return profondeur % 2 == compteurProfondeur;
+    }
+
 	private int getMoyenneScoreEnfant(){
 		return this.moyenneScoreEnfants;
 	}
@@ -183,4 +186,6 @@ public class Feuille {
 	private void setMoyenneScoreEnfant(int moyenne){
 		this.moyenneScoreEnfants = moyenne;
 	}
+
+    public String getPremierCoupJouer(){ return premierCoupJouer; }
 }

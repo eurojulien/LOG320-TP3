@@ -60,6 +60,7 @@ public class IA{
     private ArrayList<int[]> positionsPionsEnemyWinLose = new ArrayList<int[]>();
     private ArrayList<int[]> piecesCourantesWinLose = new ArrayList<int[]>();
     private HashMap<String, Boolean> piecesVisiteesWinLose = new HashMap<String, Boolean>();
+    public String coupJouer = "";
 
     private String bestMove = "";
     private int bestPointage = -100;
@@ -116,6 +117,7 @@ public class IA{
         // que notre adversaire fait !
         // IMPORTANT : Le format doit toujours etre "A5_-_B5"
         IA retour = new IA(playBoard, enemyPlayerID);
+        coupJouer = movement;
         retour.notifyMovementEnemyTeam(movement);
         return retour;
     }

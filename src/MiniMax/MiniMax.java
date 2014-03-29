@@ -14,6 +14,8 @@ public class MiniMax extends Thread{
 	private static Feuille feuilleSouche;
 	
 	private static IA megaMind;
+
+    private static VictoryOrDefeat winLoseThread;
 	
 	private static int currentPlayer;
 
@@ -24,14 +26,12 @@ public class MiniMax extends Thread{
 	// Instancie l'arbre MinMax
 	// Cette fonction doit etre appeler de commencer a jouer notre premier coup seulement
 	public static void initaliserMinMax(int [][] tableauJeu, int numeroJoueur){
-	
 		SyncThread.currentMaxTreeDepth[0]		= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
 		MiniMax.megaMind						= new IA(tableauJeu, numeroJoueur);
 		MiniMax.currentPlayer					= numeroJoueur;
 	}
 	
 	public static IA getIA(){
-		
 		return MiniMax.megaMind;
 	}
 	
@@ -40,13 +40,14 @@ public class MiniMax extends Thread{
 	// Creer une feuille par deplacement permis
 	// Repete le traitement pour le nombre maximal de profondeur permise
 	private static void construireArbre(){
-		
+
 		// Profondeur actuelle de l'arbre
 		int profondeurActuelleArbre = 0;
+        SyncThread.bestMoveHasBeenFound[0] = false;
 		
 		// ReInitialisation de la feuille souche
 		MiniMax.feuilleSouche = null;
-		MiniMax.feuilleSouche = new Feuille(true, "", megaMind);
+		MiniMax.feuilleSouche = new Feuille("", megaMind,0,null);
 
 		// Fonction de recursivite de construction d'arbre
 		construireArbre(MiniMax.megaMind, MiniMax.feuilleSouche, profondeurActuelleArbre, MiniMax.feuilleSouche.getScore());
@@ -60,7 +61,10 @@ public class MiniMax extends Thread{
 		if(SyncThread.bestMoveHasBeenFound[0]){
 			return;
 		}
-		
+
+        if(profondeurArbre == 0){
+            winLoseThread = new VictoryOrDefeat(currentPlayer);
+        }
 
 		if (profondeurArbre < SyncThread.currentMaxTreeDepth[0]){
 			
@@ -86,50 +90,98 @@ public class MiniMax extends Thread{
 			
 			int index = 0;
 			for (IA ia : IAs){
-					
 				// Construction d'une feuille enfant
-				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacements.get(index++),ia);
-                feuilles.add(feuilleEnfant);
+                String premierCoupJouerBranche = "";
+
+                if(profondeurArbre == 1){
+                    // on veut conserver l'information du coup "primaire"
+                    premierCoupJouerBranche = ia.coupJouer;
+                }else{
+                    premierCoupJouerBranche = nextIA.coupJouer;
+                }
+
+				Feuille feuilleEnfant = new Feuille(deplacements.get(index++),ia,profondeurArbre,premierCoupJouerBranche);
+
 				// Ajout de cette feuille dans la liste des enfants de la feuille en cours
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
-				
-				
-				// Appel recursif avec la feuille enfant
-				construireArbre(ia, feuilleEnfant, profondeurArbre + 1, feuille.getScore());
 
-				
-				// Mis a jour de la feuille en cours avec le meilleur score de ses enfants
-				feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
-				
-				
-				// ELAGAGE
-				if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
-					
-					// MAX
-					// Si la valeur de mon parent est plus petite, j'arrete de creuser
-					if (feuille.isJoueurEstMAX() && feuille.getScore() >= scoreElagage){
-						break;
-					}
-					
-					// MIN
-					// Si la la valeur de mon parent est plus grande, j'arrete de creuser
-					else if (!feuille.isJoueurEstMAX() && feuille.getScore() <= scoreElagage){
-						break;
-					}
-				}
+                // Ajout de la feuille à la liste de feuilles
+                feuilles.add(feuilleEnfant);
 			}
 
+            try{
+                // on pause le thread
+                winLoseThread.wait();
+            }catch (Exception ex){
+                // normal
+            }
 
-            new VictoryOrDefeat(feuilles, MiniMax.currentPlayer, profondeurArbre+1).start();
+            //, on ajoute la liste de feuilles maintentnat bien construite
+            winLoseThread.addToList(feuilles);
 
+            // on repart le thread
+            winLoseThread.run();
+
+
+            for(Feuille feuilleEnfant : feuilles){
+                // Appel recursif avec la feuille enfant
+                construireArbre(feuilleEnfant.mindForFeuille, feuilleEnfant, profondeurArbre + 1, feuille.getScore());
+
+                if(profondeurArbre == 0){
+                    // c'est la branche maître !
+                    try{
+                        // on pause le thread
+                        winLoseThread.wait();
+
+                    }catch (Exception ex){
+                        //normal
+                    }
+
+                    for(int x = 0; x<winLoseThread.losinggMoves.size();x++){
+                        if(feuilleEnfant.getCoupJoue().equals(winLoseThread.losinggMoves.get(x))){
+                            feuilleEnfant.setScore(-1000);
+                        }
+                    }
+
+                    for(int x = 0; x<winLoseThread.winningMoves.size();x++){
+                        if(feuilleEnfant.getCoupJoue().equals(winLoseThread.losinggMoves.get(x))){
+                            feuilleEnfant.setScore(1000);
+                        }
+                    }
+
+                    winLoseThread.clearLists();
+
+                    winLoseThread.run();
+                }
+                // Mis a jour de la feuille en cours avec le meilleur score de ses enfants
+                feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
+
+
+                // ELAGAGE
+                if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
+
+                    // MAX
+                    // Si la valeur de mon parent est plus petite, j'arrete de creuser
+                    if (feuille.isJoueurEstMAX(profondeurArbre) && feuille.getScore() >= scoreElagage){
+                        break;
+                    }
+
+                    // MIN
+                    // Si la la valeur de mon parent est plus grande, j'arrete de creuser
+                    else if (!feuille.isJoueurEstMAX(profondeurArbre) && feuille.getScore() <= scoreElagage){
+                        break;
+                    }
+                }
+            }
 		}
 
 		// Calcul du score de la derniere feuille de l'arbre
 		else if (profondeurArbre == SyncThread.currentMaxTreeDepth[0]){
-		
+
 			// Conserve les meilleurs score
 			feuille.setScore(nextIA.getScoreForBoard(currentPlayer));
 		}
+
 	}
 
 	public static String getBestMove(){
