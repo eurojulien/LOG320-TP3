@@ -50,22 +50,15 @@ public class WatchDog extends Thread {
 			
 			SyncThread.bestMoveHasBeenFound	 = true;
 			
-			
 			// Conserve les dernieres feuilles comme MAX
-			do{
-				SyncThread.currentMaxTreeDepth --;
-			}while(SyncThread.currentMaxTreeDepth % STEP_TO_KEEP_MAX == 0);
-			
+			SyncThread.currentMaxTreeDepth --;
 		}
 		
 		// Temps de cacul suffisament rapide pour augmenter la profondeur de l'arbre
-		else if (elapsedTime * TIME_NEEDED_FOR_CALCULATION < MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound){
+		else if (elapsedTime * (SyncThread.currentMaxTreeDepth+1) < MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound){
 
 			// Conserve les dernieres feuilles comme MAX
-			do{
-				SyncThread.currentMaxTreeDepth ++;
-			}while(SyncThread.currentMaxTreeDepth % STEP_TO_KEEP_MAX == 0);
-						
+			SyncThread.currentMaxTreeDepth ++;						
 		}
 	}
 }
