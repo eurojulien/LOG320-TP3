@@ -14,7 +14,8 @@ public class Feuille {
 
 	// Pointeur sur la feuille parent
 	private ArrayList <Feuille> feuilleEnfants;
-	
+	public IA mindForFeuille;
+
 	// Vrai : Notre Pion
 	// Faux : Pion adverse
 	private boolean joueurEstMAX;
@@ -28,8 +29,9 @@ public class Feuille {
 	private String coupJoue;
 	
 	// Constructeur pour creer une feuille dans l'arbre MiniMax
-	public Feuille(boolean joueurEstMAX, String coupJoue){
-		
+	public Feuille(boolean joueurEstMAX, String coupJoue, IA mindForFeuille){
+
+        this.mindForFeuille = mindForFeuille;
 		this.feuilleEnfants = new ArrayList<Feuille>();
 		this.joueurEstMAX = joueurEstMAX;
 		this.score = 0;
@@ -48,7 +50,7 @@ public class Feuille {
 	// copie le score ET le mouvement relie a ce score
 	public void updateFeuilleAvecMeilleurFeuilleEnfant(int profondeur){
 		
-		Feuille feuilleAComparer = new Feuille(true,"");
+		Feuille feuilleAComparer = new Feuille(true,"",null);
 
         if(compteurProfondeur == -1){
             compteurProfondeur = profondeur % 2;
@@ -114,7 +116,7 @@ public class Feuille {
 				
 				// Meilleur score
 				if(feuilleAComparer.getScore() > enfant.getScore()){
-					
+
 					feuilleAComparer.setScore(enfant.getScore());
 					feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
 					feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
@@ -155,7 +157,7 @@ public class Feuille {
 	}
 	
 	public void setScore(int score){
-		this.score = score;
+		this.score += score;
 	}
 	
 	public int getScore(){

@@ -46,7 +46,7 @@ public class MiniMax extends Thread{
 		
 		// ReInitialisation de la feuille souche
 		MiniMax.feuilleSouche = null;
-		MiniMax.feuilleSouche = new Feuille(true, "");
+		MiniMax.feuilleSouche = new Feuille(true, "", megaMind);
 
 		// Fonction de recursivite de construction d'arbre
 		construireArbre(MiniMax.megaMind, MiniMax.feuilleSouche, profondeurActuelleArbre, MiniMax.feuilleSouche.getScore());
@@ -71,7 +71,7 @@ public class MiniMax extends Thread{
 			// Deplacements
 			ArrayList<String> deplacements	= nextIA.getListeMouvements();
 			ArrayList<IA> IAs				= new ArrayList<IA>();
-			
+			ArrayList<Feuille> feuilles = new ArrayList<Feuille>();
 			// Securite
 			// Si le calcul depasse 4500 MilliSecondes et qu'il
 			// faut renvoyer un mouvement, ce mouvement sera renvoye
@@ -84,16 +84,12 @@ public class MiniMax extends Thread{
 				IAs.add(nextIA.notifyAndGetNewIA(deplacement));
 			}
 			
-			if (!SyncThread.victoryOrDefautHasBeenFound[0]){
-				new VictoryOrDefeat(IAs, MiniMax.currentPlayer, profondeurArbre+1).start();
-			}
-			
 			int index = 0;
 			for (IA ia : IAs){
 					
 				// Construction d'une feuille enfant
-				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacements.get(index++));
-				
+				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacements.get(index++),ia);
+                feuilles.add(feuilleEnfant);
 				// Ajout de cette feuille dans la liste des enfants de la feuille en cours
 				feuille.ajouterFeuilleEnfant(feuilleEnfant);
 				
@@ -122,6 +118,10 @@ public class MiniMax extends Thread{
 					}
 				}
 			}
+
+
+            new VictoryOrDefeat(feuilles, MiniMax.currentPlayer, profondeurArbre+1).start();
+
 		}
 
 		// Calcul du score de la derniere feuille de l'arbre
@@ -153,7 +153,6 @@ public class MiniMax extends Thread{
 	@Override
 	public void run() {	
 		construireArbre();
-		
 		//System.out.println(" ********** Arbre MiniMax termine ! ********** ");
 		SyncThread.bestMoveHasBeenFound[0] = true;
 	}

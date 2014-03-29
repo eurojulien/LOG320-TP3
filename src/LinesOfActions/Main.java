@@ -87,8 +87,6 @@ public class Main{
 			} while(!MiniMax.bestMoveHasBeenFound());
 			
 			endTime = System.nanoTime();
-
-
             String move = MiniMax.getBestMove();
 
             if(move.equals("")){
