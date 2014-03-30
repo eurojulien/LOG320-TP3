@@ -9,6 +9,7 @@ public class MiniMax extends Thread{
 	// Profodeur maximale de l'arbre MiniMax par defaut
 	// Toujours un nombre impair pour que les avant dernieres feuilles soient MAX
 	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 1;
+	private final static int MAX_NUMBER_OF_SIMULATNEOUS_THREAD			= 4;
 	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
@@ -40,6 +41,14 @@ public class MiniMax extends Thread{
 	// Creer une feuille par deplacement permis
 	// Repete le traitement pour le nombre maximal de profondeur permise
 	private static void construireArbre(){
+		
+		
+		MiniMax.megaMind.generateMoveList(false, 0);
+		
+		for (int cpt = 0; cpt < )
+	
+		
+		
 		
 		// Profondeur actuelle de l'arbre
 		int profondeurActuelleArbre = 0;
