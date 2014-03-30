@@ -82,7 +82,7 @@ public class Main{
 			// Attente de calcul de l'arbre MinMax
 			do{
 				try {
-					Thread.sleep(100);
+					Thread.sleep(SyncThread.WAITING_STEP_TIME);
 				} catch (InterruptedException e) {}
 			} while(!MiniMax.bestMoveHasBeenFound());
 			

@@ -4,10 +4,8 @@ package MiniMax;
 // Si oui, elle permet d'avertir le Main qu'il faut envoyer immediatement le meilleur coup trouve
 public class WatchDog extends Thread {
 
-	private static final int MILLISECONDS_BEFORE_WAKE_THE_DOG 	= 4500;
-	private static final int TIME_NEEDED_FOR_CALCULATION		= 3;
-	private static final int WAITING_STEP_TIME					= 100;
-	
+
+	private static final int TIME_NEEDED_FOR_CALCULATION		= 3;	
 	private static final int STEP_TO_KEEP_MAX					= 2;
 	
 	private static MiniMax miniMax;
@@ -24,6 +22,7 @@ public class WatchDog extends Thread {
 		// Initalisation des flags
 		SyncThread.bestMoveHasBeenFound 			= false;
 		SyncThread.victoryOrDefautHasBeenFound	 	= false;
+		SyncThread.computationTimeIsFinished		= false;
 		
 		// Lancement du thread de MinMax
 		miniMax = new MiniMax();
@@ -34,28 +33,32 @@ public class WatchDog extends Thread {
 		
 		do{
 			try {
-				Thread.sleep(WAITING_STEP_TIME);
+				Thread.sleep(SyncThread.WAITING_STEP_TIME);
 			} catch (InterruptedException e) {}
 			
-			elapsedTime += WAITING_STEP_TIME;
+			elapsedTime += SyncThread.WAITING_STEP_TIME;
 			
 			if (MiniMax.bestMoveHasBeenFound()){
 				minMaxHasFinished = true;
 			}
 			
-		}while(!minMaxHasFinished && elapsedTime < MILLISECONDS_BEFORE_WAKE_THE_DOG);
+		}while(!minMaxHasFinished && elapsedTime < SyncThread.MILLISECONDS_BEFORE_WAKE_THE_DOG);
 		
 		// Temps de calcul trop lent pour profondeur actuelle de l'arbre, on remonte de 1
 		if (!minMaxHasFinished) {
 			
-			SyncThread.bestMoveHasBeenFound	 = true;
+			// On arrete les calculs
+			SyncThread.computationTimeIsFinished	= true;
 			
 			// Conserve les dernieres feuilles comme MAX
-			SyncThread.currentMaxTreeDepth --;
+			// La profondeur de l'arbre ne va jamais sous 1 (Silly !)
+			if (SyncThread.currentMaxTreeDepth > 1){
+				SyncThread.currentMaxTreeDepth --;
+			}
 		}
 		
 		// Temps de cacul suffisament rapide pour augmenter la profondeur de l'arbre
-		else if (elapsedTime * (SyncThread.currentMaxTreeDepth+1) < MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound){
+		else if (elapsedTime * 2 < SyncThread.MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound){
 
 			// Conserve les dernieres feuilles comme MAX
 			SyncThread.currentMaxTreeDepth ++;						

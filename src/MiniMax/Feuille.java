@@ -41,6 +41,10 @@ public class Feuille {
 		this.feuilleEnfants.add(feuilleEnfant);
 	}
 	
+	public void ajouterFeuilleEnfants(ArrayList<Feuille> feuilleEnfants){
+		this.feuilleEnfants.addAll(feuilleEnfants);
+	}
+	
 	// Attribue le score a cette feuille selon le meilleur score
 	// des enfants de cette feuille
 	// Parametre profondeur : Si egal a zero (Feuille parent), la feuille parent
