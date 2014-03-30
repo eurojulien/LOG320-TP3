@@ -257,6 +257,7 @@ public class IA{
             lstPossibleMove.add(toAdd);
             retour++;
         }
+
         Boolean up = true;
         Boolean down = true;
         for(int x = 1; x <= distanceNordSud;x++){
@@ -931,9 +932,12 @@ public class IA{
 
     public int findMateThreat(int playerToScore){
         int retour = 0;
-        piecesCourantesWinLose.clear();
-        piecesVisiteesWinLose.clear();
 
+        if(positionsPions.size() == 0){
+            positionsPions.clear();
+            positionsPionsEnemy.clear();
+            initializePositionsList();
+        }
 
         int playerThem = 0;
         if(playerToScore != playerNumber)
@@ -941,21 +945,20 @@ public class IA{
         else
             playerThem = enemyPlayerID;
 
-        initializePositionsListWinLose();
-        if(playerThem == playerNumber)
-            parcoursMottonWinLose(positionsPionsWinLose.get(0)[0], positionsPionsWinLose.get(0)[1], playerToScore);
+        if(playerToScore == playerNumber)
+            parcoursMottonWinLose(positionsPions.get(0)[0], positionsPions.get(0)[1], playerToScore);
         else
-            parcoursMottonWinLose(positionsPionsWinLose.get(0)[0], positionsPionsWinLose.get(0)[1], playerThem);
+            parcoursMottonWinLose(positionsPions.get(0)[0], positionsPions.get(0)[1], playerThem);
 
         //System.out.println(piecesCourantesWinLose.size());
         if(playerToScore == playerNumber){
-            if(piecesCourantesWinLose.size() == positionsPionsWinLose.size()){
-                //VICTOIRE DETECTEE
+            if(piecesCourantesWinLose.size() == positionsPions.size()){
+
                 return 1;
             }
         }else{
-            if(piecesCourantesWinLose.size() == positionsPionsWinLose.size()){
-                //DEFAITE DETECTEE
+            if(piecesCourantesWinLose.size() == positionsPions.size()){
+
                 return -1;
             }
         }
@@ -963,21 +966,21 @@ public class IA{
         piecesVisiteesWinLose.clear();
 
 
-        if(playerThem != playerNumber)
-            parcoursMottonWinLose(positionsPionsWinLose.get(0)[0], positionsPionsWinLose.get(0)[1], playerNumber);
+        if(playerToScore != playerNumber)
+            parcoursMottonWinLose(positionsPionsEnemy.get(0)[0], positionsPionsEnemy.get(0)[1], playerToScore);
         else
-            parcoursMottonWinLose(positionsPionsWinLose.get(0)[0], positionsPionsWinLose.get(0)[1], playerThem);
+            parcoursMottonWinLose(positionsPionsEnemy.get(0)[0], positionsPionsEnemy.get(0)[1], playerThem);
 
         //System.out.println(piecesCourantesWinLose.size());
         if(playerToScore == enemyPlayerID){
-            if(piecesCourantesWinLose.size() == positionsPionsEnemyWinLose.size()){
-                //VICTOIRE DETECTEE
+            if(piecesCourantesWinLose.size() == positionsPionsEnemy.size()){
+
                 return 1;
             }
 
         }else{
-            if(piecesCourantesWinLose.size() == positionsPionsEnemyWinLose.size()){
-                //DEFAITE DETECTEE
+            if(piecesCourantesWinLose.size() == positionsPionsEnemy.size()){
+
                 return -1;
             }
 
@@ -985,7 +988,6 @@ public class IA{
         piecesCourantesWinLose.clear();
         piecesVisiteesWinLose.clear();
 
-        //System.out.println("=====");
         return retour;
     }
 

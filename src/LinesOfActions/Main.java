@@ -108,12 +108,12 @@ public class Main{
 	}
 	
 	public static void main(String[] args) {
-	
+
 		// Connexion au serveur
 		Main thread = Main.CreateConnection();
 		
 		// Lancement du thread principal
-		thread.LancerJeu();
+    	thread.LancerJeu();
 	}
 }
 	

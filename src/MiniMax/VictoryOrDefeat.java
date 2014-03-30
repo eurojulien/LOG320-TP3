@@ -50,6 +50,7 @@ public class VictoryOrDefeat extends Thread{
         for (int i = 0; i < FeuilleList.size(); i++){
             Feuille feuille = FeuilleList.get(i);
             IA VoD = feuille.mindForFeuille;
+
             victoryOrDefeat = VoD.findMateThreat(this.player);
             //todo : mettre breakpoints ici julien
            if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
