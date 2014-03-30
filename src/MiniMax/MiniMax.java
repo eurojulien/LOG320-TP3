@@ -2,6 +2,8 @@ package MiniMax;
 
 import java.util.ArrayList;
 
+import com.sun.corba.se.impl.orbutil.concurrent.Sync;
+
 import LinesOfActions.IA;
 
 public class MiniMax extends Thread{
@@ -11,6 +13,9 @@ public class MiniMax extends Thread{
 	private final static int PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT 	= 1;
 	private final static int MAX_NUMBER_OF_SIMULATNEOUS_THREAD			= 4;
 	
+	// Threads de l'arbre MinMax
+	private static Digger diggers[];
+	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
 	
@@ -19,7 +24,7 @@ public class MiniMax extends Thread{
 	private static int currentPlayer;
 
 	public MiniMax(){ 
-		this.setPriority(Thread.NORM_PRIORITY); 
+		this.setPriority(Thread.MAX_PRIORITY); 
 	}
 	
 	// Instancie l'arbre MinMax
@@ -29,6 +34,17 @@ public class MiniMax extends Thread{
 		SyncThread.currentMaxTreeDepth			= PROFONDEUR_MAXIMALE_PERMISE_PAR_DEFAUT;
 		MiniMax.megaMind						= new IA(tableauJeu, numeroJoueur);
 		MiniMax.currentPlayer					= numeroJoueur;
+		diggers									= new Digger[SyncThread.ALL_DIGGERS_ARE_DONE];
+		
+		// Creation des creuseurs
+		for (int i = 0; i < SyncThread.ALL_DIGGERS_ARE_DONE; i ++){
+			diggers[i] = new Digger();
+		}
+		
+		// Demarrage des diggers
+		for(Digger dig : diggers){
+			dig.start();
+		}
 	}
 	
 	public static IA getIA(){
@@ -42,100 +58,46 @@ public class MiniMax extends Thread{
 	// Repete le traitement pour le nombre maximal de profondeur permise
 	private static void construireArbre(){
 		
-		
-		MiniMax.megaMind.generateMoveList(false, 0);
-		
-		for (int cpt = 0; cpt < )
-	
-		
-		
-		
 		// Profondeur actuelle de l'arbre
 		int profondeurActuelleArbre = 0;
-		
+				
 		// ReInitialisation de la feuille souche
 		MiniMax.feuilleSouche = null;
 		MiniMax.feuilleSouche = new Feuille(true, "");
-
-		// Fonction de recursivite de construction d'arbre
-		construireArbre(MiniMax.megaMind, MiniMax.feuilleSouche, profondeurActuelleArbre, MiniMax.feuilleSouche.getScore());
-	}
-	
-	// Fonction recursive de construction d'arbre
-	private static void construireArbre(IA nextIA, Feuille feuille, int profondeurArbre, int scoreElagage){
 		
-		// Si watchdog a atteint 4500 millisecondes
-		// L'arbre arrete de calculer
-		if(SyncThread.bestMoveHasBeenFound){
-			return;
+		// Preparation des creuseur
+		SyncThread.diggersAreDone = 0;
+		
+		// Generation des mouvements (Feuille Racine)
+		MiniMax.megaMind.generateMoveList(false, 0);
+		ArrayList<String> deplacements	= MiniMax.megaMind.getListeMouvements();
+		
+		// Assignation du IA de base
+		for (Digger dig : diggers){
+			dig.setDiggerToDig(MiniMax.megaMind, 1, MiniMax.currentPlayer);
+		}
+		// Assignation des mouvements a verifier
+		for (int cpt = 0; cpt < deplacements.size(); cpt ++){
+			diggers[cpt % SyncThread.ALL_DIGGERS_ARE_DONE].AddMoveToDig(deplacements.get(cpt));
 		}
 		
-
-		if (profondeurArbre < SyncThread.currentMaxTreeDepth){
-			
-			// Genere la liste des mouvements
-			// TODO : Lance un StackOverFlow Error !
-			nextIA.generateMoveList(false,0);
-			
-			// Deplacements
-			ArrayList<String> deplacements	= nextIA.getListeMouvements();
-			ArrayList<IA> IAs				= new ArrayList<IA>();
-			
-			// Securite
-			// Si le calcul depasse 4500 MilliSecondes et qu'il
-			// faut renvoyer un mouvement, ce mouvement sera renvoye
-			if (profondeurArbre == 0){
-				feuille.setCoupJoue(deplacements.get(0));
-			}
-
-			// Creation des IA pour les enfants de la feuille courante
-			for(String deplacement : deplacements){
-				IAs.add(nextIA.notifyAndGetNewIA(deplacement));
-			}
-			
-			if (!SyncThread.victoryOrDefautHasBeenFound){
-				//new VictoryOrDefeat(IAs, MiniMax.currentPlayer, profondeurArbre+1).start();
-			}
-			
-			int index = 0;
-			for (IA ia : IAs){
-					
-				// Construction d'une feuille enfant
-				Feuille feuilleEnfant = new Feuille(!feuille.isJoueurEstMAX(), deplacements.get(index++));
-				
-				// Ajout de cette feuille dans la liste des enfants de la feuille en cours
-				feuille.ajouterFeuilleEnfant(feuilleEnfant);
-				
-				
-				// Appel recursif avec la feuille enfant
-				construireArbre(ia, feuilleEnfant, profondeurArbre + 1, feuille.getScore());
-				
-				// ELAGAGE
-				if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
-					
-					// MAX
-					// Si la valeur de mon parent est plus petite, j'arrete de creuser
-					if (feuille.isJoueurEstMAX() && feuille.getScore() >= scoreElagage){
-						break;
-					}
-					
-					// MIN
-					// Si la la valeur de mon parent est plus grande, j'arrete de creuser
-					else if (!feuille.isJoueurEstMAX() && feuille.getScore() <= scoreElagage){
-						break;
-					}
-				}
-			}
+		// Demarrage des diggers
+		SyncThread.minMaxIsReadyToBeDigged = true;
 		
-			feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
+		// Atente que les diggers aient fini
+		do{
+			try {
+				Thread.sleep(SyncThread.WAITING_STEP_TIME);
+			} catch (InterruptedException e) {}
+		}while(SyncThread.diggersAreDone != SyncThread.ALL_DIGGERS_ARE_DONE);
+		
+		// Unification de toutes les feuilles souches des threads
+		for(Digger dig : diggers){
+			MiniMax.feuilleSouche.ajouterFeuilleEnfants(dig.getFoundLeaves());
 		}
-
-		// Calcul du score de la derniere feuille de l'arbre
-		else if (profondeurArbre == SyncThread.currentMaxTreeDepth){
 		
-			// Conserve les meilleurs score
-			feuille.setScore(nextIA.getScoreForBoard(currentPlayer));
-		}	
+		// Meilleur score trouve
+		MiniMax.feuilleSouche.updateFeuilleAvecMeilleurFeuilleEnfant(0);
 	}
 
 	public static String getBestMove(){
@@ -160,7 +122,7 @@ public class MiniMax extends Thread{
 	public void run() {	
 		construireArbre();
 		
-		System.out.println(" ********** Arbre MiniMax termine ! ********** ");
 		SyncThread.bestMoveHasBeenFound = true;
+		System.out.println(" ********** Arbre MiniMax termine ! ********** ");
 	}
 }
