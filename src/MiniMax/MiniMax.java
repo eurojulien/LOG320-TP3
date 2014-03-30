@@ -148,11 +148,9 @@ public class MiniMax extends Thread{
                             feuilleEnfant.setScore(1000);
                         }
                     }
-
                     winLoseThread.clearLists();
-
-                    winLoseThread.run();
                 }
+
                 // Mis a jour de la feuille en cours avec le meilleur score de ses enfants
                 feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre);
 

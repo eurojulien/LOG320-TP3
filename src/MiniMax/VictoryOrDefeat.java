@@ -27,6 +27,7 @@ public class VictoryOrDefeat extends Thread{
             this.FeuilleList = new ArrayList<Feuille>();
         }
         this.FeuilleList.addAll(FeuilleList);
+
     }
 
     public void clearLists(){
@@ -41,32 +42,33 @@ public class VictoryOrDefeat extends Thread{
         if(FeuilleList == null){
             FeuilleList = new ArrayList<Feuille>();
         }
-		started = true;
+
 		int victoryOrDefeat = 0;
         // on va essayer d'utiliser le thread avec une liste variable plutôt
-        while(!SyncThread.bestMoveHasBeenFound[0]){
-            for (int i = 0; i < FeuilleList.size(); i++){
-                Feuille feuille = FeuilleList.get(i);
-                IA VoD = feuille.mindForFeuille;
-                victoryOrDefeat = VoD.findMateThreat(this.player);
 
-
-                //todo : mettre breakpoints ici julien
-               if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
-                    if(victoryOrDefeat == VICTORY){
-                        System.out.println("Victory detected! | Niveau Arbre : " + feuille.profondeurArbre + " --- move primordial: " + feuille.getPremierCoupJouer());
-                        winningMoves.add(feuille.getPremierCoupJouer());
-                    }
-                    if(victoryOrDefeat == DEFEAT)
-                    {
-                        System.out.println("Defeat detected!  | Niveau Arbre : " + feuille.profondeurArbre + " --- move primordial: " + feuille.getPremierCoupJouer());
-                        losinggMoves.add(feuille.getPremierCoupJouer());
-                    }
-                    //SyncThread.currentMaxTreeDepth[0] = this.currentTreeDepth;
-                    //SyncThread.victoryOrDefautHasBeenFound[0] = true;
-                    break;
+        while(true){
+        for (int i = 0; i < FeuilleList.size(); i++){
+            Feuille feuille = FeuilleList.get(i);
+            IA VoD = feuille.mindForFeuille;
+            victoryOrDefeat = VoD.findMateThreat(this.player);
+            //todo : mettre breakpoints ici julien
+           if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
+                if(victoryOrDefeat == VICTORY){
+                    System.out.println("Victory detected! | Niveau Arbre : " + feuille.profondeurArbre + " --- move primordial: " + feuille.getPremierCoupJouer());
+                    winningMoves.add(feuille.getPremierCoupJouer());
+                }
+                if(victoryOrDefeat == DEFEAT)
+                {
+                    System.out.println("Defeat detected!  | Niveau Arbre : " + feuille.profondeurArbre + " --- move primordial: " + feuille.getPremierCoupJouer());
+                    losinggMoves.add(feuille.getPremierCoupJouer());
                 }
             }
         }
+            FeuilleList.clear();
+        }
+
+        //System.out.println("VoD : I fini ! List size :" + FeuilleList.size());
+
+
 	}
 }

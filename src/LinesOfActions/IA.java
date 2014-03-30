@@ -934,6 +934,7 @@ public class IA{
         piecesCourantesWinLose.clear();
         piecesVisiteesWinLose.clear();
 
+
         int playerThem = 0;
         if(playerToScore != playerNumber)
             playerThem = playerNumber;
@@ -941,8 +942,12 @@ public class IA{
             playerThem = enemyPlayerID;
 
         initializePositionsListWinLose();
-        parcoursMottonWinLose(positionsPionsWinLose.get(0)[0], positionsPionsWinLose.get(0)[1], playerToScore);
+        if(playerThem == playerNumber)
+            parcoursMottonWinLose(positionsPionsWinLose.get(0)[0], positionsPionsWinLose.get(0)[1], playerToScore);
+        else
+            parcoursMottonWinLose(positionsPionsWinLose.get(0)[0], positionsPionsWinLose.get(0)[1], playerThem);
 
+        //System.out.println(piecesCourantesWinLose.size());
         if(playerToScore == playerNumber){
             if(piecesCourantesWinLose.size() == positionsPionsWinLose.size()){
                 //VICTOIRE DETECTEE
@@ -958,8 +963,12 @@ public class IA{
         piecesVisiteesWinLose.clear();
 
 
-        parcoursMottonWinLose(positionsPionsEnemyWinLose.get(0)[0], positionsPionsEnemyWinLose.get(0)[1], playerThem);
+        if(playerThem != playerNumber)
+            parcoursMottonWinLose(positionsPionsWinLose.get(0)[0], positionsPionsWinLose.get(0)[1], playerNumber);
+        else
+            parcoursMottonWinLose(positionsPionsWinLose.get(0)[0], positionsPionsWinLose.get(0)[1], playerThem);
 
+        //System.out.println(piecesCourantesWinLose.size());
         if(playerToScore == enemyPlayerID){
             if(piecesCourantesWinLose.size() == positionsPionsEnemyWinLose.size()){
                 //VICTOIRE DETECTEE
@@ -976,6 +985,7 @@ public class IA{
         piecesCourantesWinLose.clear();
         piecesVisiteesWinLose.clear();
 
+        //System.out.println("=====");
         return retour;
     }
 
