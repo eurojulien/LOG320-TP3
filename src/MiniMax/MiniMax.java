@@ -112,23 +112,23 @@ public class MiniMax extends Thread{
                 feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre,currentPlayer);
 
 
-                if(!foundVictoryOrDefeat){
-                    // ELAGAGE
-                    if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
-                        // MAX
-                        // Si la valeur de mon parent est plus petite, j'arrete de creuser
-                        if (feuille.isJoueurEstMAX(profondeurArbre) && feuille.getScore() >= scoreElagage){
-                            break;
-                        }
 
-                        // MIN
-                        // Si la la valeur de mon parent est plus grande, j'arrete de creuser
-                        else if (!feuille.isJoueurEstMAX(profondeurArbre) && scoreElagage != 0  && feuille.getScore() <= scoreElagage){
-                            break;
-                        }
-
+                // ELAGAGE
+                if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
+                    // MAX
+                    // Si la valeur de mon parent est plus petite, j'arrete de creuser
+                    if (feuille.isJoueurEstMAX(profondeurArbre) && feuille.getScore() >= scoreElagage){
+                        break;
                     }
+
+                    // MIN
+                    // Si la la valeur de mon parent est plus grande, j'arrete de creuser
+                    else if (!feuille.isJoueurEstMAX(profondeurArbre) && scoreElagage != 0  && feuille.getScore() <= scoreElagage){
+                        break;
+                    }
+
                 }
+
 			}
 
 		}

@@ -56,14 +56,14 @@ public class Feuille {
         //todo : mettre breakpoints ici julien
         if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
             if(victoryOrDefeat == VICTORY){
-                System.out.println("Victory detected! | Niveau Arbre : " + profondeurArbre);
+                //System.out.println("Victory detected! | Niveau Arbre : " + profondeurArbre);
                 MiniMax.foundVictoryOrDefeat = true;
                 setScoreWinLose(1000);
             }
             if(victoryOrDefeat == DEFEAT)
             {
                 MiniMax.foundVictoryOrDefeat = true;
-                System.out.println("Defeat detected! | Niveau Arbre : " + profondeurArbre);
+                //System.out.println("Defeat detected! | Niveau Arbre : " + profondeurArbre);
                 setScoreWinLose(-1000);
             }
         }
