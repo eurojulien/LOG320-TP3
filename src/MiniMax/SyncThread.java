@@ -11,8 +11,7 @@ public class SyncThread {
 	
 	// Attente du main pour envoyer une reponse
 	public final static int MILLISECONDS_BEFORE_WAKE_THE_DOG 	= 4000;
-	public final static int WAITING_STEP_TIME					= 100;
-	public final static int THREAD_WAITING_STEP_TIME			= 10;
+	public final static int WAITING_STEP_TIME					= 10;
 	public static boolean keepDiggerAlive						= true;
 	public static boolean minMaxIsReadyToBeDigged				= false;
 

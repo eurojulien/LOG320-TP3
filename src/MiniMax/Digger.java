@@ -38,7 +38,7 @@ public class Digger extends Thread{
 			// Attend du travail
 			do{
 				try {
-					Thread.sleep(SyncThread.THREAD_WAITING_STEP_TIME);
+					Thread.sleep(SyncThread.WAITING_STEP_TIME);
 				} catch (InterruptedException e) {}
 			}while(!SyncThread.minMaxIsReadyToBeDigged);
 		
@@ -51,6 +51,10 @@ public class Digger extends Thread{
 				Feuille feuille = new Feuille(this.joueurEstMax, mouvement);
 				creuserBranche(masterMind.notifyAndGetNewIA(mouvement), feuille , treeDepth, 0);
 				this.nextLeaves.add(feuille);
+				
+				if(SyncThread.computationTimeIsFinished){
+					break;
+				}
 			}
 			
 			// Vidange des anciens mouvements

@@ -20,6 +20,10 @@ public class Feuille {
 	private boolean joueurEstMAX;
 	private int score;
 	
+	private int scoreVictoryOrDefeat;
+	public final static int SCORE_VICTORY 	= 1000;
+	public final static int SCORE_DEFEAT	= -1000;
+	
 	// Moyenne du score des enfants
 	private int moyenneScoreEnfants;
 	
@@ -32,8 +36,8 @@ public class Feuille {
 		this.feuilleEnfants = new ArrayList<Feuille>();
 		this.joueurEstMAX = joueurEstMAX;
 		this.score = 0;
+		this.scoreVictoryOrDefeat = 0;
 		this.coupJoue = coupJoue;
-		
 		this.moyenneScoreEnfants = 0;
 	}
 	
@@ -165,7 +169,7 @@ public class Feuille {
 	}
 	
 	public int getScore(){
-		return this.score;
+		return this.score + this.scoreVictoryOrDefeat;
 	}
 	
 	public void setCoupJoue(String coupJoue){
@@ -186,5 +190,9 @@ public class Feuille {
 	
 	private void setMoyenneScoreEnfant(int moyenne){
 		this.moyenneScoreEnfants = moyenne;
+	}
+	
+	public void setScoreVictoryOrDefeat(int score){
+		this.scoreVictoryOrDefeat = score;
 	}
 }
