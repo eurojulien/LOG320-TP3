@@ -111,8 +111,6 @@ public class MiniMax extends Thread{
                 // Mis a jour de la feuille en cours avec le meilleur score de ses enfants
                 feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre,currentPlayer);
 
-
-
                 // ELAGAGE
                 if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
                     // MAX
