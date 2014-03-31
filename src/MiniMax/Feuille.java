@@ -2,6 +2,8 @@ package MiniMax;
 
 import java.util.ArrayList;
 
+import LinesOfActions.IA;
+
 /**
  * 
  * @author julien
@@ -10,9 +12,7 @@ import java.util.ArrayList;
  */
 public class Feuille {
 
-	// Liste des feuilles enfant de cette feuille
-	// Cette approche a ete choisie car il est possible que deux feuilles
-	// parent aient la meme feuille enfant
+	// Pointeur sur la feuille parent
 	private ArrayList <Feuille> feuilleEnfants;
 	
 	// Vrai : Notre Pion
@@ -20,60 +20,148 @@ public class Feuille {
 	private boolean joueurEstMAX;
 	private int score;
 	
+	private int scoreVictoryOrDefeat;
+	public final static int SCORE_VICTORY 	= 1000;
+	public final static int SCORE_DEFEAT	= -1000;
+	
+	// Moyenne du score des enfants
+	private int moyenneScoreEnfants;
+	
 	// Coup joue pour atteindre cette feuille
 	private String coupJoue;
 	
 	// Constructeur pour creer une feuille dans l'arbre MiniMax
-	public Feuille(boolean joueurAdverse, String coupJoue){
+	public Feuille(boolean joueurEstMAX, String coupJoue){
 		
 		this.feuilleEnfants = new ArrayList<Feuille>();
-		this.joueurEstMAX = joueurAdverse;
+		this.joueurEstMAX = joueurEstMAX;
 		this.score = 0;
+		this.scoreVictoryOrDefeat = 0;
 		this.coupJoue = coupJoue;
+		this.moyenneScoreEnfants = 0;
 	}
 	
 	public void ajouterFeuilleEnfant(Feuille feuilleEnfant){
 		this.feuilleEnfants.add(feuilleEnfant);
 	}
 	
+	public void ajouterFeuilleEnfants(ArrayList<Feuille> feuilleEnfants){
+		this.feuilleEnfants.addAll(feuilleEnfants);
+	}
+	
 	// Attribue le score a cette feuille selon le meilleur score
 	// des enfants de cette feuille
-	public void updateFeuilleScoreAvecMeilleurScoreEnfants(){
+	// Parametre profondeur : Si egal a zero (Feuille parent), la feuille parent
+	// copie le score ET le mouvement relie a ce score
+	public void updateFeuilleAvecMeilleurFeuilleEnfant(int profondeur){
 		
-		int scoreAComparer = (int) Math.pow(10, 5);
+		Feuille feuilleAComparer = new Feuille(true,"");
+	
+		if (this.joueurEstMAX) { 
+			feuilleAComparer.setScore(-10000);
+		}
 		
-		if (this.joueurEstMAX) { scoreAComparer = -(int) Math.pow(10, 5);}
+		else{
+			feuilleAComparer.setScore(10000);
+		}
+		
+		this.moyenneScoreEnfants	= 0;
 		
 		// La condition est en dehors de la boucle.
 		// Cela oblige a avoir deux boucles, mais moins
-		// de comparason.
+		// de comparaison.
 		
-		// Conserve le plus petit score possible
+		// Conserve le plus grand score possible
 		if(this.joueurEstMAX){
 		
 			for (Feuille enfant : this.feuilleEnfants){
 				
-				if(scoreAComparer > enfant.getScore()){
+				// Meilleur score
+				if(feuilleAComparer.getScore() < enfant.getScore()){
 					
-					scoreAComparer = enfant.getScore();
+					feuilleAComparer.setScore(enfant.getScore());
+					feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+					feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
+					
 				}
+				
+				// En cas d'egalite
+				else if(feuilleAComparer.getScore() == enfant.getScore()){
+				
+					if (feuilleAComparer.getMoyenneScoreEnfant() == 0 && Math.random() > 0.5d){
+						
+						//System.out.println(" RANDOM MAX [" + profondeur + "] " + feuilleAComparer.getCoupJoue() + " > " + enfant.getCoupJoue());
+						
+						feuilleAComparer.setScore(enfant.getScore());
+						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+						feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
+					}
+					
+					else if(feuilleAComparer.getMoyenneScoreEnfant() < enfant.getMoyenneScoreEnfant()){
+						
+						//System.out.println(" MAX [" + profondeur + "] " + feuilleAComparer.getCoupJoue() + " > " + enfant.getCoupJoue());
+						
+						feuilleAComparer.setScore(enfant.getScore());
+						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+						feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
+					}
+					
+				}
+				
+				this.moyenneScoreEnfants += enfant.getScore();
 			}
 		}
 		
-		// Conserve le plus grand score possible
+		// Conserve le plus petit score possible
 		else{
 			
+
 			for (Feuille enfant : this.feuilleEnfants){
 				
-				if(scoreAComparer < enfant.getScore()){
+				// Meilleur score
+				if(feuilleAComparer.getScore() > enfant.getScore()){
 					
-					scoreAComparer = enfant.getScore();
+					feuilleAComparer.setScore(enfant.getScore());
+					feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+					feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
 				}
+				
+				// En cas d'egalite
+				else if(feuilleAComparer.getScore() == enfant.getScore()){
+				
+					if (feuilleAComparer.getMoyenneScoreEnfant() == 0 && Math.random() > 0.5d){
+						
+						//System.out.println(" RANDOM MIN [" + profondeur + "] " + feuilleAComparer.getCoupJoue() + " > " + enfant.getCoupJoue());
+						
+						feuilleAComparer.setScore(enfant.getScore());
+						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+						feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
+					}
+					
+					else if(feuilleAComparer.getMoyenneScoreEnfant() > enfant.getMoyenneScoreEnfant()){
+						
+						//System.out.println(" MIN [" + profondeur + "] " + feuilleAComparer.getCoupJoue() + " > " + enfant.getCoupJoue());
+						
+						feuilleAComparer.setScore(enfant.getScore());
+						feuilleAComparer.setCoupJoue(enfant.getCoupJoue());
+						feuilleAComparer.setMoyenneScoreEnfant(enfant.getMoyenneScoreEnfant());
+					}	
+				}
+				
+				this.moyenneScoreEnfants += enfant.getScore();
 			}
 		}
 		
 		// Mise a jour de cette feuille avec le 'meilleur' score de ses enfants
-		this.setScore(scoreAComparer);
+		this.setScore(feuilleAComparer.getScore());
+		
+		this.moyenneScoreEnfants /= this.feuilleEnfants.size();
+		
+		// Si c'est la feuille racine, elle conserve aussi le meilleur mouvement
+		// dans le but de l'envoyer au serveur apres
+		if (profondeur == 0 ){
+			this.setCoupJoue(feuilleAComparer.getCoupJoue());
+		}
 	}
 	
 	public void setScore(int score){
@@ -81,7 +169,7 @@ public class Feuille {
 	}
 	
 	public int getScore(){
-		return this.score;
+		return this.score + this.scoreVictoryOrDefeat;
 	}
 	
 	public void setCoupJoue(String coupJoue){
@@ -96,5 +184,15 @@ public class Feuille {
 		return this.joueurEstMAX;
 	}
 	
+	private int getMoyenneScoreEnfant(){
+		return this.moyenneScoreEnfants;
+	}
 	
+	private void setMoyenneScoreEnfant(int moyenne){
+		this.moyenneScoreEnfants = moyenne;
+	}
+	
+	public void setScoreVictoryOrDefeat(int score){
+		this.scoreVictoryOrDefeat = score;
+	}
 }
