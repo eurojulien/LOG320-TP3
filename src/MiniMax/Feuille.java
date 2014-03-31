@@ -56,12 +56,14 @@ public class Feuille {
         //todo : mettre breakpoints ici julien
         if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
             if(victoryOrDefeat == VICTORY){
-                //System.out.println("Victory detected! | Niveau Arbre : " + profondeurArbre);
+                System.out.println("Victory detected! | Niveau Arbre : " + profondeurArbre);
+                MiniMax.foundVictoryOrDefeat = true;
                 setScoreWinLose(1000);
             }
             if(victoryOrDefeat == DEFEAT)
             {
-                //System.out.println("Defeat detected! | Niveau Arbre : " + profondeurArbre);
+                MiniMax.foundVictoryOrDefeat = true;
+                System.out.println("Defeat detected! | Niveau Arbre : " + profondeurArbre);
                 setScoreWinLose(-1000);
             }
         }
@@ -99,9 +101,9 @@ public class Feuille {
 		if(isJoueurEstMAX(profondeur)){
 		
 			for (Feuille enfant : this.feuilleEnfants){
-				if(profondeur==0){
+				/*if(profondeur==0){
                     System.out.println("Move jouer : " + enfant.getCoupJoue() + ":  " + enfant.getScore());
-                }
+                }*/
 				// Meilleur score
 				if(compareScore < enfant.getScore()){
 

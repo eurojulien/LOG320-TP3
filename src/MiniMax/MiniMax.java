@@ -12,10 +12,14 @@ public class MiniMax extends Thread{
 	
 	// Premiere feuille de l'arbre
 	private static Feuille feuilleSouche;
+
+    private static String failSafe = "";
 	
 	private static IA megaMind;
 	
 	private static int currentPlayer;
+
+    public static boolean foundVictoryOrDefeat = false;
 
 	public MiniMax(){ 
 		this.setPriority(Thread.NORM_PRIORITY); 
@@ -74,6 +78,7 @@ public class MiniMax extends Thread{
 			// faut renvoyer un mouvement, ce mouvement sera renvoye
 			if (profondeurArbre == 0){
 				feuille.setCoupJoue(deplacements.get(0));
+                failSafe = deplacements.get(0);
 			}
 
 			// Creation des IA pour les enfants de la feuille courante
@@ -102,23 +107,27 @@ public class MiniMax extends Thread{
                 // Appel recursif avec la feuille enfant
                 construireArbre(feuilleEnfant.mindForFeuille, feuilleEnfant, profondeurArbre + 1, feuille.getScore());
 
+
                 // Mis a jour de la feuille en cours avec le meilleur score de ses enfants
                 feuille.updateFeuilleAvecMeilleurFeuilleEnfant(profondeurArbre,currentPlayer);
 
-                // ELAGAGE
-                if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
-                    // MAX
-                    // Si la valeur de mon parent est plus petite, j'arrete de creuser
-                    if (feuille.isJoueurEstMAX(profondeurArbre) && feuille.getScore() >= scoreElagage){
-                        break;
-                    }
 
-                    // MIN
-                    // Si la la valeur de mon parent est plus grande, j'arrete de creuser
-                    else if (!feuille.isJoueurEstMAX(profondeurArbre) && feuille.getScore() <= scoreElagage){
-                        break;
-                    }
+                if(!foundVictoryOrDefeat){
+                    // ELAGAGE
+                    if (profondeurArbre >= 1 && scoreElagage != 0 && feuille.getScore() != 0){
+                        // MAX
+                        // Si la valeur de mon parent est plus petite, j'arrete de creuser
+                        if (feuille.isJoueurEstMAX(profondeurArbre) && feuille.getScore() >= scoreElagage){
+                            break;
+                        }
 
+                        // MIN
+                        // Si la la valeur de mon parent est plus grande, j'arrete de creuser
+                        else if (!feuille.isJoueurEstMAX(profondeurArbre) && scoreElagage != 0  && feuille.getScore() <= scoreElagage){
+                            break;
+                        }
+
+                    }
                 }
 			}
 
@@ -134,6 +143,10 @@ public class MiniMax extends Thread{
 	}
 
 	public static String getBestMove(){
+        if(feuilleSouche.getCoupJoue().equals("")){
+            System.out.println(" = Failsafe = ");
+            return failSafe;
+        }
 		return MiniMax.feuilleSouche.getCoupJoue();
 	}
 	

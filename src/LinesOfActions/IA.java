@@ -62,8 +62,6 @@ public class IA{
     private HashMap<String, Boolean> piecesVisiteesWinLose = new HashMap<String, Boolean>();
     public String coupJouer = "";
 
-    private String bestMove = "";
-    private int bestPointage = -100;
     private double centreIDeMasseAllier = 4.5;
     private double centreJDeMasseAllier = 4.5;
     private double centreIDeMasseEnemy = 4.5;
@@ -72,10 +70,9 @@ public class IA{
     // valeurs qui pourraient etre modifiee
     private static final int POSITION_MASK_EXTERNE = 12;
     private static final int POSITION_MASK_MILLIEU = 15;
-    private static final int POSITION_MASK_INTERIEUR = 40;
-    private static final int BLOQUER_MOUVEMENT_ENEMY = 1;
+    private static final int POSITION_MASK_INTERIEUR = 20;
     private static final int BOX_EFFECT = 50;
-    private static final int MULT_IMPORTANCE_PIECE = 40;
+    private static final int MULT_IMPORTANCE_PIECE = 20;
 
     public IA(int[][] playBoard, int playerNumber){
         cloneBoard(playBoard);
@@ -739,16 +736,12 @@ public class IA{
         int boardScore = 0;
         //calculerCentreDeMasses();
         initializePositionsList();
-        int bloquage = blockadeScore(playerToScore);
+        //int bloquage = blockadeScore(playerToScore);
         int motonScore = obtenirScoreMoton(playerToScore);
         int centrality = getScoreForCentrality(playerToScore);
         int eatenPawn =  devalueEnemyEatenPawns(playerToScore);
-        boardScore = centrality + motonScore + eatenPawn + bloquage;
+        boardScore = centrality + motonScore + eatenPawn;
 
-        /*if(boardScore < 0){
-            drawBoard(false);
-            System.out.println("yoooooo");
-        }*/
         return boardScore;
     }
 
@@ -813,13 +806,6 @@ public class IA{
             retour = lstPossibleMoveEnemy.size() - lstPossibleMove.size();
         }
 
-
-        /*for(int x = 0; x<positionsPions.size();x++){
-            retour += getBlockadePiece(positionsPions.get(x)[0],positionsPions.get(x)[1],playerToScore,playerToScore==playerNumber);
-        }
-        for(int x = 0; x<positionsPionsEnemy.size();x++){
-            retour += getBlockadePiece(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],playerToScore,playerToScore==enemyPlayerID);
-        }*/
         return retour;
     }
 
@@ -1026,22 +1012,33 @@ public class IA{
         }
     }
 
-    private int obtenirScoreMoton(int playerToScore){
+    public int obtenirScoreMoton(int playerToScore){
         int retour = 0;
         piecesCourantes.clear();
         piecesVisitees.clear();
         initializePositionsList();
 
+        boolean swap = false;
         int playerThem = 0;
-        if(playerToScore != playerNumber)
-            playerThem = playerNumber;
-        else
+        int playerUs = 0;
+        if(playerToScore == playerNumber){
             playerThem = enemyPlayerID;
+            playerUs = playerNumber;
+        }
+        else{
+            swap = true;
+            playerThem = playerNumber;
+            playerUs = enemyPlayerID;
+        }
 
             for(int x =0; x<positionsPions.size();x++){
-                parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1],playerToScore);
+                if(!swap)
+                    parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1],playerUs);
+                else
+                    parcoursMotton(positionsPions.get(x)[0],positionsPions.get(x)[1],playerThem);
+
                 int sizeMoton = piecesCourantes.size();
-                if(playerToScore == playerNumber){
+                if(!swap){
                     if(sizeMoton == positionsPions.size()){
                         //VICTOIRE DETECTEE
                         retour += 1000;
@@ -1049,7 +1046,7 @@ public class IA{
                         int nbMouvements = genererMouvementPiece(positionsPions.get(x)[0],positionsPions.get(x)[1],true);
                         if(nbMouvements == 0){
                             // piece boxed in !
-                            retour-= BOX_EFFECT;
+                            retour -= BOX_EFFECT;
                         }
                     }
                     retour += Math.pow(piecesCourantes.size(), 2);
@@ -1058,10 +1055,10 @@ public class IA{
                         //DEFAITE DETECTEE
                         retour -= 1000;
                     }else if(sizeMoton == 1){
-                        int nbMouvements = genererMouvementPiece(positionsPions.get(x)[0],positionsPions.get(x)[1],false);
+                        int nbMouvements = genererMouvementPiece(positionsPions.get(x)[0],positionsPions.get(x)[1],true);
                         if(nbMouvements == 0){
                             // piece boxed in !
-                            retour+= BOX_EFFECT;
+                            retour += BOX_EFFECT;
                         }
                     }
                     retour -= Math.pow(piecesCourantes.size(), 2);
@@ -1070,14 +1067,18 @@ public class IA{
             }
 
             for(int x =0; x<positionsPionsEnemy.size();x++){
-                parcoursMotton(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],playerThem);
+                if(!swap)
+                    parcoursMotton(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],playerThem);
+                else
+                    parcoursMotton(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],playerUs);
+
                 int sizeMoton = piecesCourantes.size();
-                if(playerToScore == enemyPlayerID){
+                if(swap){
                     if(sizeMoton == positionsPionsEnemy.size()){
                         //VICTOIRE DETECTEE
                         retour += 1000;
-                    }else if(sizeMoton ==0){
-                        int nbMouvements = genererMouvementPiece(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],true);
+                    }else if(sizeMoton == 1){
+                        int nbMouvements = genererMouvementPiece(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],false);
                         if(nbMouvements == 0){
                             // piece boxed in !
                             retour -= BOX_EFFECT;
@@ -1089,10 +1090,10 @@ public class IA{
                         // DEFAITE DETECTEE
                         retour -= 1000;
                     }else if(sizeMoton == 1){
-                        int nbMouvements = genererMouvementPiece(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],true);
+                        int nbMouvements = genererMouvementPiece(positionsPionsEnemy.get(x)[0],positionsPionsEnemy.get(x)[1],false);
                         if(nbMouvements == 0){
                             // piece boxed in !
-                            retour -= BOX_EFFECT;
+                            retour += BOX_EFFECT;
                         }
                     }
                     retour -= Math.pow(piecesCourantes.size(), 2);

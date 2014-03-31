@@ -114,6 +114,7 @@ public class Main{
 		
 		// Lancement du thread principal
     	thread.LancerJeu();
+
 	}
 }
 	
