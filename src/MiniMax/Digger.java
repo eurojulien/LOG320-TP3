@@ -1,9 +1,5 @@
 package MiniMax;
-
 import java.util.ArrayList;
-
-import com.sun.corba.se.impl.orbutil.concurrent.Sync;
-
 import LinesOfActions.IA;
 
 public class Digger extends Thread{
@@ -33,7 +29,7 @@ public class Digger extends Thread{
 	private void creuserBranche(){
 	
 		// En attente d'etre arrete ...
-		while(SyncThread.keepDiggerAlive){
+		while(SyncThread.keepThreadsAlive){
 	
 			// Attend du travail
 			do{
@@ -49,7 +45,11 @@ public class Digger extends Thread{
 			for(String mouvement : this.deplacements){
 				
 				Feuille feuille = new Feuille(this.joueurEstMax, mouvement);
-				creuserBranche(masterMind.notifyAndGetNewIA(mouvement), feuille , treeDepth, 0);
+				
+				IA nextIA = masterMind.notifyAndGetNewIA(mouvement);
+				VictoryOrDefeat.addLeafToCheck(feuille, nextIA);
+				
+				creuserBranche(nextIA, feuille , treeDepth, 0);
 				this.nextLeaves.add(feuille);
 				
 				if(SyncThread.computationTimeIsFinished){
@@ -88,10 +88,6 @@ public class Digger extends Thread{
 			// Creation des IA pour les enfants de la feuille courante
 			for(String deplacement : deplacements){
 				IAs.add(nextIA.notifyAndGetNewIA(deplacement));
-			}
-			
-			if (!SyncThread.victoryOrDefautHasBeenFound){
-				//new VictoryOrDefeat(IAs, MiniMax.currentPlayer, profondeurArbre+1).start();
 			}
 			
 			int index = 0;

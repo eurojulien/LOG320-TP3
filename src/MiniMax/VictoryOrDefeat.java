@@ -6,41 +6,83 @@ import LinesOfActions.IA;
 
 public class VictoryOrDefeat extends Thread{
 
-	private ArrayList<IA> IAList 		= null;
-	private int currentTreeDepth		= 0;
-	private int player					= 0;
+	private static ArrayList<IA> IAList;
+	private static ArrayList<Feuille> leafList;
+	private static VictoryOrDefeat vod				= null;
+	private static int index;
 	
-	public static final int VICTORY		= 1;
-	public static final int DEFEAT		= -1;
-	public static final int NOTHING		= 0;
+	private static int VICTORY						= 1;
+	private static int DEFEAT						= -1;
 	
-	public VictoryOrDefeat(ArrayList<IA> IAList, int player, int currentTreeDepth){
+	private VictoryOrDefeat(){
 		
 		Thread.currentThread().setPriority(NORM_PRIORITY);
 		
-		this.IAList 			= IAList;
-		this.player				= player;
-		this.currentTreeDepth	= currentTreeDepth;
+		this.IAList		= new ArrayList<IA>();
+		this.leafList	= new ArrayList<Feuille>();
+		index		= 0;
+	}
+	
+	public static VictoryOrDefeat getInstance(){
+		if(vod == null){
+			vod = new VictoryOrDefeat();
+		}
+		
+		return  vod;
 	}
 	
 	// Thread
 	public void run(){
 		
 		int victoryOrDefeat = 0;
-		
-		for (IA VoD : this.IAList){
-			victoryOrDefeat = VoD.findMateThreat(this.player);
-		
-			if(SyncThread.victoryOrDefautHasBeenFound){
-				break;
+		while(SyncThread.keepThreadsAlive){
+			
+			// Attente de travail
+			while(index == VictoryOrDefeat.IAList.size()){
+				
+				
+				if(SyncThread.flushVictoryOrDefeat){
+				
+					VictoryOrDefeat.leafList.clear();
+					VictoryOrDefeat.IAList.clear();
+					index = 0;
+					
+					SyncThread.flushVictoryOrDefeat = false;
+				}
+				
+				try {
+					Thread.sleep(SyncThread.WAITING_STEP_TIME);
+				} catch (InterruptedException e) {}
 			}
 			
-			else if(victoryOrDefeat == VICTORY || victoryOrDefeat == DEFEAT){
-				System.out.println("Victory or Defeat | Niveau Arbre : " + this.currentTreeDepth);
-				SyncThread.currentMaxTreeDepth			= this.currentTreeDepth;
-				SyncThread.victoryOrDefautHasBeenFound	= true;
-				break;
-			}
-		}
+			// Execution du travail
+			do{
+		
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {}
+				
+				victoryOrDefeat = IAList.get(index).findMateThreat(2);
+				
+				if(victoryOrDefeat == VICTORY){
+					leafList.get(index).setScoreVictoryOrDefeat(Feuille.SCORE_VICTORY);
+					System.out.println("VICTORY");
+				}
+				
+				else if (victoryOrDefeat == DEFEAT){
+					leafList.get(index).setScoreVictoryOrDefeat(Feuille.SCORE_DEFEAT);
+					System.out.println("DEFEAT");
+				}
+				
+				index ++;
+				
+			}while(index < leafList.size());
+		}	
+	}
+	
+	public static void addLeafToCheck(Feuille feuille, IA ia){
+		
+		VictoryOrDefeat.leafList.add(feuille);
+		VictoryOrDefeat.IAList.add(ia);
 	}
 }

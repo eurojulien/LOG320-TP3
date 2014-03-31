@@ -21,7 +21,6 @@ public class WatchDog extends Thread {
 		
 		// Initalisation des flags
 		SyncThread.bestMoveHasBeenFound 			= false;
-		SyncThread.victoryOrDefautHasBeenFound	 	= false;
 		SyncThread.computationTimeIsFinished		= false;
 		
 		// Lancement du thread de MinMax
@@ -58,7 +57,7 @@ public class WatchDog extends Thread {
 		}
 		
 		// Temps de cacul suffisament rapide pour augmenter la profondeur de l'arbre
-		else if (elapsedTime * 2 < SyncThread.MILLISECONDS_BEFORE_WAKE_THE_DOG && !SyncThread.victoryOrDefautHasBeenFound){
+		else if (elapsedTime * 2 < SyncThread.MILLISECONDS_BEFORE_WAKE_THE_DOG){
 
 			// Conserve les dernieres feuilles comme MAX
 			SyncThread.currentMaxTreeDepth ++;						

@@ -2,8 +2,6 @@ package MiniMax;
 
 import java.util.ArrayList;
 
-import com.sun.corba.se.impl.orbutil.concurrent.Sync;
-
 import LinesOfActions.IA;
 
 public class MiniMax extends Thread{
@@ -45,6 +43,9 @@ public class MiniMax extends Thread{
 		for(Digger dig : diggers){
 			dig.start();
 		}
+		
+		// Thread victoire ou defaite
+		VictoryOrDefeat.getInstance().start();
 	}
 	
 	public static IA getIA(){
@@ -57,6 +58,8 @@ public class MiniMax extends Thread{
 	// Creer une feuille par deplacement permis
 	// Repete le traitement pour le nombre maximal de profondeur permise
 	private static void construireArbre(){
+		
+		long startTime = System.nanoTime();
 		
 		// Profondeur actuelle de l'arbre
 		int profondeurActuelleArbre = 0;
@@ -98,6 +101,9 @@ public class MiniMax extends Thread{
 		
 		// Meilleur score trouve
 		MiniMax.feuilleSouche.updateFeuilleAvecMeilleurFeuilleEnfant(0);
+		
+		long endTime = System.nanoTime();
+		System.out.println("Diggers time		: " + (endTime - startTime)/(1000000) + " milliseconds");
 	}
 
 	public static String getBestMove(){
@@ -123,6 +129,7 @@ public class MiniMax extends Thread{
 		construireArbre();
 		
 		SyncThread.bestMoveHasBeenFound = true;
+		SyncThread.flushVictoryOrDefeat	= true;
 		System.out.println(" ********** Arbre MiniMax termine ! ********** ");
 	}
 }
